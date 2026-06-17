@@ -768,10 +768,10 @@ function viewGrape(id){
     const head=t?`<button class="rsname link" data-topic="${t.id}">${esc(r.region)} →</button>`:`<span class="rsname">${esc(r.region)}</span>`;
     return `<div class="rsrow"><span class="rsdot ${isRed?'r':'w'}"></span><div class="rstx">${head}<div class="rsnote">${esc(r.note)}</div></div></div>`;
   }).join('');
-  // uniform single-column stat boxes; budding + ripening always paired on one row
+  // budding + ripening first (paired on the top row), then the rest
   const statList=isRed
-    ? [['Acidity',g.acidity],['Tannin',g.tannin],['Body',g.body],['Alcohol',g.alcohol],['Budding',g.budding],['Ripening',g.ripening],['Climate',g.climate]]
-    : [['Acidity',g.acidity],['Body',g.body],['Budding',g.budding],['Ripening',g.ripening],['Alcohol',g.alcohol],['Climate',g.climate]];
+    ? [['Budding',g.budding],['Ripening',g.ripening],['Acidity',g.acidity],['Tannin',g.tannin],['Body',g.body],['Alcohol',g.alcohol],['Climate',g.climate]]
+    : [['Budding',g.budding],['Ripening',g.ripening],['Acidity',g.acidity],['Body',g.body],['Alcohol',g.alcohol],['Climate',g.climate]];
   return `<div class="view">
    <div class="crumb" data-back-grape="1">‹ All grapes</div>
    <div class="ghead">
