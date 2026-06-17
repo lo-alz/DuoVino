@@ -1,7 +1,7 @@
 # DuoVino — WSET D3 study app (multi-user / Supabase build)
 
 A single self-contained web app for studying the WSET Diploma D3 (still wines of the
-world), built around a "Lattice" learning method. This build adds **accounts + cloud
+world). This build adds **accounts + cloud
 sync** so multiple people each keep their own progress, synced across their devices.
 
 - **Frontend:** one static file, `index.html` (no build step, no framework server).
