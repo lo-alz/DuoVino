@@ -629,10 +629,10 @@ function viewDash(){
    </div>
    ${accountRow()}
    <div class="hero">
-     <div class="glasswrap">${glass(pct,72)}<div class="pct">${pct}%</div><div class="pctl">Cellar filled</div></div>
+     <div class="glasswrap">${glass(pct,72)}<div class="pct">${pct}%</div><div class="pctl">Glass filled</div></div>
      <div class="right"><div class="eyebrow">Mastery</div>
        <h2>${mastered}<span style="color:var(--muted);font-size:.6em"> / ${total}</span> KKP mastered</h2>
-       <p>${pct<8?'Empty cellar. Start a quick review to lay down your first bottles.':pct<50?'Filling steadily — keep closing the gaps below.':'Strong cellar. Push the causal "why" cards to the top tier.'}</p>
+       <p>${pct<8?'Empty glass. Start a quick review to lay down your first bottles.':pct<50?'Filling steadily — keep closing the gaps below.':'Glass full. Push the causal "why" cards to the top tier.'}</p>
      </div>
    </div>
    <div class="statgrid">
@@ -972,7 +972,7 @@ function viewSummary(){
       <div class="sg"><div class="n" style="color:var(--s1)">${r.s}</div><div class="l">Revisit</div></div>
     </div>
     <button class="studybtn" data-again>Study again</button>
-    <button class="qbtn" style="margin-top:10px;align-items:center" data-todash><span class="qt" style="text-align:center;width:100%">Back to cellar</span></button>
+    <button class="qbtn" style="margin-top:10px;align-items:center" data-todash><span class="qt" style="text-align:center;width:100%">Back to home</span></button>
   </div></div>`;
 }
 function grade(v){ const it=study.queue[study.idx]; if(it.kp)bumpState(it.kp,v);
