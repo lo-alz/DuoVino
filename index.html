@@ -20,6 +20,31 @@
   --mono:'IBM Plex Mono',ui-monospace,monospace;
   --navh:64px;
 }
+/* ---------- light theme ---------- */
+body.light{
+  --bg:#f4efe5; --bg2:#ece4d4; --panel:#fbf8f1; --panel2:#f1ebdd; --panel3:#e6ddc8;
+  --ink:#2a2620; --ink-dim:#544b3a; --muted:#8a7f67; --line:#ded3bc; --line2:#ccbf9f;
+  --gold:#9c7c2c; --gold-l:#7a5e1c; --gold-d:#6a521a;
+  --garnet:#8a2540; --garnet-l:#a8324f; --rose:#b0405c; --azul:#2f6cab; --azul-l:#2f6cab;
+  --green:#5f8a3a; --green-l:#4d7a2c;
+  --s0:#cbbfa6; --s1:#3f82c4; --s2:#a9842f; --s3:#6f9a47;
+}
+body.light .hero{background:radial-gradient(120% 140% at 80% 0%,#fffdf8 0%,var(--panel) 55%)}
+body.light .nav{background:rgba(251,248,241,.92)}
+body.light .authov{background:radial-gradient(circle at 50% 28%,#fffdf8,#ece4d4)}
+body.light .maptab{background:#e6ddc8}
+body.light .modeseg .mode.on,body.light .studybtn,body.light .actions .b-next,body.light .authbtn{color:#fbf8f1}
+body.light ::selection{background:var(--garnet);color:#fbf8f1}
+/* ---------- corner logo + theme toggle ---------- */
+.corner{position:fixed;top:0;right:0;z-index:10000;display:flex;align-items:center;gap:9px;
+  padding:calc(env(safe-area-inset-top) + 11px) 15px 8px;pointer-events:none}
+.corner>*{pointer-events:auto}
+.themebtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);
+  color:var(--ink-dim);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 9px rgba(0,0,0,.22);transition:background .15s}
+.themebtn:active{background:var(--panel3)}
+.corner-logo{display:block;line-height:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+.corner-logo svg{display:block}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--body);
   font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
@@ -458,6 +483,24 @@ const store={
   save(){ try{localStorage.setItem(KEY,JSON.stringify(MEM));}catch(e){} cloudSaveDebounced(); }
 };
 store.load();
+/* ============================ THEME / CHROME ============================ */
+function applyTheme(t){ const light=(t==='light'); document.body.classList.toggle('light',light);
+  try{localStorage.setItem('duovino.theme',t);}catch(e){}
+  const b=document.getElementById('themeBtn'); if(b){ b.textContent=light?'\u263e':'\u2600'; b.title=light?'Switch to dark':'Switch to light'; } }
+function toggleTheme(){ applyTheme(document.body.classList.contains('light')?'dark':'light'); }
+function initChrome(){
+  let t='dark'; try{ t=localStorage.getItem('duovino.theme')||'dark'; }catch(e){}
+  if(!document.getElementById('appcorner')){
+    const c=document.createElement('div'); c.className='corner'; c.id='appcorner';
+    c.innerHTML='<button class="themebtn" id="themeBtn" aria-label="Toggle theme"></button>'+
+      '<span class="corner-logo" role="img" aria-label="DuoVino">'+glass(100,24)+'</span>';
+    document.body.appendChild(c);
+    document.getElementById('themeBtn').onclick=toggleTheme;
+  }
+  applyTheme(t);
+}
+// apply theme class early to avoid flash; the corner logo is built in boot() once glass() is initialized
+try{document.body.classList.toggle('light',localStorage.getItem('duovino.theme')==='light');}catch(e){}
 function getState(id){return MEM[id]||0;}
 function setState(id,v){ MEM[id]=v; store.save(); }
 function bumpState(id,v){ const cur=MEM[id]||0; MEM[id]=Math.max(cur,v); store.save(); }
@@ -624,7 +667,6 @@ function viewDash(){
   }).join('');
   return `<div class="view">
    <div class="top"><div class="brand">
-     <span class="mark">${glass(pct,30)}</span>
      <span><h1>DuoVino</h1><div class="sub">WSET D3 · Study</div></span></div>
    </div>
    ${accountRow()}
@@ -1187,6 +1229,7 @@ function renderAccount(){
   } else if(ov){ ov.remove(); }
 }
 async function boot(){
+  initChrome();
   renderAccount(); render();
   if(SB){ try{
     const {data:{session}}=await SB.auth.getSession(); USER=session?session.user:null;
