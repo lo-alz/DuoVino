@@ -1,5 +1,5 @@
 -- ===========================================================================
--- Cellar — per-user study progress
+-- DuoVino — per-user study progress
 -- Run this ONCE in your Supabase project:
 --   Supabase dashboard → SQL Editor → New query → paste all of this → Run
 -- ===========================================================================

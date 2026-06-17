@@ -1,4 +1,4 @@
-# Cellar — WSET D3 study app (multi-user / Supabase build)
+# DuoVino — WSET D3 study app (multi-user / Supabase build)
 
 A single self-contained web app for studying the WSET Diploma D3 (still wines of the
 world), built around a "Lattice" learning method. This build adds **accounts + cloud

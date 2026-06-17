@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>Cellar — WSET D3 Lattice Study</title>
+<title>DuoVino — WSET D3 Lattice Study</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -400,7 +400,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 <div class="app" id="app"></div>
 
 <nav class="nav"><div class="max">
-  <button data-nav="dash"   id="nv-dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"/></svg><span>Cellar</span><div class="nv-ind"></div></button>
+  <button data-nav="dash"   id="nv-dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"/></svg><span>DuoVino</span><div class="nv-ind"></div></button>
   <button data-nav="learn"  id="nv-learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5a2 2 0 012-2h12v17H6a2 2 0 00-2 2z"/><path d="M18 3v17"/></svg><span>Learn</span><div class="nv-ind"></div></button>
   <button data-nav="study"  id="nv-study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4-8 4-8-4z"/><path d="M6 9v5c0 1.5 3 3 6 3s6-1.5 6-3V9"/></svg><span>Study</span><div class="nv-ind"></div></button>
   <button data-nav="map"    id="nv-map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span><div class="nv-ind"></div></button>
@@ -625,7 +625,7 @@ function viewDash(){
   return `<div class="view">
    <div class="top"><div class="brand">
      <span class="mark">${glass(pct,30)}</span>
-     <span><h1>Cellar</h1><div class="sub">WSET D3 · Lattice Study</div></span></div>
+     <span><h1>DuoVino</h1><div class="sub">WSET D3 · Lattice Study</div></span></div>
    </div>
    ${accountRow()}
    <div class="hero">
@@ -1164,7 +1164,7 @@ function renderAccount(){
   if(authNeeded()){
     if(!ov){ ov=document.createElement('div'); ov.id='authov'; document.body.appendChild(ov); }
     ov.className='authov';
-    ov.innerHTML=`<div class="authbox"><div class="authwine">&#127863;</div><h2>Cellar</h2>
+    ov.innerHTML=`<div class="authbox"><div class="authwine">&#127863;</div><h2>DuoVino</h2>
       <p class="authsub">Sign in to sync your study progress across all your devices.</p>
       <input id="authemail" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email">
       <button id="authsend" class="authbtn">Email me a login link</button>
