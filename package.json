@@ -5,6 +5,6 @@
   "type": "module",
   "description": "DuoVino — WSET D3 study app",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.69.0"
+    "@anthropic-ai/sdk": "^0.105.0"
   }
 }
