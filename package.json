@@ -1,0 +1,10 @@
+{
+  "name": "duovino",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DuoVino — WSET D3 study app",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.69.0"
+  }
+}

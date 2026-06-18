@@ -1,3 +1,7 @@
-# Static single-file site — no build step.
+# Static site (no build step) + serverless functions for the AI agent.
 [build]
   publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

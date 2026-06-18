@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>DuoVino — Head of Marketing</title>
+<style>
+  :root{
+    --bg:#14161c; --panel:#20232c; --panel2:#272b36; --ink:#ece3d2; --ink-dim:#c9c0ad;
+    --muted:#928a78; --line:#333949; --line2:#3d4456; --gold:#caa64b; --garnet:#8a2540;
+    --garnet-l:#a8324f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:18px 16px 0}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  header h1{font-family:'Barlow Condensed','Barlow',system-ui,sans-serif;font-size:26px;text-transform:uppercase;letter-spacing:.05em;margin:0}
+  header .tag{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .sub{color:var(--ink-dim);font-size:13px;margin:0 0 14px}
+  .gate{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:18px;margin-bottom:14px}
+  .gate input{width:100%;background:#191c24;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;color:var(--ink);font-size:15px;margin-top:8px}
+  .chat{flex:1;display:flex;flex-direction:column;gap:12px;padding-bottom:14px;overflow-y:auto}
+  .msg{border-radius:12px;padding:12px 14px;white-space:pre-wrap;word-wrap:break-word;font-size:14.5px}
+  .msg.user{background:var(--panel2);border:1px solid var(--line2);align-self:flex-end;max-width:85%}
+  .msg.bot{background:var(--panel);border:1px solid var(--line)}
+  .msg .who{font-family:ui-monospace,monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .composer{position:sticky;bottom:0;background:linear-gradient(180deg,transparent,var(--bg) 22%);padding:8px 0 16px}
+  .composer .row{display:flex;gap:8px;align-items:flex-end}
+  textarea{flex:1;resize:none;background:#191c24;border:1px solid var(--line2);border-radius:12px;padding:12px;color:var(--ink);font-size:15px;font-family:inherit;min-height:52px;max-height:160px}
+  button{background:var(--garnet);border:1px solid var(--garnet-l);color:var(--ink);border-radius:12px;padding:0 18px;height:52px;font-family:'Barlow Condensed','Barlow',sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  .hint{font-family:ui-monospace,monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.03em}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px}
+  .chip{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:6px 11px;font-size:12px;color:var(--ink-dim);cursor:pointer}
+  .err{color:var(--garnet-l);font-size:12.5px;margin-top:8px;min-height:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span style="font-size:24px">🍷</span><h1>DuoVino</h1><span class="tag">Head of Marketing</span></header>
+  <p class="sub">Your AI marketing strategist for DuoVino. Describe a goal and it'll design the strategy.</p>
+
+  <div class="gate" id="gate">
+    <div style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Access</div>
+    <input id="passcode" type="password" placeholder="Enter passcode" autocomplete="off">
+    <div class="err" id="gateErr"></div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="composer">
+    <div class="chips" id="chips">
+      <span class="chip" data-q="Design a 90-day launch marketing strategy for DuoVino on a near-zero budget.">90-day launch plan</span>
+      <span class="chip" data-q="Give me 10 organic content ideas to reach WSET Diploma candidates on Instagram and TikTok.">Content ideas</span>
+      <span class="chip" data-q="Write positioning and 3 tagline options for DuoVino.">Positioning + taglines</span>
+      <span class="chip" data-q="How should I price DuoVino and what should the free vs paid tiers be?">Pricing &amp; tiers</span>
+    </div>
+    <div class="row">
+      <textarea id="input" placeholder="e.g. Plan an exam-season campaign to drive sign-ups…"></textarea>
+      <button id="send">Send</button>
+    </div>
+    <div class="hint">Powered by Claude · key stays server-side</div>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const errEl = document.getElementById('err');
+const messages = []; // {role, content}
+
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ input.value=c.dataset.q; input.focus(); });
+
+function addMsg(role, text){
+  const d=document.createElement('div');
+  d.className='msg '+(role==='user'?'user':'bot');
+  d.innerHTML='<div class="who">'+(role==='user'?'You':'Head of Marketing')+'</div>';
+  const span=document.createElement('span'); span.textContent=text; d.appendChild(span);
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+  return span;
+}
+
+async function send(){
+  const text=input.value.trim();
+  if(!text) return;
+  const passcode=document.getElementById('passcode').value.trim();
+  errEl.textContent='';
+  input.value=''; input.style.height='auto';
+  addMsg('user', text);
+  messages.push({role:'user', content:text});
+  sendBtn.disabled=true;
+  const out=addMsg('bot','');
+  out.textContent='…';
+  try{
+    const res=await fetch('/.netlify/functions/agent',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({messages, passcode})
+    });
+    if(!res.ok){
+      const t=await res.text();
+      out.textContent='';
+      errEl.textContent='Error '+res.status+': '+(t||'request failed');
+      sendBtn.disabled=false; return;
+    }
+    const reader=res.body.getReader();
+    const dec=new TextDecoder();
+    let acc='';
+    out.textContent='';
+    while(true){
+      const {done, value}=await reader.read();
+      if(done) break;
+      acc+=dec.decode(value,{stream:true});
+      out.textContent=acc;
+      chat.scrollTop=chat.scrollHeight;
+    }
+    messages.push({role:'assistant', content:acc});
+  }catch(e){
+    errEl.textContent='Network error: '+(e.message||e);
+  }
+  sendBtn.disabled=false;
+}
+
+sendBtn.onclick=send;
+input.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
+input.addEventListener('input',()=>{ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,160)+'px'; });
+</script>
+</body>
+</html>
