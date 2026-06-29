@@ -48,3 +48,6 @@ that UI, authored so Claude Design can build with on-brand components. The CSS i
   correctly in Claude Design's browser (network available). Its own preview keeps
   the real tiles; the composite previews (CompareCard, CompareColHead) use a
   non-network map stand-in so they verify locally.
+- `BottomNav` → `[RENDER_BLANK]`: it is `position:fixed` (a real bottom nav bar),
+  so it pins to the viewport edge and the card capture reads near-blank even as a
+  single card. Renders correctly in the app/designs; benign for the catalog card.
