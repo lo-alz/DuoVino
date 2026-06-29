@@ -502,7 +502,7 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .cmprc{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
 .cmpcell{min-width:0;font-size:13px;color:var(--ink-dim);text-align:left}
 .cmpclim{text-align:center}
-.cmpclim svg{margin:0 auto;display:block}
+.cmpclim svg{margin:0 auto;display:block;max-width:270px;width:100%}
 .cmptxt{font-size:13px;color:var(--ink);line-height:1.4}
 .cmptxt.sm{font-size:11.5px;color:var(--ink-dim);line-height:1.4;text-align:left}
 .cmpmuted{color:var(--muted)}
@@ -1040,6 +1040,18 @@ function cmpClimateDiff(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&
 function _gRow(label,key){ return {label:label, hl:true, cell:g=>`<div class="cmptxt" style="text-align:left">${g[key]?esc(g[key]):'<span class="cmpmuted">—</span>'}</div>`, diff:(a,b)=>(a[key]||'')!==(b[key]||'')}; }
 function _cmpList(arr){ if(!arr||!arr.length)return '<div class="cmptxt sm cmpmuted">—</div>'; return `<ul class="cmpul">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; }
 function getCurrencySymbol(){ return currency==='EUR'?'€':'$'; }
+// Map WSET price bands → an approximate currency range (USD/EUR are close enough).
+function priceRange(str){
+  if(!str)return '';
+  let s=String(str).toLowerCase(); const hits=[];
+  s=s.replace(/super[- ]premium/g,()=>{hits.push([60,150]);return ' ';});
+  if(/inexpensive/.test(s))hits.push([8,15]);
+  if(/mid[- ]priced/.test(s))hits.push([15,30]);
+  if(/premium/.test(s))hits.push([30,60]);
+  if(!hits.length)return '';
+  const lo=Math.min(...hits.map(h=>h[0])), hi=Math.max(...hits.map(h=>h[1])), sym=getCurrencySymbol();
+  return `${sym}${lo}–${sym}${hi}`;
+}
 const CMP_MODES={
   region:{ label:'Region', list:()=>TOPICS.slice().sort((a,b)=>a.title.localeCompare(b.title)), byId:id=>BY_ID[id], name:t=>t.title, sub:t=>`${t.flag||''} ${esc(t.country)}`, mastery:t=>fillPct(topicKKPs(t)),
     media:e=>{ const p=MAPPTS[e.id]; const theme=document.body.classList.contains('light')?'light':'dark'; return p?cmpMiniMap(p.lat,p.lng,6,theme):'<div class="cmpmap" style="background:linear-gradient(135deg,var(--panel2),var(--panel3))"></div>'; },
@@ -1049,7 +1061,7 @@ const CMP_MODES={
       {label:'Style', hl:true, cell:t=>cmpStyleBarInline(t.style), diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
       {label:'Winemaking', cell:t=>`<div class="cmptxt sm">${esc(t.winemaking||'—')}</div>`, diff:()=>false},
       {label:'Quality', hl:true, cell:t=>`<div class="cmptxt">${esc(t.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
-      {label:'Price', hl:true, cell:t=>`<div class="cmptxt">${getCurrencySymbol()} ${esc(t.price||'—')}</div>`, diff:(a,b)=>(a.price||'')!==(b.price||'')},
+      {label:'Price', hl:true, cell:t=>{const pr=priceRange(t.price);return `<div class="cmptxt">${esc(t.price||'—')}${pr?`<div class="cmplab" style="margin-top:3px;color:var(--gold-l)">${pr}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
       {label:'Why it tastes that way', cell:t=>`<div class="cmptxt sm">${esc(_firstRelKKP(t)||'—')}</div>`, diff:()=>false},
       {label:'Signature', cell:t=>`<div class="cmptxt sm">${esc(t.blurb||'—')}</div>`, diff:()=>false},
     ] },
@@ -1062,7 +1074,7 @@ const CMP_MODES={
       {label:'In the vineyard', cell:g=>_cmpList(g.viticulture), diff:()=>false},
       {label:'In the winery', cell:g=>_cmpList(g.winemaking), diff:()=>false},
       {label:'Typical quality', hl:true, cell:g=>`<div class="cmptxt">${esc(g.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
-      {label:'Price band', hl:true, cell:g=>`<div class="cmptxt">${getCurrencySymbol()} ${esc(g.price||'—')}</div>`, diff:(a,b)=>(a.price||'')!==(b.price||'')},
+      {label:'Price band', hl:true, cell:g=>{const pr=priceRange(g.price);return `<div class="cmptxt">${esc(g.price||'—')}${pr?`<div class="cmplab" style="margin-top:3px;color:var(--gold-l)">${pr}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
       {label:'Overall style', cell:g=>`<div class="cmptxt sm">${esc(g.style||'—')}</div>`, diff:()=>false},
       {label:'Key regions', hl:true, cell:g=>_cmpList((g.regionStyles||[]).map(r=>r.region)), diff:(a,b)=>_setNe((a.regionStyles||[]).map(r=>r.region),(b.regionStyles||[]).map(r=>r.region))},
     ] },
@@ -1088,20 +1100,18 @@ function viewCompare(){
   if(!a||!b){ body=`<div class="cmpempty">Pick two ${cmp.mode==='region'?'regions':'grapes'} to compare, side by side.${cmp.mode==='region'?'<div class="cmphint">Or tap a classic contrast</div>'+chips:''}</div>`; }
   else {
     const colHead=e=>`<div class="cmpmedia">${M.media?M.media(e):''}<div class="cmpmedscrim"></div><div class="cmpmedlab"><div class="cmpmedname">${esc(M.name(e))}</div><div class="cmpmedsub">${M.sub(e)}</div></div></div>`;
-    const rows=M.rows.map(r=>{ const isd=r.hl&&r.diff?r.diff(a,b):false;
-      if(r.full){ const delta=(r.kind==='radar'&&isd)?cmpClimateDeltas(a,b):'';
-        return `<div class="cmprow full ${isd?'cmp-diff':''}"><div class="cmprl">${esc(r.label)}${isd?'<span class="cmpdiffpill">Differs</span>':''}</div><div class="cmprc">${r.cellFull(a,b)}</div>${delta}</div>`; }
-      const delta=(r.kind==='radar'&&isd)?cmpClimateDeltas(a,b):'';
-      return `<div class="cmprow ${isd?'cmp-diff':''}"><div class="cmprl">${esc(r.label)}${isd?'<span class="cmpdiffpill">Differs</span>':''}</div><div class="cmprc"><div class="cmpcell">${r.cell(a,b)}</div><div class="cmpcell">${r.cell(b,a)}</div></div>${delta}</div>`; }).join('');
+    const rows=M.rows.map(r=>{
+      if(r.full){
+        return `<div class="cmprow full"><div class="cmprl">${esc(r.label)}</div><div class="cmprc">${r.cellFull(a,b)}</div></div>`; }
+      return `<div class="cmprow"><div class="cmprl">${esc(r.label)}</div><div class="cmprc"><div class="cmpcell">${r.cell(a,b)}</div><div class="cmpcell">${r.cell(b,a)}</div></div></div>`; }).join('');
     const drill=(cmp.mode==='region')?'<button class="cmpbtn primary" data-cmpdrill="1">Drill this contrast</button>':'';
     body=`<div class="cmp-card" id="cmpCard">
        <div class="cmpcols">${colHead(a)}${colHead(b)}</div>${rows}
        <div class="cmpfoot">${glass(100,13)} duovino.netlify.app</div></div>
        <div class="cmpact">${drill}<button class="cmpbtn" data-cmpshare="1">Copy link</button><button class="cmpbtn" data-cmpimg="1">Save image</button></div>`;
   }
-  const legend=(a&&b)?'<div class="cmphint" style="text-align:center;margin:8px 0 0">Highlighted rows differ between the two</div>':'';
   return `<div class="view"><div class="top"><div class="brand"><span><h1 style="font-size:26px">Compare</h1><div class="sub">Side by side</div></span></div></div>
-   <div class="modeseg cmpseg">${seg}</div>${legend}${picker}${body}</div>`;
+   <div class="modeseg cmpseg">${seg}</div>${picker}${body}</div>`;
 }
 function viewLearn(){
   if(learnMode==='grape') return viewLearnGrapes();
