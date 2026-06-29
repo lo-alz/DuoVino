@@ -1,0 +1,71 @@
+<!-- @dsCard group="Components" viewport="700x560" name="Charts" subtitle="Signature SVG data viz — fill-the-glass, climate radar, blend donut, style bars" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body{margin:0;background:var(--bg);color:var(--ink);padding:22px;font-family:var(--body)}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+  .cap{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .glassrow{display:flex;gap:20px;align-items:flex-end}
+  .gcol{text-align:center}
+  .gcol .pct{font-family:var(--disp);font-size:22px;font-weight:700;color:var(--gold-l);margin-top:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const DS = window.DuoVinoDesignSystem_63905c;
+  const { Glass, Radar, Donut, StyleBar, StyleBarInline, RadarCompare } = DS;
+  const blend = [
+    { name: "Tempranillo", color: "r", pct: 70 },
+    { name: "Garnacha", color: "r", pct: 18 },
+    { name: "Graciano", color: "r", pct: 7 },
+    { name: "Viura", color: "w", pct: 5 },
+  ];
+  const climate = { warmth: 4, sun: 4, rain: 2, diurnal: 4, risk: 2 };
+  const climateB = { warmth: 2, sun: 3, rain: 4, diurnal: 3, risk: 4 };
+  function App() {
+    return (
+      <div className="grid">
+        <div className="demo">
+          <div className="cap">Glass — fill-the-glass mastery</div>
+          <div className="glassrow">
+            <div className="gcol"><Glass pct={0} width={56} /><div className="pct">0%</div></div>
+            <div className="gcol"><Glass pct={45} width={56} /><div className="pct">45%</div></div>
+            <div className="gcol"><Glass pct={100} width={56} /><div className="pct">100%</div></div>
+          </div>
+        </div>
+        <div className="demo" style={{ width: 210 }}>
+          <div className="cap">Radar — climate fingerprint</div>
+          <Radar scores={climate} />
+        </div>
+        <div className="demo" style={{ width: 210, textAlign: "center" }}>
+          <div className="cap">Donut — grape blend</div>
+          <Donut grapes={blend} />
+        </div>
+        <div className="demo" style={{ width: 280 }}>
+          <div className="cap">StyleBar — wine-style mix</div>
+          <StyleBar style={{ red: 72, white: 20, rose: 8 }} />
+        </div>
+        <div className="demo" style={{ width: 280 }}>
+          <div className="cap">StyleBarInline — compact (Compare)</div>
+          <StyleBarInline style={{ red: 72, white: 20, rose: 8 }} />
+        </div>
+        <div className="demo" style={{ width: 320 }}>
+          <div className="cap">RadarCompare — two regions overlaid</div>
+          <RadarCompare a={climate} b={climateB} aLabel="Rioja" bLabel="Mosel" />
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

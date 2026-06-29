@@ -1,0 +1,186 @@
+<!-- @dsCard group="Components" viewport="700x720" name="Compare" subtitle="The two-column Compare card with locator maps, overlaid radar, grape bars and suggestion chips" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body{margin:0;background:var(--bg);color:var(--ink);padding:22px;font-family:var(--body)}
+  .wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .cap{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
+  .demorow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const DS = window.DuoVinoDesignSystem_63905c;
+  const { CompareCard, CompareColHead, MiniMap, RadarCompare, GrapeBars, StyleBarInline, SuggestChip } = DS;
+
+  // Local GrapeCompare — proportional table, independent of bundle compile cycle
+  const RATES   = { EUR:1, USD:1.08, GBP:0.85, CHF:0.95, JPY:163 };
+  const SYMBOLS = { EUR:"€", USD:"$", GBP:"£", CHF:"CHF ", JPY:"¥" };
+  const CURRENCIES = ["EUR","USD","GBP","CHF","JPY"];
+  // Soil assets available in assets/ref/
+  const SOIL_ASSETS = new Set(["chalk","clay","granite","gravel","limestone","marl","sand","schist","terra-rossa","volcanic"]);
+
+  function SoilImg({ name }) {
+    const [missing, setMissing] = React.useState(!SOIL_ASSETS.has(name));
+    if (missing) return (
+      <div style={{width:60,height:60,borderRadius:8,border:"1px dashed var(--rose)",background:"rgba(138,37,64,.1)",
+        display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2}}>
+        <span style={{fontSize:16}}>⚠</span>
+        <span style={{fontFamily:"var(--mono)",fontSize:7,color:"var(--rose)",letterSpacing:".04em",textTransform:"uppercase",textAlign:"center",padding:"0 4px"}}>{name}</span>
+      </div>
+    );
+    return <img src={`../../assets/ref/${name}.webp`}
+      style={{width:60,height:60,borderRadius:8,objectFit:"cover",border:"1px solid var(--line2)"}}
+      loading="lazy" alt={name} onError={()=>setMissing(true)} />;
+  }
+
+  function soilCell(imgs, text) {
+    return (
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        <div style={{display:"flex",gap:6}}>
+          {imgs.map(n => <SoilImg key={n} name={n} />)}
+        </div>
+        <div className="cmptxt sm">{text}</div>
+      </div>
+    );
+  }
+
+  const GCOL = { w:"var(--gold)", r:"var(--garnet)" };
+  const GINK = { w:"var(--gold-l)", r:"var(--rose)" };
+  function GrapeCompare({ a, b, aLabel, bLabel }) {
+    const map = {};
+    (a||[]).forEach(g => { map[g.name.toLowerCase()] = {name:g.name, color:g.color, a:g.pct, b:0}; });
+    (b||[]).forEach(g => { const k=g.name.toLowerCase(); if(map[k]) map[k].b=g.pct; else map[k]={name:g.name,color:g.color,a:0,b:g.pct}; });
+    const rows = Object.values(map).sort((x,y)=>(y.a-x.a)||(y.b-x.b));
+    const cell = (pct, col) => (
+      <div style={{height:22,background:"var(--line)",borderRadius:4,overflow:"hidden",display:"flex",alignItems:"center"}}>
+        <div style={{height:"100%",width:`${pct}%`,background:col,display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:4,boxSizing:"border-box",minWidth:4,flexShrink:0}}>
+          {pct>=12 ? <span style={{fontFamily:"var(--mono)",fontSize:8,color:"rgba(255,255,255,.85)"}}>{pct}%</span> : null}
+        </div>
+        {pct>0&&pct<12 ? <span style={{fontFamily:"var(--mono)",fontSize:8,color:"var(--muted)",paddingLeft:3}}>{pct}%</span> : null}
+      </div>
+    );
+    return (
+      <table style={{width:"100%",borderCollapse:"collapse",tableLayout:"fixed"}}>
+        <colgroup><col style={{width:"28%"}}/><col style={{width:"36%"}}/><col style={{width:"36%"}}/></colgroup>
+        <thead><tr>
+          <th style={{fontFamily:"var(--mono)",fontSize:9,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",fontWeight:400,paddingBottom:8,textAlign:"left"}}></th>
+          <th style={{fontFamily:"var(--mono)",fontSize:9,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",fontWeight:400,paddingBottom:8,textAlign:"left"}}>{aLabel}</th>
+          <th style={{fontFamily:"var(--mono)",fontSize:9,letterSpacing:".1em",textTransform:"uppercase",color:"var(--muted)",fontWeight:400,paddingBottom:8,textAlign:"left"}}>{bLabel}</th>
+        </tr></thead>
+        <tbody>{rows.map(g => (
+          <tr key={g.name} style={{borderBottom:"1px solid var(--line)"}}>
+            <td style={{padding:"6px 8px 6px 0",fontFamily:"var(--disp)",textTransform:"uppercase",letterSpacing:".02em",fontSize:13,color:GINK[g.color]||"var(--rose)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",verticalAlign:"middle"}}>{g.name}</td>
+            <td style={{padding:"6px 4px",verticalAlign:"middle"}}>{g.a>0 ? cell(g.a, GCOL[g.color]||"var(--garnet)") : null}</td>
+            <td style={{padding:"6px 4px 6px 8px",verticalAlign:"middle"}}>{g.b>0 ? cell(g.b, GCOL[g.color]||"var(--garnet)") : null}</td>
+          </tr>
+        ))}</tbody>
+      </table>
+    );
+  }
+
+  function chainLines(text) {
+    if (!text) return <span className="cmptxt sm">—</span>;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        {text.split(" → ").map((part, i) => (
+          <div key={i} className="cmptxt sm" style={{ display: "flex", gap: 5 }}>
+            {i > 0 ? <span style={{ color: "var(--gold)", flexShrink: 0 }}>→</span> : null}
+            <span>{part}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  const rioja = [{name:"Tempranillo",color:"r",pct:88},{name:"Garnacha",color:"r",pct:8},{name:"Graciano",color:"r",pct:4}];
+  const ribera = [{name:"Tempranillo",color:"r",pct:95},{name:"Cabernet S.",color:"r",pct:5}];
+  const cA = { warmth: 4, sun: 4, rain: 2, diurnal: 4, risk: 2 };
+  const cB = { warmth: 4, sun: 4, rain: 2, diurnal: 5, risk: 3 };
+  function App() {
+    const [currency, setCurrency] = React.useState(() => {
+      try { return localStorage.getItem("duovino.currency") || "EUR"; } catch(e) { return "EUR"; }
+    });
+    function pickCurrency(c){ setCurrency(c); try{localStorage.setItem("duovino.currency",c);}catch(e){} }
+    function fmtPrice(min,max,note){
+      const sym=SYMBOLS[currency], r=RATES[currency];
+      return `${sym}${Math.round(min*r)} – ${sym}${Math.round(max*r)}+  ·  ${note}`;
+    }
+    const rows = [
+      { label: "Climate", full: true, cellFull: <RadarCompare a={cA} b={cB} aLabel="Rioja" bLabel="Ribera" /> },
+      { label: "Soils",
+        cellA: soilCell(["clay","limestone"], "Calcareous & ferrous clay over alluvial terraces."),
+        cellB: soilCell(["limestone","marl"], "Limestone & marl over Duero terraces; chalky outcrops.") },
+      { label: "Grapes", full: true,
+        cellFull: <GrapeCompare a={rioja} b={ribera} aLabel="Rioja" bLabel="Ribera" /> },
+      { label: "Viticulture",
+        cellA: <div className="cmptxt sm">Tempranillo-led; bush vines & trellis; warm continental.</div>,
+        cellB: <div className="cmptxt sm">Tempranillo at high altitude; big diurnal swings; frost risk.</div> },
+      { label: "Winemaking",
+        cellA: <div className="cmptxt sm">American & French oak; Crianza / Reserva / Gran Reserva.</div>,
+        cellB: <div className="cmptxt sm">French & American oak; structured, modern extraction.</div> },
+      { label: "Why it tastes that way",
+        cellA: chainLines("Warm, semi-arid continental climate → Tempranillo ripens to high sugar with thick skins → concentrated fruit, firm tannin, medium acid → ideal for extended oak ageing"),
+        cellB: chainLines("High-altitude plateau with big diurnal swings → Tinto Fino retains acidity despite full ripeness → dense, dark fruit with firm structure → built for long ageing") },
+      { label: "Style",
+        cellA: <StyleBarInline style={{ red: 90, rose: 6, white: 4 }} />,
+        cellB: <StyleBarInline style={{ red: 96, rose: 4 }} /> },
+      { label: "Quality",
+        cellA: <div className="cmptxt sm">Savoury, supple — leather & dried fruit; ages well.</div>,
+        cellB: <div className="cmptxt sm">Denser, darker, more structured & age-worthy.</div> },
+      { label: "Price", full: true,
+        cellFull: (
+          <div>
+            <div style={{display:"flex",gap:5,marginBottom:10}}>
+              {CURRENCIES.map(c=>(
+                <button key={c} onClick={()=>pickCurrency(c)} style={{
+                  fontFamily:"var(--mono)",fontSize:9,letterSpacing:".08em",padding:"3px 8px",
+                  borderRadius:999,border:"1px solid"+(currency===c?" var(--gold)":" var(--line2)"),
+                  background:currency===c?"rgba(202,166,75,.18)":"transparent",
+                  color:currency===c?"var(--gold-l)":"var(--muted)",cursor:"pointer"}}>
+                  {c}
+                </button>
+              ))}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              <div style={{fontFamily:"var(--mono)",fontSize:11,letterSpacing:".02em",color:"var(--gold-l)",lineHeight:1.5}}>{fmtPrice(8,120,"Crianza to Gran Reserva")}</div>
+              <div style={{fontFamily:"var(--mono)",fontSize:11,letterSpacing:".02em",color:"var(--gold-l)",lineHeight:1.5}}>{fmtPrice(12,150,"Joven to Gran Reserva")}</div>
+            </div>
+          </div>
+        ) },
+    ];
+    return (
+      <div className="wrap">
+        <div className="cap">CompareCard — full two-column contrast</div>
+        <CompareCard
+          a={{ name: "Rioja", sub: "🇪🇸 Spain", media: <MiniMap lat={42.45} lng={-2.45} zoom={6} /> }}
+          b={{ name: "Ribera del Duero", sub: "🇪🇸 Spain", media: <MiniMap lat={41.6} lng={-3.7} zoom={6} /> }}
+          rows={rows} />
+
+        <div className="cap">SuggestChip — empty-state head-to-heads</div>
+        <div className="cmpchips" style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <SuggestChip label="Rioja × Ribera del Duero" />
+          <SuggestChip label="Mosel × Rheingau" />
+          <SuggestChip label="Chablis × Meursault" />
+        </div>
+
+        <div className="cap">CompareColHead & MiniMap (standalone)</div>
+        <div className="demorow">
+          <div style={{ width: 200 }}>
+            <CompareColHead name="Barolo" sub="🇮🇹 Piedmont" media={<MiniMap lat={44.61} lng={7.94} zoom={8} />} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

@@ -28,9 +28,12 @@ export function GrapeBars({ grapes, otherNames = [] }: GrapeBarsProps) {
       {grapes.map((g, i) => {
         const shared = others.has(g.name.toLowerCase());
         const fill = g.color === "w" ? "var(--gold)" : "var(--garnet)";
+        // grape name takes the colour of the grape — gold for whites, rose-garnet
+        // for reds. The shared signal is carried by the bar's reduced opacity.
+        const nameColor = g.color === "w" ? "var(--gold-l)" : "var(--rose)";
         return (
           <div className={shared ? "cmpgbar sh" : "cmpgbar"} key={g.name + i}>
-            <span className="gbn">{g.name}</span>
+            <span className="gbn" style={{ color: nameColor }}>{g.name}</span>
             <span className="gbt">
               <span className="gbf" style={{ width: `${Math.max(3, Math.min(100, g.pct))}%`, background: fill }} />
             </span>

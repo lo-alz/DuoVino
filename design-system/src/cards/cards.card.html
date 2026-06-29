@@ -1,0 +1,71 @@
+<!-- @dsCard group="Components" viewport="700x760" name="Content Cards" subtitle="Region, grape, reference, curriculum, glossary, settings and weak-spot rows" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body{margin:0;background:var(--bg);color:var(--ink);padding:22px;font-family:var(--body)}
+  .wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .cap{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const DS = window.DuoVinoDesignSystem_63905c;
+  const { RegionCard, GrapeCard, RefCard, CurriculumOption, GlossaryItem, SettingItem, WeakRow, Panel } = DS;
+  function App() {
+    return (
+      <div className="wrap">
+        <div className="cap">RegionCard — headed by the Glass glyph</div>
+        <div className="tcards">
+          <RegionCard title="Chablis" flag="🇫🇷" alt="Burgundy" kkpCount={18} whyCount={6} pct={64} />
+          <RegionCard title="Barossa Valley" flag="🇦🇺" alt="South Australia" kkpCount={15} whyCount={4} pct={20} />
+        </div>
+
+        <div className="cap">GrapeCard — white (gold) vs black (garnet)</div>
+        <div className="gcards">
+          <GrapeCard name="Chardonnay" color="w" aka={["—"]} stats={[{label:"BUD",value:"Early"},{label:"ACID",value:"Med–High"}]} />
+          <GrapeCard name="Nebbiolo" color="r" aka={["Spanna"]} stats={[{label:"RIPEN",value:"Late"},{label:"TANNIN",value:"High"}]} />
+        </div>
+
+        <div className="cap">RefCard — vessel / soil reference</div>
+        <div className="refcards">
+          <RefCard name="French Oak" tag="Barrique · tight grain" imgSrc="../../assets/ref/french-oak.webp" />
+          <RefCard name="Limestone" tag="Calcareous · cool" imgSrc="../../assets/ref/limestone.webp" />
+        </div>
+
+        <div className="cap">CurriculumOption</div>
+        <div className="curseg">
+          <CurriculumOption label="WSET Diploma · D3" desc="All still wines of the world — the full D3 unit." count={84} active />
+          <CurriculumOption label="WSET Level 3" desc="Still-wine regions in the Level 3 scope." count={40} />
+        </div>
+
+        <div className="cap">GlossaryItem</div>
+        <div className="glossary">
+          <GlossaryItem term="Kimmeridgian" language="geol" def="Limestone-and-clay marl rich in fossilised seashells; the classic soil of Chablis." />
+          <GlossaryItem term="Aspersion" language="fr" def="Frost protection that sprays water over buds; latent heat protects the bud in an ice shell." />
+        </div>
+
+        <div className="cap">SettingItem</div>
+        <div className="setlist">
+          <SettingItem icon="🎓" title="Curriculum" desc="Choose your qualification & filter regions" />
+        </div>
+
+        <div className="cap">WeakRow — mastery-state review rows</div>
+        <Panel>
+          <WeakRow topicTitle="Chablis" statement="Why MLC softens the naturally high acidity" cat="relationship" state={1} />
+          <WeakRow topicTitle="Rioja" statement="American vs French oak signatures" cat="comparison" state={2} />
+        </Panel>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

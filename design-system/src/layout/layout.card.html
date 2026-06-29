@@ -1,0 +1,83 @@
+<!-- @dsCard group="Components" viewport="700x900" name="Layout & Shell" subtitle="Panels, hero, stats, quick actions, chips, segments, nav and the app chrome" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body{margin:0;background:var(--bg);color:var(--ink);padding:22px;font-family:var(--body)}
+  .wrap{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .cap{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
+  .navbox{position:relative;height:78px;border:1px solid var(--line);border-radius:14px;overflow:hidden;transform:translateZ(0)}
+  .navbox .nav{position:absolute}
+  .inlinebar{display:flex;gap:10px;align-items:center}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const DS = window.DuoVinoDesignSystem_63905c;
+  const { Panel, Hero, StatGrid, QBtn, Chip, ModeSeg, SectionHead, Eyebrow,
+          ProgressBar, CountryTile, ThemeToggle, BottomNav, TopHeader } = DS;
+  function App() {
+    const [tab, setTab] = React.useState("dash");
+    const [mode, setMode] = React.useState("geo");
+    const [chip, setChip] = React.useState("France");
+    return (
+      <div className="wrap">
+        <div className="cap">TopHeader</div>
+        <TopHeader title="DuoVino" sub="WSET D3 · Study" />
+
+        <div className="cap">Hero — mastery banner</div>
+        <Hero pct={42} mastered={88} total={210} message="Filling steadily — keep closing the gaps below." />
+
+        <div className="cap">StatGrid</div>
+        <StatGrid mastered={88} partial={41} seen={33} relMastered={19} relTotal={54} />
+
+        <div className="cap">QBtn — quick actions (accent + default)</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <QBtn title="Review weakest" desc="Target your 41 open gaps" accent />
+          <QBtn title="Quick quiz" desc="Multiple-choice facts" />
+        </div>
+
+        <div className="cap">ModeSeg — segmented control</div>
+        <ModeSeg active={mode} onSelect={setMode}
+          modes={[{key:"geo",label:"Regions"},{key:"grape",label:"Grapes"},{key:"barrels",label:"Vessels"},{key:"soils",label:"Soils"}]} />
+
+        <div className="cap">Chip — filter pills</div>
+        <div className="chips">
+          {["All","France","Spain","Italy","Germany"].map(c =>
+            <Chip key={c} label={c} active={chip===c} onSelect={()=>setChip(c)} />)}
+        </div>
+
+        <div className="cap">SectionHead · Eyebrow · ProgressBar</div>
+        <Panel>
+          <Eyebrow>Mastery</Eyebrow>
+          <SectionHead title="By country" link="All topics →" />
+          <ProgressBar pct={42} />
+        </Panel>
+
+        <div className="cap">CountryTile</div>
+        <div className="tiles">
+          <CountryTile name="France" flag="🇫🇷" topics={12} pct={56} />
+          <CountryTile name="Italy" flag="🇮🇹" topics={9} pct={28} />
+        </div>
+
+        <div className="cap">ThemeToggle</div>
+        <div className="inlinebar">
+          <ThemeToggle theme="dark" /><ThemeToggle theme="light" />
+        </div>
+
+        <div className="cap">BottomNav</div>
+        <div className="navbox"><BottomNav active={tab} onNavigate={setTab} /></div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

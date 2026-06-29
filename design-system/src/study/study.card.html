@@ -1,0 +1,71 @@
+<!-- @dsCard group="Components" viewport="700x980" name="Study Cards" subtitle="The five study modes — flashcard, MCQ, explain, blind tasting — plus KKP, LO accordion and summary" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body{margin:0;background:var(--bg);color:var(--ink);padding:22px;font-family:var(--body)}
+  .wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .cap{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
+  .runwrap{min-height:0!important}
+  .qcard{flex:none!important}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const DS = window.DuoVinoDesignSystem_63905c;
+  const { Flashcard, McqCard, ExplainCard, BlindCard, KkpCard, LoAccordion, ChainTable, SummaryPanel, Panel } = DS;
+  const chain = [
+    { label: "Factor", value: "Cool continental climate" },
+    { label: "Mechanism", value: "Slow ripening retains acid" },
+    { label: "Effect", value: "High malic acidity" },
+    { label: "Style", value: "Lean, racy, age-worthy" },
+  ];
+  function App() {
+    return (
+      <div className="wrap">
+        <div className="cap">Flashcard — answer side, 4-bullet recall</div>
+        <Flashcard topic="Chablis" question="Name the signature soil of Chablis." side="answer"
+          answerBullets={["Kimmeridgian limestone-clay marl","Rich in fossilised seashells","Good drainage + water-retentive clay","Gives flinty, wet-stone character"]} />
+
+        <div className="cap">McqCard — answered state</div>
+        <McqCard topic="Rioja" question="Which oak gives Rioja its classic vanilla & coconut?"
+          options={["French oak","American oak","Chestnut","Acacia"]} correctIndex={1} pickedIndex={0} answered />
+
+        <div className="cap">ExplainCard — revealed, with reasoning chain</div>
+        <ExplainCard topic="Mosel" prompt="Why is Mosel Riesling so high in acidity?"
+          requiredPoints={["Cool, northerly continental climate","Steep south-facing slate slopes for ripening","Late harvest preserves malic acid"]}
+          chain={chain} revealed />
+
+        <div className="cap">BlindCard — revealed deduction</div>
+        <BlindCard tastingProfile="Pale lemon, pronounced lime & green apple, high acidity, low alcohol, off-dry, wet-stone note."
+          deduce={["Grape: Riesling","Climate: cool","Region: Mosel, Germany"]}
+          justifyWith={["High acid + low alcohol → cool climate","Lime/green apple → Riesling marker","Off-dry + slate note → Mosel"]} revealed />
+
+        <div className="cap">KkpCard — relationship knowledge point</div>
+        <KkpCard id="CHA-3.1-r2" cat="relationship" statement="Spring frost risk drives the use of aspersion sprinklers in Chablis." chain={chain} />
+
+        <div className="cap">LoAccordion — learning objective + mastery track</div>
+        <LoAccordion code="LO2" title="Climate & weather" statement="Explain how climate shapes Chablis style." open
+          segments={[{state:3,pct:40},{state:2,pct:25},{state:1,pct:20},{state:0,pct:15}]}>
+          <div style={{padding:"4px 0 10px",color:"var(--ink-dim)",fontSize:13}}>Body content slots in here — KKP cards, narratives, checks.</div>
+        </LoAccordion>
+
+        <div className="cap">ChainTable — factor → style</div>
+        <ChainTable steps={chain} />
+
+        <div className="cap">SummaryPanel — end of session</div>
+        <Panel><SummaryPanel pct={58} cards={24} mastered={14} partial={7} revisit={3} /></Panel>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
