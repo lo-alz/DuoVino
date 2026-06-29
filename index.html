@@ -744,6 +744,24 @@ function cmpGrapeBars(t,otherNames){
     return `<div class="cmpgbar${shared?' sh':''}"><span class="gbn">${esc(g.name)}</span><span class="gbt"><span class="gbf" style="width:${w}%;background:${fill}"></span></span><span class="gbp">${g.pct||0}%</span></div>`;
   }).join('')}</div>`;
 }
+function cmpGrapeCompare(a,b,aName,bName){
+  // Merged grape comparison table: all grapes from both regions, bars side-by-side
+  const aGrapes=(a&&a.grapes)||[]; const bGrapes=(b&&b.grapes)||[];
+  const aMap=new Map(aGrapes.map(g=>[String(g.name).toLowerCase(),g]));
+  const bMap=new Map(bGrapes.map(g=>[String(g.name).toLowerCase(),g]));
+  const allNames=new Set([...aMap.keys(),...bMap.keys()]);
+  const rows=Array.from(allNames).sort().map(key=>{
+    const ga=aMap.get(key); const gb=bMap.get(key);
+    const gn=ga?ga.name:gb.name; const col=ga?ga.color:gb.color;
+    const fillA=col==='w'?'var(--gold)':'var(--garnet)'; const fillB=col==='w'?'var(--gold)':'var(--garnet)';
+    const wa=Math.max(2,Math.min(100,ga?.pct||0)); const wb=Math.max(2,Math.min(100,gb?.pct||0));
+    const aOnly=!gb?` (${aName} only)`:''; const bOnly=!ga?` (${bName} only)`:'';
+    return `<tr class="gcmptr"><td class="gcmptd"><span class="gcmpgname">${esc(gn)}${aOnly}${bOnly}</span></td>
+      <td class="gcmptd"><div class="gcmpcell"><div class="gcmpbar" style="width:${wa}%;background:${fillA}"></div></div>${ga?'<div class="gcmppct2">'+ga.pct+'%</div>':''}</td>
+      <td class="gcmptd"><div class="gcmpcell"><div class="gcmpbar" style="width:${wb}%;background:${fillB}"></div></div>${gb?'<div class="gcmppct2">'+gb.pct+'%</div>':''}</td></tr>`;
+  }).join('');
+  return `<table class="gcmptbl"><thead><tr><th class="gcmpth"></th><th class="gcmpth">${esc(aName)}</th><th class="gcmpth">${esc(bName)}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
 const STYLE_INK={red:'#f7e9ec',white:'#1a1407',rose:'#2a0e16',sparkling:'#06121f',sweet:'#2a0e16'};
 function cmpStyleBarInline(st){
   if(!st)return ''; const keys=Object.keys(st).filter(k=>st[k]>0); const tot=keys.reduce((s,k)=>s+st[k],0)||1;
@@ -985,7 +1003,7 @@ const CMP_MODES={
     media:e=>{ const p=MAPPTS[e.id]; const theme=document.body.classList.contains('light')?'light':'dark'; return p?cmpMiniMap(p.lat,p.lng,6,theme):'<div class="cmpmap" style="background:linear-gradient(135deg,var(--panel2),var(--panel3))"></div>'; },
     rows:[
       {label:'Climate', kind:'radar', hl:true, full:true, cellFull:(a,b)=>radar2(a.climate&&a.climate.scores,b.climate&&b.climate.scores,a.title,b.title), diff:cmpClimateDiff},
-      {label:'Principal grapes', hl:true, cell:(t,o)=>cmpGrapeBars(t,_gnames(o||{})), diff:(a,b)=>_setNe(_gnames(a),_gnames(b))},
+      {label:'Principal grapes', hl:true, full:true, cellFull:(a,b)=>cmpGrapeCompare(a,b,a.title,b.title), diff:(a,b)=>_setNe(_gnames(a),_gnames(b))},
       {label:'Style', hl:true, cell:t=>cmpStyleBarInline(t.style), diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
       {label:'Winemaking', cell:t=>`<div class="cmptxt sm">${esc(t.winemaking||'—')}</div>`, diff:()=>false},
       {label:'Quality', hl:true, cell:t=>`<div class="cmptxt">${esc(t.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
