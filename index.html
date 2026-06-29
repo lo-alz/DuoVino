@@ -801,10 +801,10 @@ function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'
 
 /* ============================ ROUTER ============================ */
 const app=document.getElementById('app');
-let route={view:'dash'};
+let route={view:'dash'}; try{const saved=localStorage.getItem('duovino.route');if(saved)route=JSON.parse(saved);}catch(e){}
 let study=null; // active session
 
-function nav(view,extra){ route={view,...(extra||{})}; render(); window.scrollTo(0,0); }
+function nav(view,extra){ route={view,...(extra||{})}; try{localStorage.setItem('duovino.route',JSON.stringify(route));}catch(e){} render(); window.scrollTo(0,0); }
 function setNav(v){['dash','learn','study','map','compare','settings'].forEach(n=>{
   const b=document.getElementById('nv-'+n); if(b)b.classList.toggle('on',n===v);});}
 document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{
