@@ -621,8 +621,8 @@ let MEM={};
 const SUPA_ENABLED = !/YOUR-PROJECT-REF|YOUR-PUBLIC-ANON-KEY/.test(SUPABASE_URL+SUPABASE_ANON_KEY);
 let SB=null, USER=null, _syncTimer=null, _skipAuth=false;
 try{ _skipAuth = localStorage.getItem('cellar.localonly')==='1'; }catch(e){}
-// Admin view (Settings → Admin): password-gated list of registered emails.
-const ADMIN_PASS='duovino-admin';   // ← change this to your own admin password
+// Admin view (Settings → Admin): the password is verified server-side by the
+// /.netlify/functions/admin function — it is never stored in this file.
 let _adminUnlocked=false, _adminEmails=null;
 if(SUPA_ENABLED && window.supabase){ try{ SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ SB=null; } }
 const store={
@@ -1624,11 +1624,14 @@ function bind(){
   app.querySelectorAll('[data-back-settings]').forEach(b=>b.onclick=()=>nav('settings'));
   app.querySelectorAll('[data-adminunlock]').forEach(b=>b.onclick=async()=>{
     const inp=document.getElementById('adminpass'), msg=document.getElementById('adminmsg');
-    if(!inp||inp.value!==ADMIN_PASS){ if(msg)msg.textContent='Incorrect password.'; return; }
-    if(msg)msg.textContent='Loading…';
-    try{ const {data,error}=await SB.from('accounts').select('email,updated_at').order('updated_at',{ascending:false});
-      _adminEmails=error?[]:(data||[]); }catch(e){ _adminEmails=[]; }
-    _adminUnlocked=true; render();
+    if(!inp||!inp.value){ if(msg)msg.textContent='Enter the admin password.'; return; }
+    if(msg)msg.textContent='Checking…'; b.disabled=true;
+    try{
+      const res=await fetch('/.netlify/functions/admin',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({passcode:inp.value})});
+      if(res.status===401){ if(msg)msg.textContent='Incorrect password.'; b.disabled=false; return; }
+      if(!res.ok){ if(msg)msg.textContent='Error reaching admin service.'; b.disabled=false; return; }
+      const out=await res.json(); _adminEmails=out.emails||[]; _adminUnlocked=true; render();
+    }catch(e){ if(msg)msg.textContent='Error: '+(e.message||e); b.disabled=false; }
   });
   app.querySelectorAll('[data-adminlock]').forEach(b=>b.onclick=()=>{ _adminUnlocked=false; _adminEmails=null; render(); });
   const ap=document.getElementById('adminpass'); if(ap)ap.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){const u=document.querySelector('[data-adminunlock]');if(u)u.click();} });
