@@ -1056,7 +1056,7 @@ function priceRange(str){
   return `${sym}${lo}–${sym}${hi}`;
 }
 const CMP_MODES={
-  region:{ label:'Region', list:()=>TOPICS.slice().sort((a,b)=>a.title.localeCompare(b.title)), byId:id=>BY_ID[id], name:t=>t.title, sub:t=>`${t.flag||''} ${esc(t.country)}`, mastery:t=>fillPct(topicKKPs(t)),
+  region:{ label:'Region', list:()=>TOPICS.slice().sort((a,b)=>(a.country||'').localeCompare(b.country||'')||a.title.localeCompare(b.title)), byId:id=>BY_ID[id], name:t=>t.title, sub:t=>`${t.flag||''} ${esc(t.country)}`, mastery:t=>fillPct(topicKKPs(t)),
     media:e=>{ const p=MAPPTS[e.id]; const theme=document.body.classList.contains('light')?'light':'dark'; return p?cmpMiniMap(p.lat,p.lng,6,theme):'<div class="cmpmap" style="background:linear-gradient(135deg,var(--panel2),var(--panel3))"></div>'; },
     rows:[
       {label:'Climate', kind:'radar', hl:true, full:true, cellFull:(a,b)=>radar2(a.climate&&a.climate.scores,b.climate&&b.climate.scores,a.title,b.title), diff:cmpClimateDiff},
@@ -1094,7 +1094,17 @@ function viewCompare(){
   const M=CMP_MODES[cmp.mode]; const a=cmp.a?M.byId(cmp.a):null, b=cmp.b?M.byId(cmp.b):null;
   if(a&&b)cmpSyncHash();
   const seg=Object.keys(CMP_MODES).map(k=>`<button class="mode ${cmp.mode===k?'on':''}" data-cmpmode="${k}">${CMP_MODES[k].label}</button>`).join('');
-  const opts=(sel)=>['<option value="">— choose —</option>'].concat(M.list().map(e=>`<option value="${e.id}" ${sel===e.id?'selected':''}>${esc(M.name(e))}</option>`)).join('');
+  const opts=(sel)=>{
+    const items=M.list();
+    const optTag=e=>`<option value="${e.id}" ${sel===e.id?'selected':''}>${esc(M.name(e))}</option>`;
+    let out='<option value="">— choose —</option>';
+    if(cmp.mode==='region'){ // group options under country headers
+      let cur=null;
+      items.forEach(e=>{ const c=e.country||'Other'; if(c!==cur){ if(cur!==null)out+='</optgroup>'; out+=`<optgroup label="${esc(c)}">`; cur=c; } out+=optTag(e); });
+      if(cur!==null)out+='</optgroup>';
+    } else { out+=items.map(optTag).join(''); }
+    return out;
+  };
   const picker=`<div class="cmppick"><select class="cmpsel" data-cmpslot="a">${opts(cmp.a)}</select><span class="cmpvs">vs</span><select class="cmpsel" data-cmpslot="b">${opts(cmp.b)}</select></div>`;
   let chips='';
   if(cmp.mode==='region'){ const SUG=[['rioja','ribera-del-duero'],['barossa-valley','coonawarra'],['mosel','rheingau'],['n-rhone','s-rhone'],['barolo','barbaresco'],['chianti-classico','brunello-di-montalcino'],['douro-port','priorat'],['uco-valley','n-rhone'],['napa-valley','bordeaux'],['marlborough','sancerre']];
