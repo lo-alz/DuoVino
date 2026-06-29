@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "DuoVino — WSET D3 study app",
+  "description": "DuoVino — WSET Study Guide",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0"
   }

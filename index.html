@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>DuoVino — WSET D3 Study</title>
+<title>DuoVino — WSET Study Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -849,7 +849,7 @@ function viewDash(){
   }).join('');
   return `<div class="view">
    <div class="top"><div class="brand">
-     <span><h1>DuoVino</h1><div class="sub">WSET D3 · Study</div></span></div>
+     <span><h1>DuoVino</h1><div class="sub">WSET Study Guide</div></span></div>
    </div>
    ${accountRow()}
    <div class="hero">
@@ -935,7 +935,7 @@ function viewCurriculum(){
      ${optDisabled('Level 2 Award','Principal grape varieties and 70+ regions that shape them.')}
      ${optActive('L3','Level 3 Award','Advanced still-wine regions: how location, grapes & winemaking drive style, quality & price.',c.L3)}
    </div>
-   <div class="sec-h"><h3>WSET Diploma · Units</h3></div>
+   <div class="sec-h"><h3>WSET Curricula</h3></div>
    <div class="curseg">
      ${optDisabled('D1 — Wine Production','Viticulture & winemaking, and how they shape style, quality & price.')}
      ${optDisabled('D2 — Wine Business','The trade: supply, distribution, pricing & marketing.')}
@@ -1061,7 +1061,7 @@ function viewLearn(){
   return `<div class="view">
    <div class="top"><div class="brand"><span><h1 style="font-size:26px">Learn</h1><div class="sub">Regions & appellations</div></span></div></div>
    ${learnToggle()}
-   ${curric!=='all'?`<div class="curbanner">Curriculum: <b>${curric==='L3'?'WSET Level 3':'WSET Diploma · D3'}</b> · ${list.length} regions<button class="curclear" data-curric="all">show all</button></div>`:''}
+   ${curric!=='all'?`<div class="curbanner">Curriculum: <b>${curric==='L3'?'WSET Level 3':'WSET Diploma (D3)'}</b> · ${list.length} regions<button class="curclear" data-curric="all">show all</button></div>`:''}
    <div class="chips">${chips}</div>
    <div class="tcards">${cards||'<div class="empty">No topics.</div>'}</div>
   </div>`;

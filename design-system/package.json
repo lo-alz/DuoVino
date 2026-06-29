@@ -2,7 +2,7 @@
   "name": "@duovino/design-system",
   "version": "0.1.0",
   "private": true,
-  "description": "DuoVino design system — React component library mirroring the WSET D3 study app's UI.",
+  "description": "DuoVino design system — React component library for the WSET Study Guide.",
   "type": "module",
   "module": "dist/index.es.js",
   "main": "dist/index.es.js",

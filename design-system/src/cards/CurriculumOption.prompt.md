@@ -23,8 +23,8 @@ interface CurriculumOptionProps {
 () => (
   <div style={{ display: "grid", gap: 8, padding: 8, maxWidth: 380 }}>
     <CurriculumOption
-      label="WSET Diploma · D3"
-      desc="All still wines of the world — the full Diploma D3 unit."
+      label="WSET Diploma (D3)"
+      desc="All still wines of the world — the full unit."
       count={91}
       active
     />
