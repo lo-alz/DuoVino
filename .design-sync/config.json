@@ -1,0 +1,8 @@
+{
+  "pkg": "@duovino/design-system",
+  "globalName": "DuoVino",
+  "shape": "package",
+  "buildCmd": "npm run build",
+  "cssEntry": "src/duovino.css",
+  "srcDir": "src"
+}

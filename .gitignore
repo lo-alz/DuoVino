@@ -5,3 +5,11 @@ node_modules/
 
 # Netlify CLI local state
 .netlify/
+# design-system build + design-sync machine state
+design-system/dist/
+design-system/node_modules/
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
