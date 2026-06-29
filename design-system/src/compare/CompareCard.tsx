@@ -1,6 +1,5 @@
 import React from "react";
 import { CompareColHead } from "./CompareColHead";
-import { DiffPill } from "./DiffPill";
 import { Glass } from "../charts/Glass";
 
 export interface CompareColumn {
@@ -12,8 +11,6 @@ export interface CompareColumn {
 export interface CompareRow {
   /** Row label, e.g. "Climate", "Principal grapes", "Style". */
   label: string;
-  /** Show the "Differs" pill + gold highlight on this row. */
-  differs?: boolean;
   /** Full-width row spanning both columns (e.g. the combined climate radar). */
   full?: boolean;
   /** Content for column A (two-column rows). */
@@ -49,11 +46,8 @@ export function CompareCard({ a, b, rows, actions }: CompareCardProps) {
           <CompareColHead name={b.name} sub={b.sub} media={b.media} />
         </div>
         {rows.map((r, i) => (
-          <div className={"cmprow" + (r.full ? " full" : "") + (r.differs ? " cmp-diff" : "")} key={r.label + i}>
-            <div className="cmprl">
-              {r.label}
-              {r.differs && <DiffPill />}
-            </div>
+          <div className={"cmprow" + (r.full ? " full" : "")} key={r.label + i}>
+            <div className="cmprl">{r.label}</div>
             <div className="cmprc">
               {r.full ? (
                 r.cellFull

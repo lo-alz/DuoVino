@@ -46,7 +46,6 @@ export * from "./study/SummaryPanel";
 // compare
 export * from "./compare/CompareCard";
 export * from "./compare/CompareColHead";
-export * from "./compare/DiffPill";
 export * from "./compare/GrapeBars";
 export * from "./compare/MiniMap";
 export * from "./compare/SuggestChip";

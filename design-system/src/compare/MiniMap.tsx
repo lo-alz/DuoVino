@@ -7,11 +7,7 @@ export interface MiniMapProps {
   lng: number;
   /** Zoom level (web-mercator). Default 6 — regional context. */
   zoom?: number;
-  /** Basemap theme. Defaults to dark to match the app's default theme. */
-  theme?: "light" | "dark";
 }
-
-const SUBS = ["a", "b", "c", "d"];
 
 function lon2px(lon: number, z: number) {
   return ((lon + 180) / 360) * Math.pow(2, z) * 256;
@@ -22,18 +18,18 @@ function lat2px(lat: number, z: number) {
 }
 
 /**
- * A static "locator" map centred on a wine region — a tiled Carto basemap
- * (theme-matched, no API key) with a centred pin. Used as the Compare column
- * header for regions, and exports cleanly to image (CORS-enabled tiles).
+ * A static "locator" map centred on a wine region — a tiled Esri **World
+ * Terrain** basemap (shaded relief + topography, so the terroir reads at a
+ * glance) with a centred pin. No API key; CORS-enabled tiles export cleanly
+ * to image.
  */
-export function MiniMap({ lat, lng, zoom = 6, theme = "dark" }: MiniMapProps) {
+export function MiniMap({ lat, lng, zoom = 6 }: MiniMapProps) {
   const z = zoom;
   const n = Math.pow(2, z);
   const cx = lon2px(lng, z);
   const cy = lat2px(lat, z);
   const ctx = Math.floor(cx / 256);
   const cty = Math.floor(cy / 256);
-  const style = theme === "light" ? "light_all" : "dark_all";
   const tiles: React.ReactNode[] = [];
   for (let tx = ctx - 2; tx <= ctx + 2; tx++) {
     for (let ty = cty - 2; ty <= cty + 2; ty++) {
@@ -41,8 +37,8 @@ export function MiniMap({ lat, lng, zoom = 6, theme = "dark" }: MiniMapProps) {
       const wx = ((tx % n) + n) % n; // wrap longitude
       const offX = tx * 256 - cx;
       const offY = ty * 256 - cy;
-      const sub = SUBS[(Math.abs(tx) + Math.abs(ty)) % SUBS.length];
-      const url = `https://${sub}.basemaps.cartocdn.com/${style}/${z}/${wx}/${ty}.png`;
+      // Esri World Topo (terrain/relief). Note the URL order is {z}/{y}/{x}.
+      const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${z}/${ty}/${wx}`;
       tiles.push(
         <img
           key={tx + "_" + ty}
@@ -60,7 +56,7 @@ export function MiniMap({ lat, lng, zoom = 6, theme = "dark" }: MiniMapProps) {
     }
   }
   return (
-    <div className="cmpmap" role="img" aria-label="region locator map">
+    <div className="cmpmap" role="img" aria-label="region terrain locator map">
       {tiles}
       <span className="cmppin" />
     </div>

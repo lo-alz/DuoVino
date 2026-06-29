@@ -54,9 +54,9 @@ export function RadarCompare({ a, b, aLabel, bLabel }: RadarCompareProps) {
   RADAR_AX.forEach((ax, i) => {
     const [x, y] = polar(cx, cy, R, (i * 360) / N);
     axes.push(<line key={"a" + i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--line)" strokeWidth="1" />);
-    const [lx, ly] = polar(cx, cy, R + 15, (i * 360) / N);
+    const [lx, ly] = polar(cx, cy, R + 12, (i * 360) / N);
     labels.push(
-      <text key={"l" + i} x={lx} y={ly} fontFamily="var(--mono)" fontSize="9" fill="var(--muted)" textAnchor="middle" dominantBaseline="middle" style={{ textTransform: "uppercase", letterSpacing: ".06em" }}>
+      <text key={"l" + i} x={lx} y={ly} fontFamily="var(--mono)" fontSize="6.5" fill="var(--muted)" textAnchor="middle" dominantBaseline="middle" style={{ textTransform: "uppercase", letterSpacing: ".04em" }}>
         {ax[1]}
       </text>
     );
@@ -65,7 +65,7 @@ export function RadarCompare({ a, b, aLabel, bLabel }: RadarCompareProps) {
   const pb = series(b, cx, cy, R, N);
   return (
     <div className="cmpclim">
-      <svg viewBox="0 0 200 192" width="100%" role="img" aria-label="climate comparison">
+      <svg viewBox="0 0 200 192" width="100%" style={{ maxWidth: 300 }} role="img" aria-label="climate comparison">
         {grid}
         {axes}
         <polygon points={pb.join(" ")} fill="rgba(63,130,196,.16)" stroke="var(--azul)" strokeWidth="2" />
