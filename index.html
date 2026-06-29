@@ -461,7 +461,6 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .curopt .curtop{display:flex;align-items:center;justify-content:space-between}
 .curopt .curtop b{font-family:var(--disp);font-size:16px;text-transform:uppercase;letter-spacing:.02em}
 .curopt .curon{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-l);border:1px solid var(--gold-d);border-radius:6px;padding:2px 7px}
-.curopt .curdisabled{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:2px 7px}
 .curopt .curdesc{font-size:12.5px;color:var(--ink-dim);line-height:1.4}
 .curopt .curcount{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted)}
 .curinfo p{margin:0 0 7px;font-size:13.5px;color:var(--ink-dim);line-height:1.5}
@@ -501,7 +500,9 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .cmprow.cmp-diff .cmprl{color:var(--gold-l)}
 .cmpd{background:var(--gold);color:#1a1407;border-radius:5px;font-size:8px;padding:0 4px;line-height:1.6}
 .cmprc{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
-.cmpcell{min-width:0;font-size:13px;color:var(--ink-dim);text-align:center}
+.cmpcell{min-width:0;font-size:13px;color:var(--ink-dim);text-align:left}
+.cmpclim{text-align:center}
+.cmpclim svg{margin:0 auto;display:block}
 .cmptxt{font-size:13px;color:var(--ink);line-height:1.4}
 .cmptxt.sm{font-size:11.5px;color:var(--ink-dim);line-height:1.4;text-align:left}
 .cmpmuted{color:var(--muted)}
@@ -522,6 +523,7 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 body.light .cmpbtn.primary{color:#fbf8f1}
 .cmpbtn:active{filter:brightness(1.1)}
 .cmpcta{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--azul);border-radius:11px;padding:9px 14px;color:var(--azul-l);font-family:var(--disp);font-size:14px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin:2px 0 8px}
+
 /* ---------- compare card — redesigned (DuoVino design-system) ---------- */
 .cmpfoot{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .cmpmedia{position:relative;height:96px;border-radius:12px;overflow:hidden;border:1px solid var(--line2);background:var(--panel3);display:flex;align-items:flex-end}
@@ -541,8 +543,20 @@ body.light .cmpbtn.primary{color:#fbf8f1}
 .cmpgbar .gbf{height:100%;border-radius:5px}
 .cmpgbar.sh .gbf{opacity:.55}
 .cmpgbar .gbp{flex:0 0 auto;font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);min-width:26px;text-align:right}
+/* merged grape comparison (GrapeCompare) */
+.gcmptbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.gcmpth{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 6px 8px 0;font-weight:400;text-align:left}
+.gcmptr{border-bottom:1px solid var(--line)}
+.gcmptr:last-child{border-bottom:0}
+.gcmptd{padding:6px 4px;vertical-align:middle}
+.gcmpgname{font-family:var(--disp);text-transform:uppercase;letter-spacing:.02em;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px}
+.gcmpcell{height:22px;background:var(--line);border-radius:4px;overflow:hidden;position:relative;display:flex;align-items:center}
+.gcmpbar{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;box-sizing:border-box;min-width:4px;flex-shrink:0}
+.gcmppct2{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,.82);white-space:nowrap;line-height:1}
+.gcmppct2-out{position:absolute;left:calc(var(--pct) + 3px);color:var(--muted)}
 .cmpdiffpill{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#1a1407;border-radius:5px;padding:1px 5px;line-height:1.5}
 .cmprow.full .cmprc{display:block}
+
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
@@ -607,6 +621,9 @@ let MEM={};
 const SUPA_ENABLED = !/YOUR-PROJECT-REF|YOUR-PUBLIC-ANON-KEY/.test(SUPABASE_URL+SUPABASE_ANON_KEY);
 let SB=null, USER=null, _syncTimer=null, _skipAuth=false;
 try{ _skipAuth = localStorage.getItem('cellar.localonly')==='1'; }catch(e){}
+// Admin view (Settings → Admin): password-gated list of registered emails.
+const ADMIN_PASS='duovino-admin';   // ← change this to your own admin password
+let _adminUnlocked=false, _adminEmails=null;
 if(SUPA_ENABLED && window.supabase){ try{ SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ SB=null; } }
 const store={
   load(){ try{const r=localStorage.getItem(KEY);MEM=r?JSON.parse(r):{};}catch(e){MEM={};} return MEM; },
@@ -636,9 +653,9 @@ function setState(id,v){ MEM[id]=v; store.save(); }
 function bumpState(id,v){ const cur=MEM[id]||0; MEM[id]=Math.max(cur,v); store.save(); }
 /* ---- per-user cloud sync (Supabase); localStorage stays as an offline cache ---- */
 function cloudSaveDebounced(){ if(!SB||!USER)return; clearTimeout(_syncTimer); _syncTimer=setTimeout(cloudSave,800); }
-async function cloudSave(){ if(!SB||!USER)return; try{ await SB.from('progress').upsert({user_id:USER.id,mastery:MEM,updated_at:new Date().toISOString()}); }catch(e){} }
-async function cloudLoadMerge(){ if(!SB||!USER)return;
-  try{ const {data,error}=await SB.from('progress').select('mastery').eq('user_id',USER.id).maybeSingle();
+async function cloudSave(){ if(!SB||!USER||!USER.email)return; try{ await SB.from('accounts').upsert({email:USER.email,mastery:MEM,updated_at:new Date().toISOString()},{onConflict:'email'}); }catch(e){} }
+async function cloudLoadMerge(){ if(!SB||!USER||!USER.email)return;
+  try{ const {data,error}=await SB.from('accounts').select('mastery').eq('email',USER.email).maybeSingle();
     if(!error){ const srv=(data&&data.mastery)||{}; new Set([...Object.keys(MEM),...Object.keys(srv)]).forEach(k=>{MEM[k]=Math.max(MEM[k]||0,srv[k]||0);});
       try{localStorage.setItem(KEY,JSON.stringify(MEM));}catch(e){} await cloudSave(); } }catch(e){}
 }
@@ -745,22 +762,23 @@ function cmpGrapeBars(t,otherNames){
   }).join('')}</div>`;
 }
 function cmpGrapeCompare(a,b,aName,bName){
-  // Merged grape comparison table: all grapes from both regions, bars side-by-side
+  // Merged grape comparison table — faithful port of the GrapeCompare design-system component.
   const aGrapes=(a&&a.grapes)||[]; const bGrapes=(b&&b.grapes)||[];
-  const aMap=new Map(aGrapes.map(g=>[String(g.name).toLowerCase(),g]));
-  const bMap=new Map(bGrapes.map(g=>[String(g.name).toLowerCase(),g]));
-  const allNames=new Set([...aMap.keys(),...bMap.keys()]);
-  const rows=Array.from(allNames).sort().map(key=>{
-    const ga=aMap.get(key); const gb=bMap.get(key);
-    const gn=ga?ga.name:gb.name; const col=ga?ga.color:gb.color;
-    const fillA=col==='w'?'var(--gold)':'var(--garnet)'; const fillB=col==='w'?'var(--gold)':'var(--garnet)';
-    const wa=Math.max(2,Math.min(100,ga?.pct||0)); const wb=Math.max(2,Math.min(100,gb?.pct||0));
-    const aOnly=!gb?` (${aName} only)`:''; const bOnly=!ga?` (${bName} only)`:'';
-    return `<tr class="gcmptr"><td class="gcmptd"><span class="gcmpgname">${esc(gn)}${aOnly}${bOnly}</span></td>
-      <td class="gcmptd"><div class="gcmpcell"><div class="gcmpbar" style="width:${wa}%;background:${fillA}"></div></div>${ga?'<div class="gcmppct2">'+ga.pct+'%</div>':''}</td>
-      <td class="gcmptd"><div class="gcmpcell"><div class="gcmpbar" style="width:${wb}%;background:${fillB}"></div></div>${gb?'<div class="gcmppct2">'+gb.pct+'%</div>':''}</td></tr>`;
+  const map={};
+  aGrapes.forEach(g=>{ map[g.name.toLowerCase()]={name:g.name,color:g.color,a:g.pct,b:0}; });
+  bGrapes.forEach(g=>{ const k=g.name.toLowerCase(); if(map[k])map[k].b=g.pct; else map[k]={name:g.name,color:g.color,a:0,b:g.pct}; });
+  const rows=Object.values(map).sort((x,y)=>(y.a-x.a)||(y.b-x.b));
+  const cell=(pct,color)=>`<div class="gcmpcell"><div class="gcmpbar" style="width:${pct}%;background:${color}">${pct>=10?`<span class="gcmppct2">${pct}%</span>`:''}</div>${(pct>0&&pct<10)?`<span class="gcmppct2 gcmppct2-out">${pct}%</span>`:''}</div>`;
+  const body=rows.map(g=>{
+    const color=g.color==='w'?'var(--gold)':'var(--garnet)';
+    const nameColor=g.color==='w'?'var(--gold-l)':'var(--rose)';
+    return `<tr class="gcmptr"><td class="gcmptd gcmpgname" style="color:${nameColor}">${esc(g.name)}</td>
+      <td class="gcmptd">${g.a>0?cell(g.a,color):''}</td>
+      <td class="gcmptd">${g.b>0?cell(g.b,color):''}</td></tr>`;
   }).join('');
-  return `<table class="gcmptbl"><thead><tr><th class="gcmpth"></th><th class="gcmpth">${esc(aName)}</th><th class="gcmpth">${esc(bName)}</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<table class="gcmptbl"><colgroup><col style="width:30%"><col style="width:35%"><col style="width:35%"></colgroup>
+    <thead><tr><th class="gcmpth"></th><th class="gcmpth">${esc(aName)}</th><th class="gcmpth">${esc(bName)}</th></tr></thead>
+    <tbody>${body}</tbody></table>`;
 }
 const STYLE_INK={red:'#f7e9ec',white:'#1a1407',rose:'#2a0e16',sparkling:'#06121f',sweet:'#2a0e16'};
 function cmpStyleBarInline(st){
@@ -843,6 +861,7 @@ function render(){
   else if(v==='map')app.innerHTML=viewMap();
   else if(v==='settings')app.innerHTML=viewSettings();
   else if(v==='curriculum')app.innerHTML=viewCurriculum();
+  else if(v==='admin')app.innerHTML=viewAdmin();
   else if(v==='compare')app.innerHTML=viewCompare();
   bind();
 }
@@ -929,7 +948,30 @@ function viewSettings(){
        <button class="chip ${currency==='EUR'?'on':''}" data-setcur="EUR">€ EUR</button>
      </div>
      <button class="setitem" data-reset><span class="seticon">↺</span><span class="settx"><b style="color:var(--rose)">Reset progress</b><span>Clear all mastery on this device</span></span></button>
+     <button class="setitem" data-nav3="admin"><span class="seticon">🛠️</span><span class="settx"><b>Admin</b><span>View registered emails (password protected)</span></span><span class="setarrow">›</span></button>
    </div>
+  </div>`;
+}
+function viewAdmin(){
+  if(!_adminUnlocked){
+    return `<div class="view">
+     <div class="crumb" data-back-settings="1">‹ Settings</div>
+     <div class="top"><div class="brand"><span><h1 style="font-size:26px">Admin</h1><div class="sub">Restricted area</div></span></div></div>
+     <div class="panel">
+       <div class="eyebrow" style="margin-bottom:9px">Enter admin password</div>
+       <input id="adminpass" type="password" class="cmpsel" style="width:100%;margin-bottom:10px" placeholder="Password" autocomplete="off">
+       <button class="authbtn" data-adminunlock>Unlock</button>
+       <div id="adminmsg" class="authmsg"></div>
+     </div>
+    </div>`;
+  }
+  const list=_adminEmails||[];
+  const rows=list.map(r=>`<div class="wk"><div class="wktx"><b>${esc(r.email)}</b><div class="wkmeta">${r.updated_at?esc(new Date(r.updated_at).toLocaleString()):'—'}</div></div></div>`).join('');
+  return `<div class="view">
+   <div class="crumb" data-back-settings="1">‹ Settings</div>
+   <div class="top"><div class="brand"><span><h1 style="font-size:26px">Admin</h1><div class="sub">${list.length} registered email${list.length===1?'':'s'}</div></span></div></div>
+   <div class="panel">${rows||'<div class="empty">No accounts registered yet.</div>'}</div>
+   <button class="qbtn" style="margin-top:10px;align-items:center" data-adminlock><span class="qt" style="text-align:center;width:100%">Lock admin</span></button>
   </div>`;
 }
 function viewCurriculum(){
@@ -1566,7 +1608,7 @@ function bind(){
   app.querySelectorAll('[data-country]').forEach(b=>b.onclick=()=>{learnCountry=b.dataset.country;learnMode='geo';nav('learn');});
   app.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>nav('topic',{id:b.dataset.topic}));
   app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>nav('learn'));
-  app.querySelectorAll('[data-signout]').forEach(b=>b.onclick=async()=>{ if(SB){ _skipAuth=false; try{localStorage.removeItem('cellar.localonly');}catch(e){} await SB.auth.signOut(); } });
+  app.querySelectorAll('[data-signout]').forEach(b=>b.onclick=async()=>{ USER=null; _skipAuth=false; try{localStorage.removeItem('duovino.account');}catch(e){} try{localStorage.removeItem('cellar.localonly');}catch(e){} if(SB){ try{await SB.auth.signOut();}catch(_){} } renderAccount(); render(); });
   app.querySelectorAll('[data-signin]').forEach(b=>b.onclick=()=>{ _skipAuth=false; try{localStorage.removeItem('cellar.localonly');}catch(e){} renderAccount(); });
   app.querySelectorAll('[data-lc]').forEach(b=>b.onclick=()=>{learnCountry=b.dataset.lc;render();});
   // learn: region/grape mode + grape cards
@@ -1580,6 +1622,16 @@ function bind(){
   app.querySelectorAll('[data-reset]').forEach(b=>b.onclick=()=>{ if(confirm('Reset all study progress on this device? This cannot be undone.')){
     MEM={}; try{store.save();}catch(e){} try{localStorage.removeItem('cellar.mastery.v1');}catch(e){} try{localStorage.removeItem('cellar.localonly');}catch(e){} toast('Progress reset'); render(); } });
   app.querySelectorAll('[data-back-settings]').forEach(b=>b.onclick=()=>nav('settings'));
+  app.querySelectorAll('[data-adminunlock]').forEach(b=>b.onclick=async()=>{
+    const inp=document.getElementById('adminpass'), msg=document.getElementById('adminmsg');
+    if(!inp||inp.value!==ADMIN_PASS){ if(msg)msg.textContent='Incorrect password.'; return; }
+    if(msg)msg.textContent='Loading…';
+    try{ const {data,error}=await SB.from('accounts').select('email,updated_at').order('updated_at',{ascending:false});
+      _adminEmails=error?[]:(data||[]); }catch(e){ _adminEmails=[]; }
+    _adminUnlocked=true; render();
+  });
+  app.querySelectorAll('[data-adminlock]').forEach(b=>b.onclick=()=>{ _adminUnlocked=false; _adminEmails=null; render(); });
+  const ap=document.getElementById('adminpass'); if(ap)ap.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){const u=document.querySelector('[data-adminunlock]');if(u)u.click();} });
   app.querySelectorAll('[data-curric]').forEach(b=>b.onclick=()=>{curric=b.dataset.curric;try{localStorage.setItem('duovino.curric',curric);}catch(e){} render();});
   app.querySelectorAll('[data-setcur]').forEach(b=>b.onclick=()=>{currency=b.dataset.setcur;try{localStorage.setItem('duovino.currency',currency);}catch(e){} render();});
   app.querySelectorAll('[data-cmpmode]').forEach(b=>b.onclick=()=>{cmp.mode=b.dataset.cmpmode;cmp.a=null;cmp.b=null;cmpSave();render();});
@@ -1633,39 +1685,53 @@ function renderAccount(){
     ov.innerHTML=`<div class="authbox"><div class="authwine">&#127863;</div><h2>DuoVino</h2>
       <p class="authsub">Sign in to sync your study progress across all your devices.</p>
       <input id="authemail" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email">
-      <button id="authsend" class="authbtn">Sign in with email</button>
+      <button id="authsend" class="authbtn">Continue with email</button>
       <div id="authmsg" class="authmsg"></div>
       <button id="authskip" class="authskip">Use on this device only</button></div>`;
     const email=ov.querySelector('#authemail'), msg=ov.querySelector('#authmsg'), send=ov.querySelector('#authsend');
-    send.onclick=async()=>{ const e=(email.value||'').trim(); if(!/.+@.+\..+/.test(e)){ msg.textContent='Please enter a valid email.'; return; }
-      msg.textContent='Sending…'; send.disabled=true;
+    send.onclick=async()=>{ const e=(email.value||'').trim().toLowerCase(); if(!/.+@.+\..+/.test(e)){ msg.textContent='Please enter a valid email.'; return; }
+      msg.textContent='Checking…'; send.disabled=true;
       try{
-        // Check if email exists to show different message
-        const {count}=await SB.from('progress').select('*',{count:'exact',head:true}).eq('email',e);
-        const isNew=count===0;
-        // Send magic link for both new and existing users (email-only auth)
-        const {error}=await SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}});
-        if(error) msg.textContent='Error: '+error.message;
-        else msg.textContent=isNew?'✓ Check your email to register.':'✓ Check your email to sign in.';
+        // Look the email up in the accounts table.
+        const {data,error}=await SB.from('accounts').select('email').eq('email',e).maybeSingle();
+        if(error && error.code && error.code!=='PGRST116'){ msg.textContent='Error: '+error.message; send.disabled=false; return; }
+        if(data){
+          // Returning email — sign in instantly, NO email link.
+          msg.textContent='✓ Welcome back!';
+          signInEmail(e);
+        } else {
+          // Brand-new email — create the account and send a one-time confirmation link.
+          try{ await SB.from('accounts').insert({email:e,mastery:MEM}); }catch(_){}
+          try{ await SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname,shouldCreateUser:true}}); }catch(_){}
+          msg.textContent='✓ Account created — a confirmation link is on its way (optional).';
+          signInEmail(e);
+        }
       }
-      catch(err){ msg.textContent='Error: '+(err.message||err); }
-      send.disabled=false;
+      catch(err){ msg.textContent='Error: '+(err.message||err); send.disabled=false; }
     };
     email.addEventListener('keydown',ev=>{ if(ev.key==='Enter') send.click(); });
     ov.querySelector('#authskip').onclick=()=>{ _skipAuth=true; try{localStorage.setItem('cellar.localonly','1');}catch(e){} renderAccount(); render(); };
   } else if(ov){ ov.remove(); }
 }
+// Email-identity sign-in: store the email locally, merge cloud progress, close the overlay.
+function signInEmail(e){
+  USER={email:e};
+  try{localStorage.setItem('duovino.account',e);}catch(_){}
+  try{localStorage.removeItem('cellar.localonly');}catch(_){}
+  _skipAuth=false;
+  renderAccount(); render();
+  cloudLoadMerge().then(()=>{ renderAccount(); render(); }).catch(()=>{});
+}
 async function boot(){
   initChrome();
   if(location.hash.indexOf('#compare')===0&&cmpFromHash())route={view:'compare'};
   window.addEventListener('hashchange',()=>{ if(location.hash.indexOf('#compare')===0&&cmpFromHash())nav('compare'); });
+  // Restore email identity from localStorage (no magic-link round-trip needed).
+  try{ const saved=localStorage.getItem('duovino.account'); if(saved){ USER={email:saved}; } }catch(_){}
   renderAccount(); render();
-  if(SB){ try{
-    const {data:{session}}=await SB.auth.getSession(); USER=session?session.user:null;
-    if(USER){ await cloudLoadMerge(); }
-    renderAccount(); render();
-    SB.auth.onAuthStateChange(async(_evt,sess)=>{ USER=sess?sess.user:null; if(USER){ await cloudLoadMerge(); } renderAccount(); render(); });
-  }catch(e){ renderAccount(); render(); } }
+  if(SB && USER){ try{ await cloudLoadMerge(); renderAccount(); render(); }catch(e){} }
+  // If the user followed a confirmation link, adopt that email too.
+  if(SB){ try{ SB.auth.onAuthStateChange((_evt,sess)=>{ if(sess&&sess.user&&sess.user.email&&!USER){ signInEmail(sess.user.email); } }); }catch(_){}}
 }
 boot();
 </script>
