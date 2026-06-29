@@ -461,6 +461,7 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .curopt .curtop{display:flex;align-items:center;justify-content:space-between}
 .curopt .curtop b{font-family:var(--disp);font-size:16px;text-transform:uppercase;letter-spacing:.02em}
 .curopt .curon{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-l);border:1px solid var(--gold-d);border-radius:6px;padding:2px 7px}
+.curopt .curdisabled{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:2px 7px}
 .curopt .curdesc{font-size:12.5px;color:var(--ink-dim);line-height:1.4}
 .curopt .curcount{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--muted)}
 .curinfo p{margin:0 0 7px;font-size:13.5px;color:var(--ink-dim);line-height:1.5}
@@ -915,17 +916,33 @@ function viewSettings(){
 }
 function viewCurriculum(){
   const c=curricCounts();
-  const opt=(key,label,desc,count)=>`<button class="curopt ${curric===key?'on':''}" data-curric="${key}">
+  const optActive=(key,label,desc,count)=>`<button class="curopt ${curric===key?'on':''}" data-curric="${key}">
      <span class="curtop"><b>${label}</b>${curric===key?'<span class="curon">Active</span>':''}</span>
      <span class="curdesc">${esc(desc)}</span>
      <span class="curcount">${count} region${count===1?'':'s'} in scope</span></button>`;
+  const optDisabled=(label,desc)=>`<div class="curopt disabled" style="opacity:0.5;pointer-events:none">
+     <span class="curtop"><b>${label}</b><span class="curdisabled">Coming soon</span></span>
+     <span class="curdesc">${esc(desc)}</span></div>`;
   return `<div class="view">
    <div class="crumb" data-back-settings="1">‹ Settings</div>
    <div class="top"><div class="brand"><span><h1 style="font-size:26px">Curriculum</h1><div class="sub">What are you studying?</div></span></div></div>
    <div class="curseg">
-     ${opt('all','All content','Everything in DuoVino — every region, no exam filter.',c.all)}
-     ${opt('L3','WSET Level 3 Award','Advanced still-wine regions in the Level 3 scope — the classics, in depth.',c.L3)}
-     ${opt('D3','WSET Diploma · Unit D3','All still wines of the world — the full Diploma D3 unit.',c.D3)}
+     ${optActive('all','All content','Everything in DuoVino — every region, no exam filter.',c.all)}
+   </div>
+   <div class="sec-h"><h3>WSET Awards</h3></div>
+   <div class="curseg">
+     ${optDisabled('Level 1 Award','Beginner's introduction to wine styles, grapes, storage & service.')}
+     ${optDisabled('Level 2 Award','Principal grape varieties and 70+ regions that shape them.')}
+     ${optActive('L3','Level 3 Award','Advanced still-wine regions: how location, grapes & winemaking drive style, quality & price.',c.L3)}
+   </div>
+   <div class="sec-h"><h3>WSET Diploma · Units</h3></div>
+   <div class="curseg">
+     ${optDisabled('D1 — Wine Production','Viticulture & winemaking, and how they shape style, quality & price.')}
+     ${optDisabled('D2 — Wine Business','The trade: supply, distribution, pricing & marketing.')}
+     ${optActive('D3','D3 — Wines of the World','All still wines of the world — the full Diploma D3 unit.',c.D3)}
+     ${optDisabled('D4 — Sparkling Wines','Production & blind tasting of three sparkling wines.')}
+     ${optDisabled('D5 — Fortified Wines','Production & blind tasting of three fortified wines.')}
+     ${optDisabled('D6 — Research Assignment','A ~3,000-word independent research piece.')}
    </div>
    <div class="sec-h"><h3>The WSET wine pathway</h3></div>
    <div class="panel curinfo">
