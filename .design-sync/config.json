@@ -4,5 +4,8 @@
   "shape": "package",
   "buildCmd": "npm run build",
   "cssEntry": "src/duovino.css",
-  "srcDir": "src"
+  "srcDir": "src",
+  "overrides": {
+    "BottomNav": { "cardMode": "single", "primaryStory": "Dashboard" }
+  }
 }

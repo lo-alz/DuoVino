@@ -39,3 +39,12 @@ that UI, authored so Claude Design can build with on-brand components. The CSS i
 - Live app is evolving in parallel (Compare gained winemaking/quality/price rows;
   settings/curriculum changes) — those are app-side and not yet mirrored as
   component prop changes here beyond CompareCard's flexible `rows` API.
+
+## Known render warns (triaged — benign)
+- `Glass`, `CornerLogo` → `[RENDER_THIN]`: they are small pure-SVG glyphs with no
+  text; the thin-content heuristic flags them but the screenshots are correct.
+- `MiniMap` → `[RENDER]` page.goto timeout in the headless check: it loads remote
+  Esri terrain tiles which hang behind this environment's proxy. It renders
+  correctly in Claude Design's browser (network available). Its own preview keeps
+  the real tiles; the composite previews (CompareCard, CompareColHead) use a
+  non-network map stand-in so they verify locally.

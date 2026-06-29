@@ -1,11 +1,18 @@
 import React from "react";
 import {
   CompareCard,
-  MiniMap,
   RadarCompare,
   GrapeBars,
   StyleBarInline,
 } from "@duovino/design-system";
+
+// Non-network stand-in for the locator-map header so the showcase renders in
+// the headless check; the real MiniMap loads tiles in Claude Design's browser.
+const MapMedia = () => (
+  <div className="cmpmap" style={{ background: "linear-gradient(135deg,#2e323e,#3a4150)" }}>
+    <span className="cmppin" />
+  </div>
+);
 
 const adelaideScores = { warmth: 2, sun: 4, rain: 3, diurnal: 4, risk: 2 };
 const brunelloScores = { warmth: 4, sun: 4, rain: 2, diurnal: 3, risk: 2 };
@@ -21,12 +28,12 @@ const adelaideNames = adelaideGrapes.map((g) => g.name);
 const a = {
   name: "Adelaide Hills",
   sub: "🇦🇺 Australia",
-  media: <MiniMap lat={-34.9} lng={138.7} />,
+  media: <MapMedia />,
 };
 const b = {
   name: "Brunello di Montalcino",
   sub: "🇮🇹 Italy",
-  media: <MiniMap lat={43.06} lng={11.49} />,
+  media: <MapMedia />,
 };
 
 const rows = [
