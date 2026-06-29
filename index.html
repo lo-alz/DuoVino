@@ -521,6 +521,27 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 body.light .cmpbtn.primary{color:#fbf8f1}
 .cmpbtn:active{filter:brightness(1.1)}
 .cmpcta{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--azul);border-radius:11px;padding:9px 14px;color:var(--azul-l);font-family:var(--disp);font-size:14px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin:2px 0 8px}
+/* ---------- compare card — redesigned (DuoVino design-system) ---------- */
+.cmpfoot{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cmpmedia{position:relative;height:96px;border-radius:12px;overflow:hidden;border:1px solid var(--line2);background:var(--panel3);display:flex;align-items:flex-end}
+.cmpmediaimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cmpmedscrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,11,15,.05) 30%,rgba(10,11,15,.8))}
+.cmpmedlab{position:relative;width:100%;padding:8px 10px;text-align:center}
+.cmpmedname{font-family:var(--disp);font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.65);overflow-wrap:anywhere}
+.cmpmedsub{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:#e8e0cf;text-shadow:0 1px 2px rgba(0,0,0,.65);margin-top:2px}
+.cmpmap{position:absolute;inset:0;overflow:hidden;background:var(--panel3)}
+.cmpmaptile{position:absolute;width:256px;height:256px;max-width:none}
+.cmppin{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-9px 0 0 -6px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--garnet);border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5);z-index:2}
+.cmpgbars{display:flex;flex-direction:column;gap:5px;width:100%}
+.cmpgbar{display:flex;align-items:center;gap:6px}
+.cmpgbar .gbn{flex:0 0 auto;max-width:44%;font-size:10.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.cmpgbar.sh .gbn{color:var(--muted)}
+.cmpgbar .gbt{flex:1;height:9px;background:var(--line);border-radius:5px;overflow:hidden}
+.cmpgbar .gbf{height:100%;border-radius:5px}
+.cmpgbar.sh .gbf{opacity:.55}
+.cmpgbar .gbp{flex:0 0 auto;font-family:var(--mono);font-size:9.5px;color:var(--ink-dim);min-width:26px;text-align:right}
+.cmpdiffpill{font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#1a1407;border-radius:5px;padding:1px 5px;line-height:1.5}
+.cmprow.full .cmprc{display:block}
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
@@ -536,6 +557,7 @@ body.light .cmpbtn.primary{color:#fbf8f1}
   <button data-nav="study"  id="nv-study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4-8 4-8-4z"/><path d="M6 9v5c0 1.5 3 3 6 3s6-1.5 6-3V9"/></svg><span>Study</span><div class="nv-ind"></div></button>
   <button data-nav="map"    id="nv-map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span><div class="nv-ind"></div></button>
   <button data-nav="compare" id="nv-compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6" height="16" rx="1"/><rect x="14" y="4" width="6" height="16" rx="1"/></svg><span>Compare</span><div class="nv-ind"></div></button>
+  <button data-nav="settings" id="nv-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span><div class="nv-ind"></div></button>
 </div></nav>
 
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -599,12 +621,10 @@ function initChrome(){
   let t='dark'; try{ t=localStorage.getItem('duovino.theme')||'dark'; }catch(e){}
   if(!document.getElementById('appcorner')){
     const c=document.createElement('div'); c.className='corner'; c.id='appcorner';
-    c.innerHTML='<button class="gearbtn" id="gearBtn" aria-label="Settings" title="Settings">\u2699</button>'+
-      '<button class="themebtn" id="themeBtn" aria-label="Toggle theme"></button>'+
+    c.innerHTML='<button class="themebtn" id="themeBtn" aria-label="Toggle theme"></button>'+
       '<span class="corner-logo" role="img" aria-label="DuoVino">'+glass(100,24)+'</span>';
     document.body.appendChild(c);
     document.getElementById('themeBtn').onclick=toggleTheme;
-    const _g=document.getElementById('gearBtn'); if(_g)_g.onclick=()=>nav('settings');
   }
   applyTheme(t);
 }
@@ -683,6 +703,53 @@ function radar(scores){
     ${valpts.map(p=>{const[x,y]=p.split(',');return `<circle cx="${x}" cy="${y}" r="2.4" fill="var(--gold-l)"/>`}).join('')}
     ${labels}</svg>`;
 }
+const _CMP_SUBS=['a','b','c','d'];
+function _lon2px(lon,z){return ((lon+180)/360)*Math.pow(2,z)*256;}
+function _lat2px(lat,z){const r=lat*Math.PI/180;return ((1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2)*Math.pow(2,z)*256;}
+function cmpMiniMap(lat,lng,zoom,theme){
+  const z=zoom||6, n=Math.pow(2,z); const cx=_lon2px(lng,z), cy=_lat2px(lat,z);
+  const ctx=Math.floor(cx/256), cty=Math.floor(cy/256);
+  const style=theme==='light'?'light_all':'dark_all'; let tiles='';
+  for(let tx=ctx-2;tx<=ctx+2;tx++){ for(let ty=cty-2;ty<=cty+2;ty++){
+    if(ty<0||ty>=n)continue; const wx=((tx%n)+n)%n;
+    const offX=tx*256-cx, offY=ty*256-cy; const sub=_CMP_SUBS[(Math.abs(tx)+Math.abs(ty))%_CMP_SUBS.length];
+    const url=`https://${sub}.basemaps.cartocdn.com/${style}/${z}/${wx}/${ty}.png`;
+    tiles+=`<img class="cmpmaptile" src="${url}" alt="" crossorigin="anonymous" loading="lazy" style="left:calc(50% + ${offX}px);top:calc(50% + ${offY}px)" onerror="this.style.display='none'">`;
+  }}
+  return `<div class="cmpmap" role="img" aria-label="region locator map">${tiles}<span class="cmppin"></span></div>`;
+}
+function _radarSeries(scores,cx,cy,R,N){ return RADAR_AX.map((ax,i)=>{const v=(scores&&scores[ax[0]])||0;const[vx,vy]=polar(cx,cy,R*v/5,i*360/N);return vx.toFixed(1)+','+vy.toFixed(1);}); }
+function radar2(scoresA,scoresB,labelA,labelB){
+  const cx=100,cy=96,R=66,N=5; let grid='';
+  for(let ring=1;ring<=5;ring++){ let pts=[]; for(let i=0;i<N;i++){const[x,y]=polar(cx,cy,R*ring/5,i*360/N);pts.push(x.toFixed(1)+','+y.toFixed(1));} grid+=`<polygon points="${pts.join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`; }
+  let axes='',labels='';
+  RADAR_AX.forEach((ax,i)=>{ const[x,y]=polar(cx,cy,R,i*360/N); axes+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`;
+    const[lx,ly]=polar(cx,cy,R+15,i*360/N); labels+=`<text x="${lx}" y="${ly}" font-family="var(--mono)" font-size="9" fill="var(--muted)" text-anchor="middle" dominant-baseline="middle" style="text-transform:uppercase;letter-spacing:.06em">${ax[1]}</text>`; });
+  const pa=_radarSeries(scoresA,cx,cy,R,N), pb=_radarSeries(scoresB,cx,cy,R,N);
+  return `<div class="cmpclim"><svg viewBox="0 0 200 192" width="100%" role="img" aria-label="climate comparison">
+    ${grid}${axes}
+    <polygon points="${pb.join(' ')}" fill="rgba(63,130,196,.16)" stroke="var(--azul)" stroke-width="2"/>
+    <polygon points="${pa.join(' ')}" fill="rgba(202,166,75,.16)" stroke="var(--gold)" stroke-width="2"/>
+    ${pa.map(p=>{const[x,y]=p.split(',');return `<circle cx="${x}" cy="${y}" r="2.4" fill="var(--gold-l)"/>`}).join('')}
+    ${pb.map(p=>{const[x,y]=p.split(',');return `<circle cx="${x}" cy="${y}" r="2.4" fill="var(--azul-l)"/>`}).join('')}
+    ${labels}</svg>
+    <div class="legend"><span><span class="dot" style="background:var(--gold)"></span>${esc(labelA||'')}</span><span><span class="dot" style="background:var(--azul)"></span>${esc(labelB||'')}</span></div></div>`;
+}
+function cmpGrapeBars(t,otherNames){
+  const grapes=(t&&t.grapes)||[]; if(!grapes.length)return '<div class="cmptxt sm cmpmuted">—</div>';
+  const others=new Set((otherNames||[]).map(n=>String(n).toLowerCase()));
+  return `<div class="cmpgbars">${grapes.map(g=>{ const shared=others.has(String(g.name).toLowerCase());
+    const fill=g.color==='w'?'var(--gold)':'var(--garnet)'; const w=Math.max(3,Math.min(100,g.pct||0));
+    return `<div class="cmpgbar${shared?' sh':''}"><span class="gbn">${esc(g.name)}</span><span class="gbt"><span class="gbf" style="width:${w}%;background:${fill}"></span></span><span class="gbp">${g.pct||0}%</span></div>`;
+  }).join('')}</div>`;
+}
+const STYLE_INK={red:'#f7e9ec',white:'#1a1407',rose:'#2a0e16',sparkling:'#06121f',sweet:'#2a0e16'};
+function cmpStyleBarInline(st){
+  if(!st)return ''; const keys=Object.keys(st).filter(k=>st[k]>0); const tot=keys.reduce((s,k)=>s+st[k],0)||1;
+  return `<div style="display:flex;height:26px;border-radius:7px;overflow:hidden;border:1px solid var(--line)">${keys.map(k=>{ const w=st[k]/tot*100;
+    return `<i style="width:${w}%;background:${STYLE_COL[k]};color:${STYLE_INK[k]};display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--mono);font-size:9.5px;font-style:normal;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;overflow:hidden">${w>=16?`${STYLE_LBL[k]} ${st[k]}%`:`${st[k]}%`}</i>`;
+  }).join('')}</div>`;
+}
 
 const GOLDS=['#caa64b','#e6d7a0','#b8923a','#d9c27a','#9c7c2e','#f0e4b8'];
 const REDS=['#8a2540','#c0566e','#6e1d33','#a83b56','#d98a9c','#5a1628'];
@@ -737,11 +804,11 @@ let route={view:'dash'};
 let study=null; // active session
 
 function nav(view,extra){ route={view,...(extra||{})}; render(); window.scrollTo(0,0); }
-function setNav(v){['dash','learn','study','map','compare'].forEach(n=>{
+function setNav(v){['dash','learn','study','map','compare','settings'].forEach(n=>{
   const b=document.getElementById('nv-'+n); if(b)b.classList.toggle('on',n===v);});}
 document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{
   const v=b.dataset.nav; study=null;
-  if(v==='learn')nav('learn'); else if(v==='study')nav('study'); else if(v==='map')nav('map'); else if(v==='compare')nav('compare'); else nav('dash');
+  if(v==='learn')nav('learn'); else if(v==='study')nav('study'); else if(v==='map')nav('map'); else if(v==='compare')nav('compare'); else if(v==='settings')nav('settings'); else nav('dash');
 }));
 
 function render(){
@@ -834,6 +901,7 @@ function viewSettings(){
        <span class="seticon">\u{1F393}</span>
        <span class="settx"><b>Curriculum</b><span>Choose your qualification &amp; filter regions</span></span>
        <span class="setarrow">›</span></button>
+     <button class="setitem" data-reset><span class="seticon">↺</span><span class="settx"><b style="color:var(--rose)">Reset progress</b><span>Clear all mastery on this device</span></span></button>
    </div>
   </div>`;
 }
@@ -884,14 +952,15 @@ function cmpGrapesCell(t,other){ const theirs=new Set(_gnames(other||{}).map(x=>
   return `<div class="cmpgr">${t.grapes.map(g=>{const sh=theirs.has(g.name.toLowerCase()); return `<span class="cmpgrape ${sh?'sh':'uq'}">${esc(g.name)}${g.pct?` <i>${g.pct}%</i>`:''}</span>`;}).join('')}</div>`; }
 function cmpClimateDeltas(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&&b.climate.scores; if(!sa||!sb)return ''; const d=RADAR_AX.map(ax=>{const v=(sb[ax[0]]||0)-(sa[ax[0]]||0); return Math.abs(v)>=2?`${ax[1]} ${v>0?'+':''}${v}`:null;}).filter(Boolean); return d.length?`<div class="cmpdelta">${d.map(x=>`<span>Δ ${esc(x)}</span>`).join('')}</div>`:''; }
 function cmpClimateDiff(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&&b.climate.scores; if(!sa||!sb)return false; return RADAR_AX.some(ax=>Math.abs((sa[ax[0]]||0)-(sb[ax[0]]||0))>=2); }
-function _gRow(label,key){ return {label:label, hl:true, cell:g=>`<div class="cmptxt">${g[key]?esc(g[key]):'<span class="cmpmuted">—</span>'}</div>`, diff:(a,b)=>(a[key]||'')!==(b[key]||'')}; }
+function _gRow(label,key){ return {label:label, hl:true, cell:g=>`<div class="cmptxt" style="text-align:left">${g[key]?esc(g[key]):'<span class="cmpmuted">—</span>'}</div>`, diff:(a,b)=>(a[key]||'')!==(b[key]||'')}; }
 function _cmpList(arr){ if(!arr||!arr.length)return '<div class="cmptxt sm cmpmuted">—</div>'; return `<ul class="cmpul">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; }
 const CMP_MODES={
   region:{ label:'Region', list:()=>TOPICS.slice().sort((a,b)=>a.title.localeCompare(b.title)), byId:id=>BY_ID[id], name:t=>t.title, sub:t=>`${t.flag||''} ${esc(t.country)}`, mastery:t=>fillPct(topicKKPs(t)),
+    media:e=>{ const p=MAPPTS[e.id]; const theme=document.body.classList.contains('light')?'light':'dark'; return p?cmpMiniMap(p.lat,p.lng,6,theme):'<div class="cmpmap" style="background:linear-gradient(135deg,var(--panel2),var(--panel3))"></div>'; },
     rows:[
-      {label:'Climate', kind:'radar', hl:true, cell:t=>`<div class="cmpclim">${radar(t.climate&&t.climate.scores)}<div class="cmplab">${esc((t.climate&&t.climate.label)||'')}</div></div>`, diff:cmpClimateDiff},
-      {label:'Principal grapes', hl:true, cell:(t,o)=>cmpGrapesCell(t,o), diff:(a,b)=>_setNe(_gnames(a),_gnames(b))},
-      {label:'Style', hl:true, cell:t=>`${styleBar(t.style)}<div class="cmplab">${esc(styleDom(t.style))}</div>`, diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
+      {label:'Climate', kind:'radar', hl:true, full:true, cellFull:(a,b)=>radar2(a.climate&&a.climate.scores,b.climate&&b.climate.scores,a.title,b.title), diff:cmpClimateDiff},
+      {label:'Principal grapes', hl:true, cell:(t,o)=>cmpGrapeBars(t,_gnames(o||{})), diff:(a,b)=>_setNe(_gnames(a),_gnames(b))},
+      {label:'Style', hl:true, cell:t=>cmpStyleBarInline(t.style), diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
       {label:'Winemaking', cell:t=>`<div class="cmptxt sm">${esc(t.winemaking||'—')}</div>`, diff:()=>false},
       {label:'Quality', hl:true, cell:t=>`<div class="cmptxt">${esc(t.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
       {label:'Price', hl:true, cell:t=>`<div class="cmptxt">${esc(t.price||'—')}</div>`, diff:(a,b)=>(a.price||'')!==(b.price||'')},
@@ -899,6 +968,7 @@ const CMP_MODES={
       {label:'Signature', cell:t=>`<div class="cmptxt sm">${esc(t.blurb||'—')}</div>`, diff:()=>false},
     ] },
   grape:{ label:'Grape', list:()=>GRAPES.slice().sort((a,b)=>a.name.localeCompare(b.name)), byId:id=>BY_GRAPE[id], name:g=>g.name, sub:g=>g.color==='r'?'Black grape':'White grape', mastery:null,
+    media:e=>GRAPE_PIX[e.id]?`<img class="cmpmediaimg" src="images/grapes/${e.id}.webp" alt="${esc(e.name)}" loading="lazy" onerror="this.style.display='none'">`:'',
     rows:[
       _gRow('Budding','budding'), _gRow('Ripening','ripening'), _gRow('Climate','climate'),
       _gRow('Acidity','acidity'), _gRow('Body','body'), _gRow('Alcohol','alcohol'), _gRow('Tannin','tannin'),
@@ -916,7 +986,7 @@ function cmpFromHash(){ const m=(location.hash||'').match(/^#compare\/([a-z]+)\/
 function cmpCopyLink(){ cmpSyncHash(); const u=location.href; if(navigator.clipboard){ navigator.clipboard.writeText(u).then(()=>toast('Link copied')).catch(()=>toast('Copy failed')); } else toast(u); }
 function cmpSaveImage(){ const el=document.getElementById('cmpCard'); if(!el||!window.html2canvas){ toast('Image export unavailable'); return; } toast('Rendering image…');
   const bg=(getComputedStyle(document.body).getPropertyValue('--bg')||'#14161c').trim();
-  html2canvas(el,{backgroundColor:bg||'#14161c',scale:2}).then(canvas=>{ canvas.toBlob(blob=>{ if(!blob){toast('Image failed');return;} const fn=`duovino-${cmp.a}-vs-${cmp.b}.png`;
+  html2canvas(el,{backgroundColor:bg||'#14161c',scale:2,useCORS:true}).then(canvas=>{ canvas.toBlob(blob=>{ if(!blob){toast('Image failed');return;} const fn=`duovino-${cmp.a}-vs-${cmp.b}.png`;
     try{ const file=new File([blob],fn,{type:'image/png'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ navigator.share({files:[file],title:'DuoVino comparison'}).catch(()=>{}); return; } }catch(e){}
     const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fn; a.click(); setTimeout(()=>URL.revokeObjectURL(url),2000); }); }).catch(e=>toast('Image failed: '+(e&&e.message||e))); }
 function viewCompare(){
@@ -931,16 +1001,21 @@ function viewCompare(){
   let body;
   if(!a||!b){ body=`<div class="cmpempty">Pick two ${cmp.mode==='region'?'regions':'grapes'} to compare, side by side.${cmp.mode==='region'?'<div class="cmphint">Or tap a classic contrast</div>'+chips:''}</div>`; }
   else {
-    const colHead=e=>`<div class="cmpcolhead">${M.mastery?`<div class="cmpglass">${glass(M.mastery(e),42)}<span class="cmpgp">${M.mastery(e)}%</span></div>`:''}<div class="cmpcn">${esc(M.name(e))}</div><div class="cmpcs">${M.sub(e)}</div></div>`;
-    const rows=M.rows.map(r=>{ const isd=r.hl&&r.diff?r.diff(a,b):false; const delta=(r.kind==='radar'&&isd)?cmpClimateDeltas(a,b):'';
-      return `<div class="cmprow ${isd?'cmp-diff':''}"><div class="cmprl">${esc(r.label)}${isd?'<span class="cmpd">Δ</span>':''}</div><div class="cmprc"><div class="cmpcell">${r.cell(a,b)}</div><div class="cmpcell">${r.cell(b,a)}</div></div>${delta}</div>`; }).join('');
+    const colHead=e=>`<div class="cmpmedia">${M.media?M.media(e):''}<div class="cmpmedscrim"></div><div class="cmpmedlab"><div class="cmpmedname">${esc(M.name(e))}</div><div class="cmpmedsub">${M.sub(e)}</div></div></div>`;
+    const rows=M.rows.map(r=>{ const isd=r.hl&&r.diff?r.diff(a,b):false;
+      if(r.full){ const delta=(r.kind==='radar'&&isd)?cmpClimateDeltas(a,b):'';
+        return `<div class="cmprow full ${isd?'cmp-diff':''}"><div class="cmprl">${esc(r.label)}${isd?'<span class="cmpdiffpill">Differs</span>':''}</div><div class="cmprc">${r.cellFull(a,b)}</div>${delta}</div>`; }
+      const delta=(r.kind==='radar'&&isd)?cmpClimateDeltas(a,b):'';
+      return `<div class="cmprow ${isd?'cmp-diff':''}"><div class="cmprl">${esc(r.label)}${isd?'<span class="cmpdiffpill">Differs</span>':''}</div><div class="cmprc"><div class="cmpcell">${r.cell(a,b)}</div><div class="cmpcell">${r.cell(b,a)}</div></div>${delta}</div>`; }).join('');
     const drill=(cmp.mode==='region')?'<button class="cmpbtn primary" data-cmpdrill="1">Drill this contrast</button>':'';
-    body=`<div class="cmp-card" id="cmpCard"><div class="cmpbrand"><span class="cmpglassmini">${glass(100,15)}</span> DuoVino · duovino.netlify.app</div>
-       <div class="cmpcols">${colHead(a)}${colHead(b)}</div>${rows}</div>
+    body=`<div class="cmp-card" id="cmpCard">
+       <div class="cmpcols">${colHead(a)}${colHead(b)}</div>${rows}
+       <div class="cmpfoot">${glass(100,13)} duovino.netlify.app</div></div>
        <div class="cmpact">${drill}<button class="cmpbtn" data-cmpshare="1">Copy link</button><button class="cmpbtn" data-cmpimg="1">Save image</button></div>`;
   }
+  const legend=(a&&b)?'<div class="cmphint" style="text-align:center;margin:8px 0 0">Highlighted rows differ between the two</div>':'';
   return `<div class="view"><div class="top"><div class="brand"><span><h1 style="font-size:26px">Compare</h1><div class="sub">Side by side</div></span></div></div>
-   <div class="modeseg cmpseg">${seg}</div>${picker}${body}</div>`;
+   <div class="modeseg cmpseg">${seg}</div>${legend}${picker}${body}</div>`;
 }
 function viewLearn(){
   if(learnMode==='grape') return viewLearnGrapes();
@@ -1458,6 +1533,8 @@ function bind(){
   app.querySelectorAll('[data-ref]').forEach(b=>b.onclick=()=>{const a=b.dataset.ref.split(':');nav('ref',{kind:a[0],id:a[1]});});
   app.querySelectorAll('[data-back-ref]').forEach(b=>b.onclick=()=>{learnMode=b.dataset.backRef;nav('learn');});
   app.querySelectorAll('[data-nav3]').forEach(b=>b.onclick=()=>nav(b.dataset.nav3));
+  app.querySelectorAll('[data-reset]').forEach(b=>b.onclick=()=>{ if(confirm('Reset all study progress on this device? This cannot be undone.')){
+    MEM={}; try{store.save();}catch(e){} try{localStorage.removeItem('cellar.mastery.v1');}catch(e){} try{localStorage.removeItem('cellar.localonly');}catch(e){} toast('Progress reset'); render(); } });
   app.querySelectorAll('[data-back-settings]').forEach(b=>b.onclick=()=>nav('settings'));
   app.querySelectorAll('[data-curric]').forEach(b=>b.onclick=()=>{curric=b.dataset.curric;try{localStorage.setItem('duovino.curric',curric);}catch(e){} render();});
   app.querySelectorAll('[data-cmpmode]').forEach(b=>b.onclick=()=>{cmp.mode=b.dataset.cmpmode;cmp.a=null;cmp.b=null;cmpSave();render();});
