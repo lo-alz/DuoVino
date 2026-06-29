@@ -474,10 +474,58 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .curbanner{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--ink-dim);background:rgba(202,166,75,.10);border:1px solid var(--gold-d);border-radius:10px;padding:8px 11px;margin:2px 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .curbanner b{color:var(--gold-l)}
 .curclear{margin-left:auto;background:none;border:1px solid var(--line2);border-radius:999px;color:var(--ink-dim);font-family:var(--mono);font-size:10px;padding:3px 9px;cursor:pointer}
+
+/* ---------- compare ---------- */
+.cmpseg{margin-top:2px}
+.cmppick{display:flex;align-items:center;gap:8px;margin:10px 0}
+.cmpsel{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:11px 10px;color:var(--ink);font-size:14px;font-family:var(--body)}
+.cmpvs{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.cmpempty{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 16px;text-align:center;color:var(--ink-dim);font-size:14px}
+.cmphint{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+.cmpchips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.cmpchip{background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:7px 12px;font-size:12px;color:var(--ink-dim);cursor:pointer}
+.cmpchip:active{background:var(--panel3)}
+.cmp-card{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:14px 12px;margin-top:4px}
+.cmpbrand{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.cmpglassmini{display:inline-flex}
+.cmpcols{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.cmpcolhead{text-align:center;background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:10px 8px}
+.cmpglass{display:flex;flex-direction:column;align-items:center;gap:2px}
+.cmpgp{font-family:var(--mono);font-size:10px;color:var(--gold-l)}
+.cmpcn{font-family:var(--disp);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;margin-top:5px;overflow-wrap:anywhere}
+.cmpcs{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:2px}
+.cmprow{border-top:1px solid var(--line);padding:9px 2px}
+.cmprow.cmp-diff{background:rgba(202,166,75,.07);border-radius:8px}
+.cmprl{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 2px 6px;display:flex;align-items:center;gap:6px}
+.cmprow.cmp-diff .cmprl{color:var(--gold-l)}
+.cmpd{background:var(--gold);color:#1a1407;border-radius:5px;font-size:8px;padding:0 4px;line-height:1.6}
+.cmprc{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+.cmpcell{min-width:0;font-size:13px;color:var(--ink-dim);text-align:center}
+.cmptxt{font-size:13px;color:var(--ink);line-height:1.4}
+.cmptxt.sm{font-size:11.5px;color:var(--ink-dim);line-height:1.4;text-align:left}
+.cmpmuted{color:var(--muted)}
+.cmpclim .cmplab,.cmplab{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.cmpgr{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.cmpgrape{font-size:11px;border-radius:6px;padding:2px 7px;border:1px solid var(--line2)}
+.cmpgrape.sh{color:var(--muted)}
+.cmpgrape.uq{color:var(--gold-l);border-color:var(--gold-d);background:rgba(202,166,75,.10)}
+.cmpgrape i{font-style:normal;opacity:.7}
+.cmpul{list-style:none;margin:0;padding:0;text-align:left}
+.cmpul li{font-size:11px;color:var(--ink-dim);padding:3px 0 3px 12px;position:relative;line-height:1.35}
+.cmpul li::before{content:'';position:absolute;left:1px;top:9px;width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.cmpdelta{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:5px}
+.cmpdelta span{font-family:var(--mono);font-size:9.5px;color:var(--azul-l);background:rgba(63,130,196,.12);border:1px solid rgba(63,130,196,.3);border-radius:999px;padding:2px 8px}
+.cmpact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.cmpbtn{flex:1;min-width:120px;background:var(--panel2);border:1px solid var(--line2);border-radius:11px;padding:12px;font-family:var(--disp);font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink);cursor:pointer}
+.cmpbtn.primary{background:var(--garnet);border-color:var(--garnet-l)}
+body.light .cmpbtn.primary{color:#fbf8f1}
+.cmpbtn:active{filter:brightness(1.1)}
+.cmpcta{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--azul);border-radius:11px;padding:9px 14px;color:var(--azul-l);font-family:var(--disp);font-size:14px;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;margin:2px 0 8px}
 </style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 <div class="app" id="app"></div>
@@ -487,6 +535,7 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
   <button data-nav="learn"  id="nv-learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5a2 2 0 012-2h12v17H6a2 2 0 00-2 2z"/><path d="M18 3v17"/></svg><span>Learn</span><div class="nv-ind"></div></button>
   <button data-nav="study"  id="nv-study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4-8 4-8-4z"/><path d="M6 9v5c0 1.5 3 3 6 3s6-1.5 6-3V9"/></svg><span>Study</span><div class="nv-ind"></div></button>
   <button data-nav="map"    id="nv-map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span>Map</span><div class="nv-ind"></div></button>
+  <button data-nav="compare" id="nv-compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="6" height="16" rx="1"/><rect x="14" y="4" width="6" height="16" rx="1"/></svg><span>Compare</span><div class="nv-ind"></div></button>
 </div></nav>
 
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -688,15 +737,16 @@ let route={view:'dash'};
 let study=null; // active session
 
 function nav(view,extra){ route={view,...(extra||{})}; render(); window.scrollTo(0,0); }
-function setNav(v){['dash','learn','study','map'].forEach(n=>{
+function setNav(v){['dash','learn','study','map','compare'].forEach(n=>{
   const b=document.getElementById('nv-'+n); if(b)b.classList.toggle('on',n===v);});}
 document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{
   const v=b.dataset.nav; study=null;
-  if(v==='learn')nav('learn'); else if(v==='study')nav('study'); else if(v==='map')nav('map'); else nav('dash');
+  if(v==='learn')nav('learn'); else if(v==='study')nav('study'); else if(v==='map')nav('map'); else if(v==='compare')nav('compare'); else nav('dash');
 }));
 
 function render(){
   let v=route.view; setNav((v==='topic'||v==='grape'||v==='ref')?'learn':(v==='run'?'study':v));
+  if(v!=='compare'&&location.hash.indexOf('#compare')===0){try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}}
   if(v==='dash')app.innerHTML=viewDash();
   else if(v==='learn')app.innerHTML=viewLearn();
   else if(v==='topic')app.innerHTML=viewTopic(route.id);
@@ -707,6 +757,7 @@ function render(){
   else if(v==='map')app.innerHTML=viewMap();
   else if(v==='settings')app.innerHTML=viewSettings();
   else if(v==='curriculum')app.innerHTML=viewCurriculum();
+  else if(v==='compare')app.innerHTML=viewCompare();
   bind();
 }
 
@@ -820,6 +871,71 @@ function viewCurriculum(){
    <div class="panel"><div style="font-size:13px;color:var(--ink-dim)">Pick a curriculum above and <b style="color:var(--gold-l)">Learn → Regions</b> shows only the regions in that exam's scope. Your progress is never deleted — it's just hidden while filtered.</div></div>
   </div>`;
 }
+/* ============================ COMPARE ============================ */
+let cmp={mode:'region', a:null, b:null};
+try{ const _sv=JSON.parse(localStorage.getItem('duovino.cmp')||'null'); if(_sv&&_sv.mode)cmp=_sv; }catch(e){}
+function cmpSave(){ try{localStorage.setItem('duovino.cmp',JSON.stringify(cmp));}catch(e){} }
+function _gnames(t){ return (t.grapes||[]).map(g=>g.name); }
+function _setNe(a,b){ const A=new Set(a.map(x=>String(x).toLowerCase())),B=new Set(b.map(x=>String(x).toLowerCase())); if(A.size!==B.size)return true; for(const x of A)if(!B.has(x))return true; return false; }
+function _firstRelKKP(t){ for(const lo of (t.objectives||[]))for(const k of lo.kkps)if(k.cat==='relationship')return k.statement; return ''; }
+function styleDom(st){ if(!st)return ''; let mk='',mv=-1; for(const k in st)if(st[k]>mv){mv=st[k];mk=k;} return mk?`Mostly ${mk} (${mv}%)`:''; }
+function cmpGrapesCell(t,other){ const theirs=new Set(_gnames(other||{}).map(x=>x.toLowerCase())); if(!(t.grapes||[]).length)return '<div class="cmptxt sm cmpmuted">—</div>';
+  return `<div class="cmpgr">${t.grapes.map(g=>{const sh=theirs.has(g.name.toLowerCase()); return `<span class="cmpgrape ${sh?'sh':'uq'}">${esc(g.name)}${g.pct?` <i>${g.pct}%</i>`:''}</span>`;}).join('')}</div>`; }
+function cmpClimateDeltas(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&&b.climate.scores; if(!sa||!sb)return ''; const d=RADAR_AX.map(ax=>{const v=(sb[ax[0]]||0)-(sa[ax[0]]||0); return Math.abs(v)>=2?`${ax[1]} ${v>0?'+':''}${v}`:null;}).filter(Boolean); return d.length?`<div class="cmpdelta">${d.map(x=>`<span>Δ ${esc(x)}</span>`).join('')}</div>`:''; }
+function cmpClimateDiff(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&&b.climate.scores; if(!sa||!sb)return false; return RADAR_AX.some(ax=>Math.abs((sa[ax[0]]||0)-(sb[ax[0]]||0))>=2); }
+function _gRow(label,key){ return {label:label, hl:true, cell:g=>`<div class="cmptxt">${g[key]?esc(g[key]):'<span class="cmpmuted">—</span>'}</div>`, diff:(a,b)=>(a[key]||'')!==(b[key]||'')}; }
+function _cmpList(arr){ if(!arr||!arr.length)return '<div class="cmptxt sm cmpmuted">—</div>'; return `<ul class="cmpul">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; }
+const CMP_MODES={
+  region:{ label:'Region', list:()=>TOPICS.slice().sort((a,b)=>a.title.localeCompare(b.title)), byId:id=>BY_ID[id], name:t=>t.title, sub:t=>`${t.flag||''} ${esc(t.country)}`, mastery:t=>fillPct(topicKKPs(t)),
+    rows:[
+      {label:'Climate', kind:'radar', hl:true, cell:t=>`<div class="cmpclim">${radar(t.climate&&t.climate.scores)}<div class="cmplab">${esc((t.climate&&t.climate.label)||'')}</div></div>`, diff:cmpClimateDiff},
+      {label:'Principal grapes', hl:true, cell:(t,o)=>cmpGrapesCell(t,o), diff:(a,b)=>_setNe(_gnames(a),_gnames(b))},
+      {label:'Style', hl:true, cell:t=>`${styleBar(t.style)}<div class="cmplab">${esc(styleDom(t.style))}</div>`, diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
+      {label:'Why it tastes that way', cell:t=>`<div class="cmptxt sm">${esc(_firstRelKKP(t)||'—')}</div>`, diff:()=>false},
+      {label:'Signature', cell:t=>`<div class="cmptxt sm">${esc(t.blurb||'—')}</div>`, diff:()=>false},
+    ] },
+  grape:{ label:'Grape', list:()=>GRAPES.slice().sort((a,b)=>a.name.localeCompare(b.name)), byId:id=>BY_GRAPE[id], name:g=>g.name, sub:g=>g.color==='r'?'Black grape':'White grape', mastery:null,
+    rows:[
+      _gRow('Budding','budding'), _gRow('Ripening','ripening'), _gRow('Climate','climate'),
+      _gRow('Acidity','acidity'), _gRow('Body','body'), _gRow('Alcohol','alcohol'), _gRow('Tannin','tannin'),
+      {label:'Aromas', cell:g=>`<div class="cmptxt sm">${esc(g.aromas||'—')}</div>`, diff:()=>false},
+      {label:'In the vineyard', cell:g=>_cmpList(g.viticulture), diff:()=>false},
+      {label:'In the winery', cell:g=>_cmpList(g.winemaking), diff:()=>false},
+      {label:'Overall style', cell:g=>`<div class="cmptxt sm">${esc(g.style||'—')}</div>`, diff:()=>false},
+      {label:'Key regions', hl:true, cell:g=>_cmpList((g.regionStyles||[]).map(r=>r.region)), diff:(a,b)=>_setNe((a.regionStyles||[]).map(r=>r.region),(b.regionStyles||[]).map(r=>r.region))},
+    ] },
+};
+function cmpSyncHash(){ if(cmp.a&&cmp.b){ const h=`#compare/${cmp.mode}/${cmp.a}~${cmp.b}`; if(location.hash!==h){ try{history.replaceState(null,'',h);}catch(e){location.hash=h;} } } }
+function cmpFromHash(){ const m=(location.hash||'').match(/^#compare\/([a-z]+)\/([^~]+)~([^~]+)$/); if(m&&CMP_MODES[m[1]]){ cmp={mode:m[1],a:decodeURIComponent(m[2]),b:decodeURIComponent(m[3])}; return true; } return false; }
+function cmpCopyLink(){ cmpSyncHash(); const u=location.href; if(navigator.clipboard){ navigator.clipboard.writeText(u).then(()=>toast('Link copied')).catch(()=>toast('Copy failed')); } else toast(u); }
+function cmpSaveImage(){ const el=document.getElementById('cmpCard'); if(!el||!window.html2canvas){ toast('Image export unavailable'); return; } toast('Rendering image…');
+  const bg=(getComputedStyle(document.body).getPropertyValue('--bg')||'#14161c').trim();
+  html2canvas(el,{backgroundColor:bg||'#14161c',scale:2}).then(canvas=>{ canvas.toBlob(blob=>{ if(!blob){toast('Image failed');return;} const fn=`duovino-${cmp.a}-vs-${cmp.b}.png`;
+    try{ const file=new File([blob],fn,{type:'image/png'}); if(navigator.canShare&&navigator.canShare({files:[file]})){ navigator.share({files:[file],title:'DuoVino comparison'}).catch(()=>{}); return; } }catch(e){}
+    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fn; a.click(); setTimeout(()=>URL.revokeObjectURL(url),2000); }); }).catch(e=>toast('Image failed: '+(e&&e.message||e))); }
+function viewCompare(){
+  const M=CMP_MODES[cmp.mode]; const a=cmp.a?M.byId(cmp.a):null, b=cmp.b?M.byId(cmp.b):null;
+  if(a&&b)cmpSyncHash();
+  const seg=Object.keys(CMP_MODES).map(k=>`<button class="mode ${cmp.mode===k?'on':''}" data-cmpmode="${k}">${CMP_MODES[k].label}</button>`).join('');
+  const opts=(sel)=>['<option value="">— choose —</option>'].concat(M.list().map(e=>`<option value="${e.id}" ${sel===e.id?'selected':''}>${esc(M.name(e))}</option>`)).join('');
+  const picker=`<div class="cmppick"><select class="cmpsel" data-cmpslot="a">${opts(cmp.a)}</select><span class="cmpvs">vs</span><select class="cmpsel" data-cmpslot="b">${opts(cmp.b)}</select></div>`;
+  let chips='';
+  if(cmp.mode==='region'){ const SUG=[['rioja','ribera-del-duero'],['barossa-valley','coonawarra'],['mosel','rheingau'],['n-rhone','s-rhone'],['barolo','barbaresco'],['chianti-classico','brunello-di-montalcino'],['douro-port','priorat'],['uco-valley','n-rhone'],['napa-valley','bordeaux'],['marlborough','sancerre']];
+    chips=`<div class="cmpchips">${SUG.filter(p=>BY_ID[p[0]]&&BY_ID[p[1]]).map(p=>`<button class="cmpchip" data-cmppair="${p[0]}~${p[1]}">${esc(BY_ID[p[0]].title)} × ${esc(BY_ID[p[1]].title)}</button>`).join('')}</div>`; }
+  let body;
+  if(!a||!b){ body=`<div class="cmpempty">Pick two ${cmp.mode==='region'?'regions':'grapes'} to compare, side by side.${cmp.mode==='region'?'<div class="cmphint">Or tap a classic contrast</div>'+chips:''}</div>`; }
+  else {
+    const colHead=e=>`<div class="cmpcolhead">${M.mastery?`<div class="cmpglass">${glass(M.mastery(e),42)}<span class="cmpgp">${M.mastery(e)}%</span></div>`:''}<div class="cmpcn">${esc(M.name(e))}</div><div class="cmpcs">${M.sub(e)}</div></div>`;
+    const rows=M.rows.map(r=>{ const isd=r.hl&&r.diff?r.diff(a,b):false; const delta=(r.kind==='radar'&&isd)?cmpClimateDeltas(a,b):'';
+      return `<div class="cmprow ${isd?'cmp-diff':''}"><div class="cmprl">${esc(r.label)}${isd?'<span class="cmpd">Δ</span>':''}</div><div class="cmprc"><div class="cmpcell">${r.cell(a,b)}</div><div class="cmpcell">${r.cell(b,a)}</div></div>${delta}</div>`; }).join('');
+    const drill=(cmp.mode==='region')?'<button class="cmpbtn primary" data-cmpdrill="1">Drill this contrast</button>':'';
+    body=`<div class="cmp-card" id="cmpCard"><div class="cmpbrand"><span class="cmpglassmini">${glass(100,15)}</span> DuoVino · duovino.netlify.app</div>
+       <div class="cmpcols">${colHead(a)}${colHead(b)}</div>${rows}</div>
+       <div class="cmpact">${drill}<button class="cmpbtn" data-cmpshare="1">Copy link</button><button class="cmpbtn" data-cmpimg="1">Save image</button></div>`;
+  }
+  return `<div class="view"><div class="top"><div class="brand"><span><h1 style="font-size:26px">Compare</h1><div class="sub">Side by side</div></span></div></div>
+   <div class="modeseg cmpseg">${seg}</div>${picker}${body}</div>`;
+}
 function viewLearn(){
   if(learnMode==='grape') return viewLearnGrapes();
   if(learnMode==='barrels') return viewRefList('barrels');
@@ -921,6 +1037,7 @@ function viewGrape(id){
        <h1 style="font-size:30px;line-height:1.02">${esc(g.name)}</h1>
        ${g.aka&&g.aka.length?`<div class="sub">a.k.a. ${esc(g.aka.join(', '))}</div>`:''}</div>
    </div>
+   <button class="cmpcta" data-compare-grape="${g.id}">⚖ Compare with…</button>
    <div class="gstatgrid">
      ${(()=>{const sl=statList.filter(([k,v])=>v);return sl.map(([k,v],i)=>stat(k,v,(sl.length%2===1&&i===sl.length-1)?'lonecenter':'')).join('');})()}
    </div>
@@ -984,6 +1101,7 @@ function viewTopic(id){
       ${t.source?`<div class="src">Source · ${esc(t.source)}</div>`:''}
     </div>
     ${charts}
+    <button class="cmpcta" data-compare="${t.id}">⚖ Compare with…</button>
     <div class="sec-h"><h3>Learning objectives</h3><span class="link">${p}% mastered</span></div>
     ${los}
     ${gloss}${blind}${flags}
@@ -1033,18 +1151,19 @@ function inScope(kpId,scope){
   if(scope.type==='country')return k.country===scope.name;
   if(scope.type==='topic')return k.topic===scope.topic;
   if(scope.type==='weak')return getState(kpId)<2;
+  if(scope.type==='pair')return scope.topics.includes(k.topic);
   return true;
 }
 function buildQueue(mode,scope){
   let items=[];
   // blind handled separately (per topic, not per KKP)
   if(mode==='blind'){
-    TOPICS.forEach(t=>{ if(scope.type==='country'&&t.country!==scope.name)return; if(scope.type==='topic'&&t.id!==scope.topic)return;
+    TOPICS.forEach(t=>{ if(scope.type==='country'&&t.country!==scope.name)return; if(scope.type==='topic'&&t.id!==scope.topic)return; if(scope.type==='pair'&&!scope.topics.includes(t.id))return;
       (t.blind||[]).forEach(b=>items.push({kind:'blind',topic:t.id,topicTitle:t.title,data:b})); });
     return shuffle(items);
   }
   if(mode==='mcq'){
-    TOPICS.forEach(t=>{ if(scope.type==='country'&&t.country!==scope.name)return; if(scope.type==='topic'&&t.id!==scope.topic)return;
+    TOPICS.forEach(t=>{ if(scope.type==='country'&&t.country!==scope.name)return; if(scope.type==='topic'&&t.id!==scope.topic)return; if(scope.type==='pair'&&!scope.topics.includes(t.id))return;
       (t.quiz||[]).forEach(q=>{ if(scope.type==='weak'&&getState(q.kp)>=2)return; items.push({kind:'mcq',kp:q.kp,topicTitle:t.title,check:q}); }); });
     ALL_KKP.forEach(id=>{ if(!inScope(id,scope))return; const c=CHECK[id]; if(c&&c.type==='mcq')items.push({kind:'mcq',kp:id,check:c}); });
     return shuffle(items);
@@ -1067,6 +1186,7 @@ function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor
 function startRun(cfg){
   let scope;
   if(cfg.scope==='topic')scope={type:'topic',topic:cfg.topic};
+  else if(cfg.scope==='pair')scope={type:'pair',topics:cfg.topics};
   else if(cfg.scope==='weak')scope={type:'weak'};
   else if(cfg.scope&&cfg.scope.indexOf('c:')===0)scope={type:'country',name:cfg.scope.slice(2)};
   else scope={type:'all'};
@@ -1334,6 +1454,14 @@ function bind(){
   app.querySelectorAll('[data-nav3]').forEach(b=>b.onclick=()=>nav(b.dataset.nav3));
   app.querySelectorAll('[data-back-settings]').forEach(b=>b.onclick=()=>nav('settings'));
   app.querySelectorAll('[data-curric]').forEach(b=>b.onclick=()=>{curric=b.dataset.curric;try{localStorage.setItem('duovino.curric',curric);}catch(e){} render();});
+  app.querySelectorAll('[data-cmpmode]').forEach(b=>b.onclick=()=>{cmp.mode=b.dataset.cmpmode;cmp.a=null;cmp.b=null;cmpSave();render();});
+  app.querySelectorAll('[data-cmpslot]').forEach(sel=>sel.onchange=()=>{cmp[sel.dataset.cmpslot]=sel.value||null;cmpSave();render();});
+  app.querySelectorAll('[data-cmppair]').forEach(b=>b.onclick=()=>{const p=b.dataset.cmppair.split('~');cmp.a=p[0];cmp.b=p[1];cmpSave();render();});
+  app.querySelectorAll('[data-cmpdrill]').forEach(b=>b.onclick=()=>{if(cmp.a&&cmp.b){study=null;startRun({mode:'mixed',scope:'pair',topics:[cmp.a,cmp.b]});}});
+  app.querySelectorAll('[data-cmpshare]').forEach(b=>b.onclick=cmpCopyLink);
+  app.querySelectorAll('[data-cmpimg]').forEach(b=>b.onclick=cmpSaveImage);
+  app.querySelectorAll('[data-compare]').forEach(b=>b.onclick=()=>{cmp={mode:'region',a:b.dataset.compare,b:null};cmpSave();nav('compare');});
+  app.querySelectorAll('[data-compare-grape]').forEach(b=>b.onclick=()=>{cmp={mode:'grape',a:b.dataset.compareGrape,b:null};cmpSave();nav('compare');});
   // topic LO accordion
   app.querySelectorAll('[data-lohead]').forEach(b=>b.onclick=()=>{const id=b.dataset.lohead;openLO[id]=!openLO[id];
     // mark all KKPs in this LO at least 'seen' when opened
@@ -1392,6 +1520,8 @@ function renderAccount(){
 }
 async function boot(){
   initChrome();
+  if(location.hash.indexOf('#compare')===0&&cmpFromHash())route={view:'compare'};
+  window.addEventListener('hashchange',()=>{ if(location.hash.indexOf('#compare')===0&&cmpFromHash())nav('compare'); });
   renderAccount(); render();
   if(SB){ try{
     const {data:{session}}=await SB.auth.getSession(); USER=session?session.user:null;
