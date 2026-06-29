@@ -621,9 +621,12 @@ let MEM={};
 const SUPA_ENABLED = !/YOUR-PROJECT-REF|YOUR-PUBLIC-ANON-KEY/.test(SUPABASE_URL+SUPABASE_ANON_KEY);
 let SB=null, USER=null, _syncTimer=null, _skipAuth=false;
 try{ _skipAuth = localStorage.getItem('cellar.localonly')==='1'; }catch(e){}
-// Admin view (Settings → Admin): the password is verified server-side by the
-// /.netlify/functions/admin function — it is never stored in this file.
+// Admin view (Settings → Admin): the plaintext password is NOT stored here —
+// only the SHA-256 hash of it. The browser hashes what you type and compares.
+// (Works on static hosting like GitHub Pages, which has no backend.)
+const ADMIN_PASS_HASH='ef876f2b7d8b26786f42d287c052e820e7c6d752a54cc0930ec147226e9bf136';
 let _adminUnlocked=false, _adminEmails=null;
+async function sha256hex(s){ const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
 if(SUPA_ENABLED && window.supabase){ try{ SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ SB=null; } }
 const store={
   load(){ try{const r=localStorage.getItem(KEY);MEM=r?JSON.parse(r):{};}catch(e){MEM={};} return MEM; },
@@ -1637,10 +1640,12 @@ function bind(){
     if(!inp||!inp.value){ if(msg)msg.textContent='Enter the admin password.'; return; }
     if(msg)msg.textContent='Checking…'; b.disabled=true;
     try{
-      const res=await fetch('/.netlify/functions/admin',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({passcode:inp.value})});
-      if(res.status===401){ if(msg)msg.textContent='Incorrect password.'; b.disabled=false; return; }
-      if(!res.ok){ if(msg)msg.textContent='Error reaching admin service.'; b.disabled=false; return; }
-      const out=await res.json(); _adminEmails=out.emails||[]; _adminUnlocked=true; render();
+      const h=await sha256hex(inp.value);
+      if(h!==ADMIN_PASS_HASH){ if(msg)msg.textContent='Incorrect password.'; b.disabled=false; return; }
+      if(msg)msg.textContent='Loading…';
+      let list=[];
+      if(SB){ try{ const {data,error}=await SB.from('accounts').select('email,updated_at').order('updated_at',{ascending:false}); list=error?[]:(data||[]); }catch(e){ list=[]; } }
+      _adminEmails=list; _adminUnlocked=true; render();
     }catch(e){ if(msg)msg.textContent='Error: '+(e.message||e); b.disabled=false; }
   });
   app.querySelectorAll('[data-adminlock]').forEach(b=>b.onclick=()=>{ _adminUnlocked=false; _adminEmails=null; render(); });
