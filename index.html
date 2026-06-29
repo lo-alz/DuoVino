@@ -532,6 +532,16 @@ body.light .cmpbtn.primary{color:#fbf8f1}
 .cmpmedlab{position:relative;width:100%;padding:8px 10px;text-align:center}
 .cmpmedname{font-family:var(--disp);font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.65);overflow-wrap:anywhere}
 .cmpmedsub{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:#e8e0cf;text-shadow:0 1px 2px rgba(0,0,0,.65);margin-top:2px}
+.cmpmedia{cursor:pointer}
+.cmpmedia .cmpmaghint{position:absolute;top:6px;right:6px;z-index:3;width:24px;height:24px;border-radius:50%;background:rgba(20,22,28,.7);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+/* map preview modal */
+.mapov{position:fixed;inset:0;z-index:10001;background:rgba(8,9,12,.82);display:flex;align-items:center;justify-content:center;padding:18px}
+.mapmodal{width:100%;max-width:640px;background:var(--panel);border:1px solid var(--line2);border-radius:16px;overflow:hidden;box-shadow:0 22px 60px rgba(0,0,0,.6);display:flex;flex-direction:column}
+.mapmodal .mmhead{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line)}
+.mapmodal .mmtitle{font-family:var(--disp);font-size:19px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;flex:1;min-width:0}
+.mapmodal .mmsub{font-family:var(--mono);font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mapmodal .mmclose{width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);color:var(--ink-dim);font-size:16px;flex:0 0 auto}
+.mapmodal .mmmap{height:60vh;min-height:340px;background:#11131a}
 .cmpmap{position:absolute;inset:0;overflow:hidden;background:var(--panel3)}
 .cmpmaptile{position:absolute;width:256px;height:256px;max-width:none}
 .cmppin{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-9px 0 0 -6px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--garnet);border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5);z-index:2}
@@ -637,7 +647,7 @@ store.load();
 function applyTheme(t){ const light=(t==='light'); document.body.classList.toggle('light',light);
   try{localStorage.setItem('duovino.theme',t);}catch(e){}
   const b=document.getElementById('themeBtn'); if(b){ b.textContent=light?'\u263e':'\u2600'; b.title=light?'Switch to dark':'Switch to light'; } }
-function toggleTheme(){ applyTheme(document.body.classList.contains('light')?'dark':'light'); }
+function toggleTheme(){ applyTheme(document.body.classList.contains('light')?'dark':'light'); try{render();}catch(e){} }
 function initChrome(){
   let t='dark'; try{ t=localStorage.getItem('duovino.theme')||'dark'; }catch(e){}
   if(!document.getElementById('appcorner')){
@@ -739,6 +749,34 @@ function cmpMiniMap(lat,lng,zoom,theme){
   }}
   return `<div class="cmpmap" role="img" aria-label="region locator map">${tiles}<span class="cmppin"></span></div>`;
 }
+// Clickable map preview — opens a navigable MapLibre map for one region, in a modal.
+let _mapPreview=null, _mapPreviewKey=null;
+function openMapPreview(id){
+  const t=BY_ID[id], p=MAPPTS[id]; if(!p)return;
+  closeMapPreview();
+  const ov=document.createElement('div'); ov.className='mapov'; ov.id='mapov';
+  ov.innerHTML=`<div class="mapmodal">
+    <div class="mmhead"><div style="flex:1;min-width:0"><div class="mmtitle">${esc(t?t.title:(p.name||id))}</div><div class="mmsub">${t?esc((t.flag||'')+' '+t.country):''}</div></div><button class="mmclose" data-mapclose>✕</button></div>
+    <div class="mmmap" id="mmmap" style="position:relative"><div class="mapload" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--mono);font-size:12px">Loading map…</div></div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{ if(e.target===ov)closeMapPreview(); });
+  ov.querySelector('[data-mapclose]').onclick=closeMapPreview;
+  _mapPreviewKey=ev=>{ if(ev.key==='Escape')closeMapPreview(); }; document.addEventListener('keydown',_mapPreviewKey);
+  const el=document.getElementById('mmmap');
+  if(typeof maplibregl==='undefined'){ el.innerHTML='<div class="mapfail" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">The map library needs a network connection.</div>'; return; }
+  el.innerHTML='';
+  try{
+    const m=new maplibregl.Map({container:el,style:'https://tiles.openfreemap.org/styles/liberty',center:[p.lng,p.lat],zoom:7,attributionControl:true});
+    m.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
+    m.on('error',()=>{});
+    m.on('load',()=>{ try{ const mk=document.createElement('div'); mk.className='rgmark sel';
+      mk.innerHTML='<span class="rgdot" style="background:'+climateColor(id)+'"></span><span class="rglabel">'+esc(p.name||(t&&t.title)||id)+'</span>';
+      new maplibregl.Marker({element:mk,anchor:'center'}).setLngLat([p.lng,p.lat]).addTo(m); }catch(e){} });
+    _mapPreview=m;
+  }catch(e){ el.innerHTML='<div class="mapfail" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">Couldn\'t start the map.</div>'; }
+}
+function closeMapPreview(){ if(_mapPreview){try{_mapPreview.remove();}catch(e){} _mapPreview=null;} if(_mapPreviewKey){document.removeEventListener('keydown',_mapPreviewKey);_mapPreviewKey=null;} const ov=document.getElementById('mapov'); if(ov)ov.remove(); }
 function _radarSeries(scores,cx,cy,R,N){ return RADAR_AX.map((ax,i)=>{const v=(scores&&scores[ax[0]])||0;const[vx,vy]=polar(cx,cy,R*v/5,i*360/N);return vx.toFixed(1)+','+vy.toFixed(1);}); }
 function radar2(scoresA,scoresB,labelA,labelB){
   const cx=100,cy=96,R=66,N=5; let grid='';
@@ -1055,6 +1093,18 @@ function priceRange(str){
   const lo=Math.min(...hits.map(h=>h[0])), hi=Math.max(...hits.map(h=>h[1])), sym=getCurrencySymbol();
   return `${sym}${lo}–${sym}${hi}`;
 }
+// The named WSET price grades spanned by a price-band string (low → high).
+const PRICE_TIERS=['Inexpensive','Mid-priced','Premium','Super-premium'];
+function priceGrades(str){
+  if(!str)return [];
+  let s=String(str).toLowerCase(); const idx=[];
+  s=s.replace(/super[- ]premium/g,()=>{idx.push(3);return ' ';});
+  if(/inexpensive/.test(s))idx.push(0);
+  if(/mid[- ]priced/.test(s))idx.push(1);
+  if(/premium/.test(s))idx.push(2);
+  if(!idx.length)return [];
+  return PRICE_TIERS.slice(Math.min(...idx),Math.max(...idx)+1);
+}
 const CMP_MODES={
   region:{ label:'Region', list:()=>TOPICS.slice().sort((a,b)=>(a.country||'').localeCompare(b.country||'')||a.title.localeCompare(b.title)), byId:id=>BY_ID[id], name:t=>t.title, sub:t=>`${t.flag||''} ${esc(t.country)}`, mastery:t=>fillPct(topicKKPs(t)),
     media:e=>{ const p=MAPPTS[e.id]; const theme=document.body.classList.contains('light')?'light':'dark'; return p?cmpMiniMap(p.lat,p.lng,6,theme):'<div class="cmpmap" style="background:linear-gradient(135deg,var(--panel2),var(--panel3))"></div>'; },
@@ -1064,7 +1114,7 @@ const CMP_MODES={
       {label:'Style', hl:true, cell:t=>cmpStyleBarInline(t.style), diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
       {label:'Winemaking', cell:t=>`<div class="cmptxt sm">${esc(t.winemaking||'—')}</div>`, diff:()=>false},
       {label:'Quality', hl:true, cell:t=>`<div class="cmptxt">${esc(t.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
-      {label:'Price', hl:true, cell:t=>{const pr=priceRange(t.price);return `<div class="cmptxt">${esc(t.price||'—')}${pr?`<div class="cmplab" style="margin-top:3px;color:var(--gold-l)">${pr}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
+      {label:'Price', hl:true, cell:t=>{const pr=priceRange(t.price);const gr=priceGrades(t.price);const main=pr||esc(t.price||'—');return `<div class="cmptxt">${main}${gr.length?`<div class="cmptxt sm" style="margin-top:3px">${gr.join(' · ')}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
       {label:'Why it tastes that way', cell:t=>`<div class="cmptxt sm">${esc(_firstRelKKP(t)||'—')}</div>`, diff:()=>false},
       {label:'Signature', cell:t=>`<div class="cmptxt sm">${esc(t.blurb||'—')}</div>`, diff:()=>false},
     ] },
@@ -1077,7 +1127,7 @@ const CMP_MODES={
       {label:'In the vineyard', cell:g=>_cmpList(g.viticulture), diff:()=>false},
       {label:'In the winery', cell:g=>_cmpList(g.winemaking), diff:()=>false},
       {label:'Typical quality', hl:true, cell:g=>`<div class="cmptxt">${esc(g.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
-      {label:'Price band', hl:true, cell:g=>{const pr=priceRange(g.price);return `<div class="cmptxt">${esc(g.price||'—')}${pr?`<div class="cmplab" style="margin-top:3px;color:var(--gold-l)">${pr}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
+      {label:'Price band', hl:true, cell:g=>{const pr=priceRange(g.price);const gr=priceGrades(g.price);const main=pr||esc(g.price||'—');return `<div class="cmptxt">${main}${gr.length?`<div class="cmptxt sm" style="margin-top:3px">${gr.join(' · ')}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
       {label:'Overall style', cell:g=>`<div class="cmptxt sm">${esc(g.style||'—')}</div>`, diff:()=>false},
       {label:'Key regions', hl:true, cell:g=>_cmpList((g.regionStyles||[]).map(r=>r.region)), diff:(a,b)=>_setNe((a.regionStyles||[]).map(r=>r.region),(b.regionStyles||[]).map(r=>r.region))},
     ] },
@@ -1112,7 +1162,8 @@ function viewCompare(){
   let body;
   if(!a||!b){ body=`<div class="cmpempty">Pick two ${cmp.mode==='region'?'regions':'grapes'} to compare, side by side.${cmp.mode==='region'?'<div class="cmphint">Or tap a classic contrast</div>'+chips:''}</div>`; }
   else {
-    const colHead=e=>`<div class="cmpmedia">${M.media?M.media(e):''}<div class="cmpmedscrim"></div><div class="cmpmedlab"><div class="cmpmedname">${esc(M.name(e))}</div><div class="cmpmedsub">${M.sub(e)}</div></div></div>`;
+    const colHead=e=>{ const clickable=(cmp.mode==='region'&&MAPPTS[e.id]);
+      return `<div class="cmpmedia"${clickable?` data-mappreview="${e.id}" title="Open map"`:''}>${M.media?M.media(e):''}<div class="cmpmedscrim"></div>${clickable?'<div class="cmpmaghint">⤢</div>':''}<div class="cmpmedlab"><div class="cmpmedname">${esc(M.name(e))}</div><div class="cmpmedsub">${M.sub(e)}</div></div></div>`; };
     const rows=M.rows.map(r=>{
       if(r.full){
         return `<div class="cmprow full"><div class="cmprl">${esc(r.label)}</div><div class="cmprc">${r.cellFull(a,b)}</div></div>`; }
@@ -1668,6 +1719,7 @@ function bind(){
   app.querySelectorAll('[data-cmpdrill]').forEach(b=>b.onclick=()=>{if(cmp.a&&cmp.b){study=null;startRun({mode:'mixed',scope:'pair',topics:[cmp.a,cmp.b]});}});
   app.querySelectorAll('[data-cmpshare]').forEach(b=>b.onclick=cmpCopyLink);
   app.querySelectorAll('[data-cmpimg]').forEach(b=>b.onclick=cmpSaveImage);
+  app.querySelectorAll('[data-mappreview]').forEach(b=>b.onclick=()=>openMapPreview(b.dataset.mappreview));
   app.querySelectorAll('[data-compare]').forEach(b=>b.onclick=()=>{cmp={mode:'region',a:b.dataset.compare,b:null};cmpSave();nav('compare');});
   app.querySelectorAll('[data-compare-grape]').forEach(b=>b.onclick=()=>{cmp={mode:'grape',a:b.dataset.compareGrape,b:null};cmpSave();nav('compare');});
   // topic LO accordion
