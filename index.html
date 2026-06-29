@@ -1633,15 +1633,26 @@ function renderAccount(){
     ov.innerHTML=`<div class="authbox"><div class="authwine">&#127863;</div><h2>DuoVino</h2>
       <p class="authsub">Sign in to sync your study progress across all your devices.</p>
       <input id="authemail" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email">
-      <button id="authsend" class="authbtn">Email me a login link</button>
+      <button id="authsend" class="authbtn">Sign in with email</button>
       <div id="authmsg" class="authmsg"></div>
       <button id="authskip" class="authskip">Use on this device only</button></div>`;
     const email=ov.querySelector('#authemail'), msg=ov.querySelector('#authmsg'), send=ov.querySelector('#authsend');
     send.onclick=async()=>{ const e=(email.value||'').trim(); if(!/.+@.+\..+/.test(e)){ msg.textContent='Please enter a valid email.'; return; }
-      msg.textContent='Sending…'; send.disabled=true;
-      try{ const {error}=await SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}});
-        msg.textContent=error?('Error: '+error.message):'Check your email and tap the link to sign in.'; }
-      catch(err){ msg.textContent='Error: '+(err.message||err); } send.disabled=false; };
+      msg.textContent='Checking…'; send.disabled=true;
+      try{
+        // Check if email already exists in the database
+        const {count}=await SB.from('progress').select('*',{count:'exact',head:true}).eq('email',e);
+        if(count>0){
+          msg.textContent='This email is already registered. Please check your Supabase email or use local-only mode.';
+          send.disabled=false;
+          return;
+        }
+        // Only send magic link for NEW emails
+        const {error}=await SB.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}});
+        msg.textContent=error?('Error: '+error.message):'✓ Check your email for a login link to register.';
+      }
+      catch(err){ msg.textContent='Error: '+(err.message||err); send.disabled=false; }
+    };
     email.addEventListener('keydown',ev=>{ if(ev.key==='Enter') send.click(); });
     ov.querySelector('#authskip').onclick=()=>{ _skipAuth=true; try{localStorage.setItem('cellar.localonly','1');}catch(e){} renderAccount(); render(); };
   } else if(ov){ ov.remove(); }
