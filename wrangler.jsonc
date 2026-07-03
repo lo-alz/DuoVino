@@ -1,0 +1,14 @@
+{
+  // DuoVino — Cloudflare Worker.
+  // Serves the static app (repo root) as assets, and routes a handful of
+  // paths (/grade, /agent, /admin) to serverless logic in src/worker.js.
+  // Deployed via the dashboard's Git integration ("npx wrangler deploy").
+  "name": "duovino",
+  "compatibility_date": "2024-09-23",
+  "main": "src/worker.js",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  }
+}
