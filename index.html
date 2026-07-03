@@ -1427,7 +1427,7 @@ function viewCompare(){
     const drill=(cmp.mode==='region')?'<button class="cmpbtn primary" data-cmpdrill="1">Drill this contrast</button>':'';
     body=`<div class="cmp-card" id="cmpCard">
        <div class="cmpcols">${colHead(a)}${colHead(b)}</div>${rows}
-       <div class="cmpfoot">${glass(100,13)} duovino.netlify.app</div></div>
+       <div class="cmpfoot">${glass(100,13)} lo-alz.github.io/DuoVino</div></div>
        <div class="cmpact">${drill}<button class="cmpbtn" data-cmpshare="1">Copy link</button><button class="cmpbtn" data-cmpimg="1">Save image</button></div>`;
   }
   return `<div class="view"><div class="top"><div class="brand"><span><h1 style="font-size:26px">Compare</h1><div class="sub">Side by side</div></span></div></div>
@@ -2406,7 +2406,7 @@ function reviewChoiceParts(q,i){
 /* ——— AI marking (exam sitting only): the Netlify grader reads the free-written answer
    against the mark scheme, returns covered/missed point indices + verbatim evidence quotes.
    Covered points are auto-ticked into exam.ticks so the band recalculates. */
-const GRADER_URL='https://duovino.netlify.app/.netlify/functions/grade';
+const GRADER_URL='https://duovino.pages.dev/grade';
 function aiHighlight(ans,quotes){
   const ranges=[];
   quotes.forEach(qt=>{ if(!qt)return; const idx=ans.indexOf(qt); if(idx>=0)ranges.push([idx,idx+qt.length]); });
