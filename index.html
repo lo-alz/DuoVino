@@ -55,6 +55,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 ::selection{background:var(--garnet);color:var(--ink)}
 .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
 .app{max-width:720px;margin:0 auto;min-height:100vh}
+/* the study/exam runner may breathe on large screens; every other page keeps the 720px column */
+@media(min-width:960px){.app:has(.runwrap){max-width:920px}}
 .view{padding:18px 16px 28px;animation:fade .32s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -172,6 +174,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .gbul li{position:relative;padding:5px 0 5px 18px;color:var(--ink-dim);font-size:14px;line-height:1.45;border-bottom:1px solid rgba(61,68,86,.4)}
 .gbul li:last-child{border-bottom:none}
 .gbul li::before{content:'';position:absolute;left:2px;top:12px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+/* compact variant: inherits the surrounding text size/colour (for prose split into clauses) */
+.gbul.tight li{font-size:inherit;color:inherit;padding:3px 0 3px 15px;border-bottom:none}
+.gbul.tight li::before{top:.58em;width:5px;height:5px}
 .gstatgrid .stat.span2{grid-column:1 / -1}
 .gstatgrid .stat.lonecenter{grid-column:1 / -1;justify-self:center;width:calc(50% - 4px)}
 .gsecsub{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.03em;margin:-2px 0 10px;font-style:italic}
@@ -283,19 +288,20 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .studybtn:active{background:var(--garnet-l)}
 
 /* ---------- study runner ---------- */
-.runwrap{min-height:calc(100vh - var(--navh) - 40px);display:flex;flex-direction:column}
+/* the card fits its content — no viewport-height stretch (flash cards keep a generous min-height) */
+.runwrap{display:flex;flex-direction:column}
 .runbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .runbar .close{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
 .progress{flex:1;height:5px;background:var(--line);border-radius:3px;overflow:hidden}
 .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--garnet),var(--gold));transition:width .3s}
 .runbar .count{font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.05em}
-.qcard{flex:1;background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:20px;
+.qcard{flex:0 0 auto;background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:20px;
   display:flex;flex-direction:column;animation:fade .25s}
 .qcard .qmeta{display:flex;gap:8px;align-items:center;margin-bottom:14px}
 .qcard .qmeta .topic{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--gold);text-transform:uppercase}
 .qcard .qtype{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
   border:1px solid var(--line2);border-radius:5px;padding:2px 7px;margin-left:auto}
-.qcard .qbody{flex:1;display:flex;flex-direction:column;justify-content:center}
+.qcard .qbody{display:flex;flex-direction:column}
 .qcard .prompt{font-family:var(--disp);font-size:23px;font-weight:600;line-height:1.16;letter-spacing:.01em}
 .qcard .ptip{font-size:12.5px;color:var(--muted);margin-top:12px;font-style:italic}
 .tasting{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:14px;margin-top:6px;
@@ -318,14 +324,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .examta:focus{outline:none;border-color:var(--gold)}
 .examta::placeholder{color:var(--muted)}
 
-.flipcard{flex:1;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;
+.flipcard{flex:1;min-height:320px;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;
   background:var(--panel2);border:1px solid var(--line2);font-size:19px;line-height:1.4;color:var(--ink)}
 .flipcard.answer{background:linear-gradient(160deg,#23262f,var(--panel));border-color:var(--gold-d)}
 .flipcard .fl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
   position:absolute;top:14px;left:0;right:0;text-align:center}
 .flipcard .ftxt{font-family:var(--disp);font-weight:500}
 .flipcard.answer .ftxt{font-family:var(--body);font-size:16px;color:var(--ink-dim)}
-.flipcard-wrap{flex:1;position:relative;display:flex}
+.flipcard-wrap{flex:1;position:relative;display:flex;min-height:320px}
 
 .actions{display:flex;gap:9px;margin-top:16px}
 .actions button{flex:1;border-radius:12px;padding:14px 8px;font-family:var(--disp);font-size:15px;font-weight:600;
@@ -595,6 +601,9 @@ body.light .cmpbtn.primary{color:#fbf8f1}
   <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#b8923a"/><stop offset="1" stop-color="#e6d7a0"/>
   </linearGradient>
+  <linearGradient id="goldGradV" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#b8923a"/><stop offset="1" stop-color="#e6d7a0"/>
+  </linearGradient>
 </defs></svg>
 
 <script>
@@ -698,22 +707,37 @@ function relCount(){return ALL_KKP.filter(id=>KKP[id].cat==='relationship');}
 
 /* ============================ COMPONENTS ============================ */
 let _gid=0;
-function glass(pct,w){
+function glass(pct,w,fill){
   const id='gl'+(_gid++); const h=(w*1.36).toFixed(1);
   const p=Math.max(0,Math.min(100,pct));
+  const fl=fill||'url(#garnetGrad)';
   // refined tulip bowl; interior spans y≈19 (rim) to y≈62 (base) — fill from the bottom up
   const bowl="M20 17 C20 43 28 62 40 62 C52 62 60 43 60 17 Z";
   const top=62-(p/100)*43;
-  const men=p>3?`<ellipse cx="40" cy="${top.toFixed(1)}" rx="22" ry="2.3" fill="var(--rose)" opacity=".5" clip-path="url(#${id})"/>`:'';
+  // meniscus highlight: rose tint on the classic garnet fill, a soft white sheen on any other
+  const menfill=fl==='url(#garnetGrad)'?'var(--rose)':'#fff';
+  const menop=fl==='url(#garnetGrad)'?'.5':'.32';
+  const men=p>3?`<ellipse cx="40" cy="${top.toFixed(1)}" rx="22" ry="2.3" fill="${menfill}" opacity="${menop}" clip-path="url(#${id})"/>`:'';
   return `<svg viewBox="0 0 80 108" width="${w}" height="${h}" aria-label="${pct}% filled" role="img">
     <defs><clipPath id="${id}"><path d="${bowl}"/></clipPath></defs>
-    <rect x="15" y="${top.toFixed(1)}" width="50" height="60" fill="url(#garnetGrad)" clip-path="url(#${id})"/>
+    <rect x="15" y="${top.toFixed(1)}" width="50" height="60" fill="${fl}" clip-path="url(#${id})"/>
     ${men}
     <path d="${bowl}" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linejoin="round"/>
     <line x1="40" y1="62" x2="40" y2="93" stroke="var(--gold)" stroke-width="1.5"/>
     <path d="M25 95 Q40 101 55 95" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>
     <ellipse cx="40" cy="17" rx="20" ry="3.1" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
   </svg>`;
+}
+// The "glass of knowledge" fill for a TOPIC: majority wine colour of the region.
+// Brand/overall glasses (logo, dashboard, summaries) keep the default garnet.
+function topicGlassFill(t){
+  let key=null,mx=-1;
+  if(t&&t.style){ for(const k in t.style){ if((t.style[k]||0)>mx){mx=t.style[k];key=k;} } }
+  if(!key&&t&&t.grapes&&t.grapes.length){
+    let w=0,r=0; t.grapes.forEach(g=>{const v=g.pct||1; if(g.color==='w')w+=v; else r+=v;});
+    key=w>r?'white':'red';
+  }
+  return {white:'url(#goldGradV)',red:'url(#garnetGrad)',rose:'var(--rose)',sparkling:'var(--azul)',sweet:'var(--gold-l)'}[key]||'url(#garnetGrad)';
 }
 function polar(cx,cy,r,a){const rad=(a-90)*Math.PI/180;return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)];}
 
@@ -847,6 +871,10 @@ function donut(grapes){
   const tot=sl.reduce((s,x)=>s+x.pct,0)||1; const cx=100,cy=100,R=86,r=52; let ang=0,paths='';
   sl.forEach(s=>{
     const a0=ang,a1=ang+s.pct/tot*360;ang=a1;
+    if(a1-a0>=359.9){ // a single ~100% slice: arc endpoints coincide, so draw a full annulus instead
+      paths+=`<path d="M${cx} ${cy-R} A${R} ${R} 0 1 1 ${cx} ${cy+R} A${R} ${R} 0 1 1 ${cx} ${cy-R} Z M${cx} ${cy-r} A${r} ${r} 0 1 0 ${cx} ${cy+r} A${r} ${r} 0 1 0 ${cx} ${cy-r} Z" fill="${s.c}" fill-rule="evenodd" stroke="var(--panel)" stroke-width="1.4"/>`;
+      return;
+    }
     const[x0,y0]=polar(cx,cy,R,a0),[x1,y1]=polar(cx,cy,R,a1);
     const[xi1,yi1]=polar(cx,cy,r,a1),[xi0,yi0]=polar(cx,cy,r,a0);
     const lg=(a1-a0)>180?1:0;
@@ -881,6 +909,112 @@ function chainTable(ch){
   return `<div class="chain">${cells.map((c,i)=>`<div class="cc ${i===3?'last':''}"><div class="cl">${c[0]}</div><div class="cv">${esc(c[1]||'')}</div></div>`).join('')}</div>`;
 }
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ——— Site-wide prose formatting (display-side only; the data blob is never rewritten).
+   Layout rules: one idea per line. "; " run-ons become bullet lists, spaced "—" continuations
+   become new lines, inline "→" chains never appear in prose (the Factor→Mechanism→Effect→Style
+   table is the canonical mechanism display), and parallel enumerations become tier cards. */
+function _splitTop(s,seps){ // split on any of `seps`, but only at parenthesis depth 0
+  const str=String(s==null?'':s); const out=[]; let d=0,cur='';
+  for(let i=0;i<str.length;i++){ const ch=str[i];
+    if(ch==='(')d++; else if(ch===')')d=Math.max(0,d-1);
+    if(d===0){ const hit=seps.find(x=>str.startsWith(x,i));
+      if(hit){ out.push(cur); cur=''; i+=hit.length-1; continue; } }
+    cur+=ch; }
+  out.push(cur);
+  return out.map(x=>x.trim()).filter(Boolean);
+}
+// Conservative clause split: only when EVERY part is a full clause of 3+ words
+// (so short enumerations like "e.g. X; Y" that carry one idea stay on one line).
+function _clauseParts(s,seps){
+  const parts=_splitTop(s,seps||['; ']);
+  return (parts.length>=2&&parts.every(p=>p.split(/\s+/).length>=3))?parts:null;
+}
+// Whole-field formatter: returns bullet-list HTML when the field strings 2+ full clauses
+// together with "; ", otherwise the escaped original text.
+function fmtClauses(str,cls){
+  const s=String(str==null?'':str); const parts=_clauseParts(s);
+  if(!parts) return esc(s);
+  return `<ul class="${cls||'gbul tight'}">${parts.map(p=>`<li>${esc(p.replace(/\.\s*$/,''))}</li>`).join('')}</ul>`;
+}
+// For items of an existing <ul>: one authored bullet → one or several <li>s.
+function fmtClauseLis(str){
+  const s=String(str==null?'':str); const parts=_clauseParts(s);
+  if(!parts) return `<li>${esc(s)}</li>`;
+  return parts.map(p=>`<li>${esc(p.replace(/\.\s*$/,''))}</li>`).join('');
+}
+// Compare-cell prose: same rule, in the compare font hierarchy (.cmptxt / .cmpul).
+// With `arrows` set, inline "→" stages are also broken out (used for KKP-derived cells).
+function _cmpProse(v,arrows){
+  if(!v) return '<div class="cmptxt cmpmuted">—</div>';
+  const s=String(v);
+  const parts=arrows?_splitTop(s,['; ',' → ']):_clauseParts(s);
+  if(parts&&parts.length>=2) return `<ul class="cmpul">${parts.map(p=>`<li>${esc(p.replace(/\.\s*$/,''))}</li>`).join('')}</ul>`;
+  return `<div class="cmptxt">${esc(s)}</div>`;
+}
+
+/* ——— KKP display formatting: the chain TABLE is the canonical mechanism display; statements
+   are reformatted into arrow-free headlines, bullet lists or side-by-side tier cards. */
+function _kkpLine(t){ return `<div class="kst">${esc(t)}</div>`; }
+function _kkpBullets(parts){ return `<div class="kst"><ul class="gbul tight">${parts.map(p=>`<li>${esc(p.replace(/\.\s*$/,''))}</li>`).join('')}</ul></div>`; }
+// Tier/comparison cards. Deliberately conservative: only clear parallel enumerations are
+// card-ified; anything that doesn't match exactly falls through to bullets.
+function kkpTierCards(k){
+  const s=String(k.statement||'').trim().replace(/\.$/,'');
+  // a) enumeration: "[Lead-in: ] item (note), item (note), ..." — every comma-item must match
+  let head=null,rest=s; const ci=s.indexOf(': ');
+  if(ci>0&&ci<=72){ head=s.slice(0,ci); rest=s.slice(ci+2); }
+  if(!/[;→]/.test(rest)&&!/\s—\s/.test(rest)){
+    const items=_splitTop(rest,[', ']).map(x=>x.replace(/^(and|or)\s+/i,''));
+    const ms=items.map(x=>x.match(/^([^()→—;]{1,40}?)\s*\(([^()]{1,60})\)$/));
+    if(items.length>=2&&items.length<=6&&ms.every(Boolean)){
+      // which side is the tier NAME? prefer the side that is digit-free and capitalised
+      const labelish=g=>ms.every(m=>!/\d/.test(m[g])&&/^[A-ZÀ-Þ]/.test(m[g]));
+      const parenIsLabel=!labelish(1)&&labelish(2);
+      const cards=ms.map(m=>{const lab=parenIsLabel?m[2]:m[1],val=parenIsLabel?m[1]:m[2];
+        return `<div class="cc"><div class="cl">${esc(lab)}</div><div class="cv">${esc(val)}</div></div>`;}).join('');
+      return `${head?_kkpLine(head):''}<div class="chain" style="grid-template-columns:repeat(${Math.min(ms.length,3)},1fr)">${cards}</div>`;
+    }
+  }
+  // b) comparisons: 2–3 ";"-clauses that are each exactly one "case → outcome" pair
+  if(k.cat==='comparison'){
+    const cls=_splitTop(s,['; ']);
+    if(cls.length>=2&&cls.length<=3&&cls.every(c=>_splitTop(c,[' → ']).length===2)){
+      const cards=cls.map(c=>{ let[cond,res]=_splitTop(c,[' → ']);
+        const lm=cond.match(/^(.{2,32}?)\s(?:sits?|is|are|has|have|was|were|lies?|comes?|use[sd]?|combines?|makes?|remains?|tends?|shows?|gets?|stays?)\b/);
+        const lab=lm?lm[1]:''; if(lab)cond=cond.slice(lab.length).trim();
+        return `<div class="cc">${lab?`<div class="cl">${esc(lab)}</div>`:''}<div class="cv">${esc(cond)}</div><div class="cv" style="margin-top:5px;color:var(--gold-l)">${esc(res)}</div></div>`;}).join('');
+      return `<div class="chain" style="grid-template-columns:repeat(${cls.length},1fr)">${cards}</div>`;
+    }
+  }
+  return null;
+}
+// Rubric dedupe: the chain TABLE is the canonical display of the model answer, so drop any
+// requiredPoint already covered by a chain cell (normalized, punctuation-insensitive match).
+function _normPt(s){ return String(s==null?'':s).toLowerCase().replace(/[^a-z0-9à-þ]+/gi,' ').trim(); }
+function dedupePoints(points,chain){
+  const pts=points||[]; if(!chain) return pts;
+  const cells=[chain.factor,chain.mechanism,chain.effect,chain.style].map(_normPt).filter(Boolean);
+  return pts.filter(p=>{ const n=_normPt(p); if(!n) return false;
+    return !cells.some(c=>c===n||(n.length>=8&&c.indexOf(n)>=0)); });
+}
+function fmtKkpBody(k){
+  const st=String(k.statement||'').trim();
+  const cards=kkpTierCards(k); if(cards) return cards;
+  if(k.chain){ // table is canonical — show a short arrow-free headline, never the "→" sentence
+    let head=/\s→\s/.test(st)?_splitTop(st,[' → '])[0]:st;
+    if(head.length>120||/;\s/.test(head)) head=k.chain.factor||_splitTop(head,['; '])[0];
+    return _kkpLine(head.replace(/[,;:\s]+$/,''))+chainTable(k.chain);
+  }
+  // no chain: split "; " / " → " / " — " run-ons into bullets; "A = B" gets an "A" headline
+  let parts=_splitTop(st.replace(/\.$/,''),[' → ','; ',' — ']);
+  let head='';
+  const eq=parts.length?parts[0].match(/^([^=()]{2,60}?)\s=\s(.+)$/):null;
+  if(eq&&(parts.length>1||st.length>90)){ head=eq[1]; parts=[eq[2],...parts.slice(1)]; }
+  if(!head&&parts.length<2) return _kkpLine(st);
+  if(head&&parts.length===1) return _kkpLine(head)+`<div class="kst" style="color:var(--ink-dim);margin-top:3px">${esc(parts[0])}</div>`;
+  return (head?_kkpLine(head):'')+_kkpBullets(parts);
+}
 
 /* ============================ ROUTER ============================ */
 const app=document.getElementById('app');
@@ -1086,8 +1220,14 @@ function cmpGrapesCell(t,other){ const theirs=new Set(_gnames(other||{}).map(x=>
   return `<div class="cmpgr">${t.grapes.map(g=>{const sh=theirs.has(g.name.toLowerCase()); return `<span class="cmpgrape ${sh?'sh':'uq'}">${esc(g.name)}${g.pct?` <i>${g.pct}%</i>`:''}</span>`;}).join('')}</div>`; }
 function cmpClimateDeltas(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&&b.climate.scores; if(!sa||!sb)return ''; const d=RADAR_AX.map(ax=>{const v=(sb[ax[0]]||0)-(sa[ax[0]]||0); return Math.abs(v)>=2?`${ax[1]} ${v>0?'+':''}${v}`:null;}).filter(Boolean); return d.length?`<div class="cmpdelta">${d.map(x=>`<span>Δ ${esc(x)}</span>`).join('')}</div>`:''; }
 function cmpClimateDiff(a,b){ const sa=a.climate&&a.climate.scores,sb=b.climate&&b.climate.scores; if(!sa||!sb)return false; return RADAR_AX.some(ax=>Math.abs((sa[ax[0]]||0)-(sb[ax[0]]||0))>=2); }
-function _gRow(label,key){ return {label:label, hl:true, cell:g=>`<div class="cmptxt" style="text-align:left">${g[key]?esc(g[key]):'<span class="cmpmuted">—</span>'}</div>`, diff:(a,b)=>(a[key]||'')!==(b[key]||'')}; }
-function _cmpList(arr){ if(!arr||!arr.length)return '<div class="cmptxt sm cmpmuted">—</div>'; return `<ul class="cmpul">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`; }
+function _gRow(label,key){ return {label:label, hl:true, cell:g=>`<div class="cmptxt">${g[key]?esc(g[key]):'<span class="cmpmuted">—</span>'}</div>`, diff:(a,b)=>(a[key]||'')!==(b[key]||'')}; }
+function _cmpList(arr){ if(!arr||!arr.length)return '<div class="cmptxt cmpmuted">—</div>'; return `<ul class="cmpul">${arr.map(x=>fmtClauseLis(x)).join('')}</ul>`; }
+// Price cell: the WSET tier NAMES are the main line; the approximate currency range is secondary.
+function _cmpPriceCell(raw){
+  const gr=priceGrades(raw), pr=priceRange(raw);
+  if(!gr.length) return `<div class="cmptxt">${esc(raw||'—')}</div>`;
+  return `<div class="cmptxt">${gr.join(' · ')}${pr?`<div class="cmptxt sm" style="margin-top:3px">${pr}</div>`:''}</div>`;
+}
 function getCurrencySymbol(){ return currency==='EUR'?'€':'$'; }
 // Map WSET price bands → an approximate currency range (USD/EUR are close enough).
 function priceRange(str){
@@ -1120,23 +1260,23 @@ const CMP_MODES={
       {label:'Climate', kind:'radar', hl:true, full:true, cellFull:(a,b)=>radar2(a.climate&&a.climate.scores,b.climate&&b.climate.scores,a.title,b.title), diff:cmpClimateDiff},
       {label:'Principal grapes', hl:true, full:true, cellFull:(a,b)=>cmpGrapeCompare(a,b,a.title,b.title), diff:(a,b)=>_setNe(_gnames(a),_gnames(b))},
       {label:'Style', hl:true, cell:t=>cmpStyleBarInline(t.style), diff:(a,b)=>JSON.stringify(a.style)!==JSON.stringify(b.style)},
-      {label:'Winemaking', cell:t=>`<div class="cmptxt sm">${esc(t.winemaking||'—')}</div>`, diff:()=>false},
-      {label:'Quality', hl:true, cell:t=>`<div class="cmptxt">${esc(t.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
-      {label:'Price', hl:true, cell:t=>{const pr=priceRange(t.price);const gr=priceGrades(t.price);const main=pr||esc(t.price||'—');return `<div class="cmptxt">${main}${gr.length?`<div class="cmptxt sm" style="margin-top:3px">${gr.join(' · ')}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
-      {label:'Why it tastes that way', cell:t=>`<div class="cmptxt sm">${esc(_firstRelKKP(t)||'—')}</div>`, diff:()=>false},
-      {label:'Signature', cell:t=>`<div class="cmptxt sm">${esc(t.blurb||'—')}</div>`, diff:()=>false},
+      {label:'Winemaking', cell:t=>_cmpProse(t.winemaking), diff:()=>false},
+      {label:'Quality', hl:true, cell:t=>_cmpProse(t.quality), diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
+      {label:'Price', hl:true, cell:t=>_cmpPriceCell(t.price), diff:(a,b)=>(a.price||'')!==(b.price||'')},
+      {label:'Why it tastes that way', cell:t=>_cmpProse(_firstRelKKP(t),true), diff:()=>false},
+      {label:'Signature', cell:t=>_cmpProse(t.blurb), diff:()=>false},
     ] },
   grape:{ label:'Grape', list:()=>GRAPES.slice().sort((a,b)=>a.name.localeCompare(b.name)), byId:id=>BY_GRAPE[id], name:g=>g.name, sub:g=>g.color==='r'?'Black grape':'White grape', mastery:null,
     media:e=>GRAPE_PIX[e.id]?`<img class="cmpmediaimg" src="images/grapes/${e.id}.webp" alt="${esc(e.name)}" loading="lazy" onerror="this.style.display='none'">`:'',
     rows:[
       _gRow('Budding','budding'), _gRow('Ripening','ripening'), _gRow('Climate','climate'),
       _gRow('Acidity','acidity'), _gRow('Body','body'), _gRow('Alcohol','alcohol'), _gRow('Tannin','tannin'),
-      {label:'Aromas', cell:g=>`<div class="cmptxt sm">${esc(g.aromas||'—')}</div>`, diff:()=>false},
+      {label:'Aromas', cell:g=>_cmpProse(g.aromas), diff:()=>false},
       {label:'In the vineyard', cell:g=>_cmpList(g.viticulture), diff:()=>false},
       {label:'In the winery', cell:g=>_cmpList(g.winemaking), diff:()=>false},
-      {label:'Typical quality', hl:true, cell:g=>`<div class="cmptxt">${esc(g.quality||'—')}</div>`, diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
-      {label:'Price band', hl:true, cell:g=>{const pr=priceRange(g.price);const gr=priceGrades(g.price);const main=pr||esc(g.price||'—');return `<div class="cmptxt">${main}${gr.length?`<div class="cmptxt sm" style="margin-top:3px">${gr.join(' · ')}</div>`:''}</div>`;}, diff:(a,b)=>(a.price||'')!==(b.price||'')},
-      {label:'Overall style', cell:g=>`<div class="cmptxt sm">${esc(g.style||'—')}</div>`, diff:()=>false},
+      {label:'Typical quality', hl:true, cell:g=>_cmpProse(g.quality), diff:(a,b)=>(a.quality||'')!==(b.quality||'')},
+      {label:'Price band', hl:true, cell:g=>_cmpPriceCell(g.price), diff:(a,b)=>(a.price||'')!==(b.price||'')},
+      {label:'Overall style', cell:g=>_cmpProse(g.style), diff:()=>false},
       {label:'Key regions', hl:true, cell:g=>_cmpList((g.regionStyles||[]).map(r=>r.region)), diff:(a,b)=>_setNe((a.regionStyles||[]).map(r=>r.region),(b.regionStyles||[]).map(r=>r.region))},
     ] },
 };
@@ -1196,7 +1336,7 @@ function viewLearn(){
   const cards=list.map(t=>{
     const ids=topicKKPs(t);const p=fillPct(ids);const nrel=t.objectives.flatMap(loKKPs).filter(id=>KKP[id].cat==='relationship').length;
     return `<button class="tcard" data-topic="${t.id}">
-      <span class="tctop">${glass(p,26)}<h3>${esc(t.title)}</h3></span>
+      <span class="tctop">${glass(p,26,topicGlassFill(t))}<h3>${esc(t.title)}</h3></span>
       <div class="alt">${t.flag||''} ${esc(t.alt||t.country)}</div>
       <div class="meta"><span class="mb"><b>${ids.length}</b> KKP</span><span class="mb"><b>${nrel}</b> why</span><span class="mb"><b>${p}%</b></span></div></button>`;
   }).join('');
@@ -1250,7 +1390,7 @@ function viewRef(kind,id){
    ${cr?`<div class="imgcredit">Photo: ${esc(cr.artist||'Wikimedia')} · ${esc(cr.license||'')}${cr.src?` · <a href="${esc(cr.src)}" target="_blank" rel="noopener">source</a>`:''}</div>`:''}
    <div class="ghead" style="margin-top:2px"><div><div class="eyebrow">${kind==='barrels'?'Vessel':'Soil'}</div>
      <h1 style="font-size:28px;line-height:1.04">${esc(x.name)}</h1><div class="sub">${esc(x.tag||'')}</div></div></div>
-   <ul class="refchar">${(x.char||[]).map(c=>`<li>${esc(c)}</li>`).join('')}</ul>
+   <ul class="refchar">${(x.char||[]).map(c=>fmtClauseLis(c)).join('')}</ul>
   </div>`;
 }
 function shortStat(s){ // keep stat chips compact: take the leading word(s) before a parenthesis
@@ -1265,13 +1405,13 @@ function viewGrape(id){
   const g=BY_GRAPE[id]; if(!g) return `<div class="view"><div class="empty">Unknown grape.</div></div>`;
   const isRed=g.color==='r';
   const stat=(k,v,cls)=>v?`<div class="stat ${cls||''}"><div class="gstk">${k}</div><div class="gstv">${esc(v)}</div></div>`:'';
-  const sec=(h,v)=>v?`<div class="gsec"><div class="gsech">${h}</div><div class="gsecb">${esc(v)}</div></div>`:'';
-  const secList=(h,arr)=>arr&&arr.length?`<div class="gsec"><div class="gsech">${h}</div><ul class="gbul">${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
+  const sec=(h,v)=>v?`<div class="gsec"><div class="gsech">${h}</div><div class="gsecb">${fmtClauses(v)}</div></div>`:'';
+  const secList=(h,arr)=>arr&&arr.length?`<div class="gsec"><div class="gsech">${h}</div><ul class="gbul">${arr.map(x=>fmtClauseLis(x)).join('')}</ul></div>`:'';
   const rs=(g.regionStyles||[]).map(r=>{
     const t=TOPICS.find(x=>x.title.toLowerCase()===r.region.toLowerCase())||
             TOPICS.find(x=>r.region.toLowerCase().indexOf(x.title.toLowerCase())>=0||x.title.toLowerCase().indexOf(r.region.toLowerCase())>=0);
     const head=t?`<button class="rsname link" data-topic="${t.id}">${esc(r.region)} →</button>`:`<span class="rsname">${esc(r.region)}</span>`;
-    return `<div class="rsrow"><span class="rsdot ${isRed?'r':'w'}"></span><div class="rstx">${head}<div class="rsnote">${esc(r.note)}</div></div></div>`;
+    return `<div class="rsrow"><span class="rsdot ${isRed?'r':'w'}"></span><div class="rstx">${head}<div class="rsnote">${fmtClauses(r.note)}</div></div></div>`;
   }).join('');
   // budding + ripening first (paired on the top row), then the rest
   const statList=isRed
@@ -1303,7 +1443,10 @@ let openLO={};
 function viewTopic(id){
   const t=BY_ID[id]; if(!t)return '<div class="view"><div class="empty">Topic not found.</div></div>';
   const ids=topicKKPs(t); const p=fillPct(ids);
+  const mpt=MAPPTS[t.id];
+  const mapbox=mpt?`<div class="chartbox full"><div class="ct">Where</div><div class="cmpmedia" style="height:132px" data-mappreview="${t.id}" title="Open map" role="button" aria-label="Open map of ${esc(t.title)}">${cmpMiniMap(mpt.lat,mpt.lng,6,document.body.classList.contains('light')?'light':'dark')}<div class="cmpmaghint">⤢</div></div></div>`:'';
   const charts=`<div class="charts">
+     ${mapbox}
      ${t.climate?`<div class="chartbox"><div class="ct">Climate · ${esc(t.climate.label||'')}</div>${radar(t.climate.scores)}</div>`:''}
      ${t.grapes&&t.grapes.length?`<div class="chartbox"><div class="ct">Signature blend</div>${donut(t.grapes)}</div>`:''}
      ${t.style?`<div class="chartbox full"><div class="ct">Style split</div>${styleBar(t.style)}</div>`:''}
@@ -1311,18 +1454,18 @@ function viewTopic(id){
   const los=t.objectives.map(lo=>{
     const lids=loKKPs(lo); const lp=fillPct(lids); const open=openLO[lo.id]?'open':'';
     const seg=[3,2,1,0].map(st=>{const n=countState(lids,st);return n?`<i style="width:${n/lids.length*100}%;background:${['var(--s0)','var(--s1)','var(--s2)','var(--s3)'][st]}"></i>`:''}).join('');
-    const narr=lo.narrative&&lo.narrative.length?`<div class="narr"><div class="nt">What the source teaches</div><ul>${lo.narrative.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`:'';
+    const narr=lo.narrative&&lo.narrative.length?`<div class="narr"><div class="nt">What the source teaches</div><ul>${lo.narrative.map(b=>fmtClauseLis(b)).join('')}</ul></div>`:'';
     const kkps=lo.kkps.map(k=>{
       const c=CHECK[k.id]; const cls=k.cat==='relationship'?'rel':(k.cat==='comparison'?'cmp':'');
       const tagcls=k.cat==='relationship'?'rel':(k.cat==='comparison'?'cmp':'fact');
       let checkInner='';
-      if(c){ if(c.type==='explain'){checkInner=`<div class="q">${esc(c.prompt)}</div><div class="rub">Model answer must contain</div><ul>${(c.requiredPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`;}
+      if(c){ if(c.type==='explain'){const pts=dedupePoints(c.requiredPoints,k.chain);
+          checkInner=`<div class="q">${esc(c.prompt)}</div>${pts.length?`<div class="rub">Model answer must contain</div><ul>${pts.map(p=>fmtClauseLis(p)).join('')}</ul>`:'<div class="rub">Covered by the chain table above</div>'}`;}
         else if(c.type==='mcq'){checkInner=`<div class="q">${esc(c.question)}</div><div class="ans">✓ ${esc(c.correctAnswer)}</div>`;}
-        else if(c.type==='flash'){checkInner=`<div class="q">${esc(c.question)}</div><div class="ans">${esc(c.answer)}</div>`;} }
+        else if(c.type==='flash'){checkInner=`<div class="q">${esc(c.question)}</div><div class="ans">${fmtClauses(c.answer)}</div>`;} }
       return `<div class="kkp ${cls}" data-kkp="${k.id}">
         <div class="ktop"><span class="tag ${tagcls}">${k.cat}</span>${k.verified?'':'<span class="tag" style="color:var(--rose);border-color:var(--garnet)">unverified</span>'}<span class="kid">${k.id}</span></div>
-        <div class="kst">${esc(k.statement)}</div>
-        ${k.chain?chainTable(k.chain):''}
+        ${fmtKkpBody(k)}
         <div class="checkbox" data-cb="${k.id}"><div class="rub" style="color:var(--gold);margin-top:0">${c&&c.type==='explain'?'Explanation check':(c&&c.type==='mcq'?'Multiple-choice check':'Recall check')}</div>${checkInner}</div>
         <div class="kfoot"><button class="reveal" data-revcb="${k.id}">Show check</button>${statePill(k.id)}</div>
       </div>`;
@@ -1337,7 +1480,7 @@ function viewTopic(id){
       <div class="lobody">${narr}${kkps}</div>
     </div>`;
   }).join('');
-  const gloss=t.glossary&&t.glossary.length?`<div class="sec-h"><h3>Glossary</h3></div><div class="panel glossary">${t.glossary.map(g=>`<div class="gt"><div class="gterm">${esc(g.term)}${g.language?`<span class="lang">${esc(g.language)}</span>`:''}</div><div class="gdef">${esc(g.def)}</div></div>`).join('')}</div>`:'';
+  const gloss=t.glossary&&t.glossary.length?`<div class="sec-h"><h3>Glossary</h3></div><div class="panel glossary">${t.glossary.map(g=>`<div class="gt"><div class="gterm">${esc(g.term)}${g.language?`<span class="lang">${esc(g.language)}</span>`:''}</div><div class="gdef">${fmtClauses(g.def)}</div></div>`).join('')}</div>`:'';
   const flags=t.flags&&t.flags.length?`<div class="flagbox"><div class="ft">⚑ Flagged for expert ruling</div>${t.flags.map(f=>`<div class="fi"><b>${esc(f.kp)}</b> — ${esc(f.issue)}</div>`).join('')}</div>`:'';
   const blind=t.blind&&t.blind.length?`<div class="sec-h"><h3>Blind deduction</h3></div><div class="panel"><div style="font-size:13px;color:var(--ink-dim)">${t.blind.length} tasting profile${t.blind.length>1?'s':''} for this topic — practise in <b style="color:var(--gold-l)">Study → Blind tasting</b>.</div></div>`:'';
   return `<div class="view">
@@ -1782,11 +1925,12 @@ function runMCQ(it){
 function mcqOptions(c){ if(c._opts)return c._opts; const o=shuffle([c.correctAnswer,...(c.distractors||[])]); c._opts=o; return o; }
 function runExplain(it){
   const c=it.check; const k=KKP[it.kp];
+  const pts=dedupePoints(c.requiredPoints,k&&k.chain); // table is canonical — only extra points as bullets
   return `<div class="qcard">
     <div class="qmeta"><span class="topic">${esc(topicTitleOf(it))}</span><span class="qtype">Explain · why</span></div>
     <div class="qbody"><div class="prompt">${esc(c.prompt)}</div>
     ${k&&k.chain?'':'<div class="ptip">Build the chain: factor → mechanism → effect → style.</div>'}
-    ${study.flipped?`<div class="revealbox"><div class="rl">A complete answer contains</div><ul>${(c.requiredPoints||[]).map(p=>`<li>${esc(p)}</li>`).join('')}</ul>${k&&k.chain?chainTable(k.chain):''}</div>`:''}
+    ${study.flipped?`<div class="revealbox"><div class="rl">A complete answer contains</div>${pts.length?`<ul>${pts.map(p=>fmtClauseLis(p)).join('')}</ul>`:''}${k&&k.chain?chainTable(k.chain):''}</div>`:''}
     </div>
     ${study.flipped?`<div class="actions">
        <button class="b-again" data-grade="1">Missed it</button>
@@ -1799,9 +1943,9 @@ function runBlind(it){
   return `<div class="qcard">
     <div class="qmeta"><span class="topic">Blind</span><span class="qtype">Deduce + justify</span></div>
     <div class="qbody"><div class="eyebrow" style="margin-bottom:8px">Tasting note</div>
-      <div class="tasting">${esc(b.tastingProfile)}</div>
-      ${study.flipped?`<div class="revealbox"><div class="rl">Deduction</div><ul class="deduce">${b.deduce.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>
-         <div class="rl" style="margin-top:12px">Justified by</div><ul>${b.justifyWith.map(j=>`<li>${esc(j)}</li>`).join('')}</ul></div>`
+      <div class="tasting">${fmtClauses(b.tastingProfile)}</div>
+      ${study.flipped?`<div class="revealbox"><div class="rl">Deduction</div><ul class="deduce">${b.deduce.map(d=>fmtClauseLis(d)).join('')}</ul>
+         <div class="rl" style="margin-top:12px">Justified by</div><ul>${b.justifyWith.map(j=>fmtClauseLis(j)).join('')}</ul></div>`
         :'<div class="ptip">Name grape, climate and region — and the markers that prove each.</div>'}
     </div>
     ${study.flipped?`<div class="actions">
