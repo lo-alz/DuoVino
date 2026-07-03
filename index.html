@@ -467,7 +467,7 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .curseg{display:flex;flex-direction:column;gap:10px;margin:4px 0 10px}
 .curopt{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--panel2);border:1px solid var(--line2);border-radius:13px;padding:13px 14px;cursor:pointer;transition:border-color .15s,background .15s}
 .curopt.on{border-color:var(--gold);background:rgba(202,166,75,.10)}
-.curopt .curtop{display:flex;align-items:center;justify-content:space-between}
+.curopt .curtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .curopt .curtop b{font-family:var(--disp);font-size:16px;text-transform:uppercase;letter-spacing:.02em}
 .curopt .curon{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-l);border:1px solid var(--gold-d);border-radius:6px;padding:2px 7px}
 .curopt .curdesc{font-size:12.5px;color:var(--ink-dim);line-height:1.4}
@@ -480,6 +480,38 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .curul li b{color:var(--gold-l);font-family:var(--mono);font-size:12px;margin-right:8px}
 .curtag{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green-l);border:1px solid var(--green);border-radius:5px;padding:1px 6px;margin-left:6px}
 .curnote{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+/* ---------- curriculum redesign ---------- */
+/* pathway diagram */
+.cur-pathway-wrap{border-radius:16px;overflow:hidden;border:1px solid var(--line2);background:var(--panel);margin:4px 0 10px}
+.cur-pathway-img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.cur-pathway-note{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:9px 14px;border-top:1px solid var(--line);text-align:center}
+/* filter section headers */
+.cur-section-head{display:flex;align-items:center;gap:10px;margin:20px 2px 8px}
+.cur-section-head h3{font-family:var(--disp);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.cur-section-head::before{content:'';flex:0 0 auto;width:3px;height:16px;border-radius:2px;background:var(--gold)}
+.cur-section-head::after{content:'';flex:1;height:1px;background:var(--line)}
+/* level badge on filter cards */
+.curopt .curlvl{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:var(--panel3);border:1px solid var(--line2);font-family:var(--disp);font-size:13px;font-weight:700;color:var(--muted);flex:0 0 auto;margin-right:2px;transition:background .15s,color .15s}
+.curopt.on .curlvl{background:var(--gold);border-color:var(--gold-d);color:#1a1407}
+.curopt.disabled .curlvl{opacity:.4}
+/* D-unit grid inside Level 4 */
+.cur-d-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.cur-d-cell{background:var(--panel3);border:1px solid var(--line2);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:3px;cursor:pointer;transition:border-color .15s,background .15s}
+.cur-d-cell:active{background:var(--panel2)}
+.cur-d-cell.on{border-color:var(--gold);background:rgba(202,166,75,.12)}
+.cur-d-cell.disabled{opacity:.45;pointer-events:none}
+.cur-d-cell .dcode{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:1px}
+.cur-d-cell.disabled .dcode{color:var(--muted)}
+.cur-d-cell .dname{font-family:var(--disp);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+.cur-d-cell .dstatus{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.cur-d-cell.on .dstatus{color:var(--gold-l)}
+/* how-filter-works panel */
+.cur-how{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.cur-how-icon{font-size:20px;flex:0 0 auto;margin-top:1px}
+.cur-how-body{flex:1;font-size:13px;color:var(--ink-dim);line-height:1.5}
+.cur-how-body b{color:var(--gold-l)}
+
 .curbanner{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--ink-dim);background:rgba(202,166,75,.10);border:1px solid var(--gold-d);border-radius:10px;padding:8px 11px;margin:2px 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .curbanner b{color:var(--gold-l)}
 .curclear{margin-left:auto;background:none;border:1px solid var(--line2);border-radius:999px;color:var(--ink-dim);font-family:var(--mono);font-size:10px;padding:3px 9px;cursor:pointer}
@@ -1159,53 +1191,63 @@ function viewAdmin(){
 }
 function viewCurriculum(){
   const c=curricCounts();
-  const optActive=(key,label,desc,count)=>`<button class="curopt ${curric===key?'on':''}" data-curric="${key}">
-     <span class="curtop"><b>${label}</b>${curric===key?'<span class="curon">Active</span>':''}</span>
+  const lvlBadge=(n)=>`<span class="curlvl">${n}</span>`;
+  const optActive=(key,label,desc,count,lvl)=>`<button class="curopt ${curric===key?'on':''}" data-curric="${key}">
+     <span class="curtop">${lvl?lvlBadge(lvl):''}<b>${label}</b>${curric===key?'<span class="curon">Active</span>':''}</span>
      <span class="curdesc">${esc(desc)}</span>
      <span class="curcount">${count} region${count===1?'':'s'} in scope</span></button>`;
-  const optDisabled=(label,desc)=>`<div class="curopt disabled" style="opacity:0.5;pointer-events:none">
-     <span class="curtop"><b>${label}</b><span class="curdisabled">Coming soon</span></span>
+  const optDisabled=(label,desc,lvl)=>`<div class="curopt disabled" style="opacity:0.45;pointer-events:none">
+     <span class="curtop">${lvl?lvlBadge(lvl):''}<b>${label}</b><span class="curdisabled" style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line2);border-radius:6px;padding:2px 7px">Soon</span></span>
      <span class="curdesc">${esc(desc)}</span></div>`;
+  const dCell=(key,code,name,live)=>`<button class="cur-d-cell ${live&&curric===key?'on':''} ${live?'':'disabled'}" ${live?`data-curric="${key}"`:''}>
+     <span class="dcode">${code}</span>
+     <span class="dname">${name}</span>
+     <span class="dstatus">${live?(curric===key?'Active':'Available'):'Coming soon'}</span></button>`;
   return `<div class="view">
    <div class="crumb" data-back-settings="1">‹ Settings</div>
    <div class="top"><div class="brand"><span><h1 style="font-size:26px">Curriculum</h1><div class="sub">What are you studying?</div></span></div></div>
+
+   <!-- ── Pathway diagram ── -->
+   <div class="cur-section-head"><h3>The WSET Wine Pathway</h3></div>
+   <div class="cur-pathway-wrap">
+     <img class="cur-pathway-img" src="wset_pathway.png" alt="WSET Wine Pathway — four levels from Award to Diploma" loading="lazy">
+     <div class="cur-pathway-note">DuoVino covers wines only · Spirits, sake &amp; beer pathways not included</div>
+   </div>
+
+   <!-- ── Unfiltered option ── -->
+   <div class="cur-section-head"><h3>Filter by qualification</h3></div>
    <div class="curseg">
-     ${optActive('all','All content','Everything in DuoVino — every region, no exam filter.',c.all)}
+     ${optActive('all','All content','Every region in DuoVino — no exam filter applied.',c.all,'∞')}
    </div>
-   <div class="sec-h"><h3>WSET Awards</h3></div>
+
+   <!-- ── WSET Awards ── -->
+   <div class="cur-section-head" style="margin-top:14px"><h3>Awards</h3></div>
    <div class="curseg">
-     ${optDisabled('Level 1 Award','Beginner\'s introduction to wine styles, grapes, storage & service.')}
-     ${optDisabled('Level 2 Award','Principal grape varieties and 70+ regions that shape them.')}
-     ${optActive('L3','Level 3 Award','Advanced still-wine regions: how location, grapes & winemaking drive style, quality & price.',c.L3)}
+     ${optDisabled('Level 1 Award','Beginner\'s introduction to wine styles, grapes, storage &amp; service.','1')}
+     ${optDisabled('Level 2 Award','Principal grape varieties and 70+ regions that shape them.','2')}
+     ${optActive('L3','Level 3 Award','Advanced still-wine regions: how location, grapes &amp; winemaking drive style, quality &amp; price.',c.L3,'3')}
    </div>
-   <div class="sec-h"><h3>WSET Curricula</h3></div>
-   <div class="curseg">
-     ${optDisabled('D1 — Wine Production','Viticulture & winemaking, and how they shape style, quality & price.')}
-     ${optDisabled('D2 — Wine Business','The trade: supply, distribution, pricing & marketing.')}
-     ${optActive('D3','D3 — Wines of the World','All still wines of the world — the full Diploma D3 unit.',c.D3)}
-     ${optDisabled('D4 — Sparkling Wines','Production & blind tasting of three sparkling wines.')}
-     ${optDisabled('D5 — Fortified Wines','Production & blind tasting of three fortified wines.')}
-     ${optDisabled('D6 — Research Assignment','A ~3,000-word independent research piece.')}
+
+   <!-- ── Level 4 Diploma units ── -->
+   <div class="cur-section-head" style="margin-top:14px"><h3>Level 4 Diploma Units</h3></div>
+   <div class="panel" style="padding:14px">
+     <div style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Select a unit to filter regions to its scope</div>
+     <div class="cur-d-grid">
+       ${dCell('D1','D1','Wine Production',false)}
+       ${dCell('D2','D2','Wine Business',false)}
+       ${dCell('D3','D3','Wines of the World',true)}
+       ${dCell('D4','D4','Sparkling Wines',false)}
+       ${dCell('D5','D5','Fortified Wines',false)}
+       ${dCell('D6','D6','Research Assignment',false)}
+     </div>
    </div>
-   <div class="sec-h"><h3>The WSET wine pathway</h3></div>
-   <div class="panel curinfo">
-     <p><b>Level 1 Award</b> — a beginner's introduction: main wine styles, common grapes, storage, service &amp; food pairing. <span class="curnote">Exam: 30 multiple-choice questions.</span></p>
-     <p><b>Level 2 Award</b> — intermediate: the principal grape varieties and the 70+ regions that shape them, plus an intro to sparkling &amp; fortified wines. <span class="curnote">Exam: 50 multiple-choice questions.</span></p>
-     <p><b>Level 3 Award in Wines</b> — advanced: how location, grape growing, winemaking &amp; maturation drive a wine's style, quality &amp; price. <span class="curnote">Exam: multiple-choice + short written answers, plus a blind tasting of two wines.</span></p>
-     <p><b>Level 4 Diploma in Wines</b> — the expert qualification covering every aspect of wine, and a key step toward the Master of Wine. Assessed across six units (closed-book theory, tasting exams &amp; a research assignment):</p>
-     <ul class="curul">
-       <li><b>D1</b> Wine Production — viticulture &amp; winemaking, and how they shape style, quality &amp; price.</li>
-       <li><b>D2</b> Wine Business — the trade: supply, distribution, pricing &amp; marketing.</li>
-       <li><b>D3</b> Wines of the World — the principal still wines globally, with expert blind tasting <span class="curtag">you are here</span></li>
-       <li><b>D4</b> Sparkling Wines — production &amp; blind tasting of three sparkling wines.</li>
-       <li><b>D5</b> Fortified Wines — production &amp; blind tasting of three fortified wines.</li>
-       <li><b>D6</b> Independent Research Assignment — a ~3,000-word research piece.</li>
-     </ul>
-     <p class="curnote">WSET also runs parallel pathways in spirits, sake &amp; beer — DuoVino is wines-only.</p>
-     <p class="curnote">DuoVino currently covers <b>D3</b> (still wines of the world) and the still-wine portion of <b>Level 3</b>. Sparkling &amp; fortified (D4 / D5, and the rest of Level 3) are on the roadmap.</p>
+
+   <!-- ── How the filter works ── -->
+   <div class="cur-section-head" style="margin-top:14px"><h3>How it works</h3></div>
+   <div class="cur-how">
+     <span class="cur-how-icon">🔍</span>
+     <div class="cur-how-body">Pick a qualification above and <b>Learn → Regions</b> shows only the regions in that exam's scope. Your progress is never deleted — it's just hidden while filtered.<br><br>DuoVino currently covers <b>D3</b> (still wines of the world) and the still-wine portion of <b>Level 3</b>. Sparkling &amp; fortified (D4 / D5) are on the roadmap.</div>
    </div>
-   <div class="sec-h"><h3>How the filter works</h3></div>
-   <div class="panel"><div style="font-size:13px;color:var(--ink-dim)">Pick a curriculum above and <b style="color:var(--gold-l)">Learn → Regions</b> shows only the regions in that exam's scope. Your progress is never deleted — it's just hidden while filtered.</div></div>
   </div>`;
 }
 /* ============================ COMPARE ============================ */
