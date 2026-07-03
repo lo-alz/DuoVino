@@ -68,6 +68,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   .app:has(.learn-wide) .lrg-tcard .lrg-sub{font-size:9px}
   .app:has(.learn-wide) .lgr-card .lgr-nm{font-size:14px}
 }
+/* Curriculum widens on desktop so the WSET pathway diagram renders larger */
+@media(min-width:960px){.app:has(.cur-pathway-wrap){max-width:1100px}}
 .view{padding:18px 16px 28px;animation:fade .32s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -105,8 +107,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .qbtn{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:13px 12px;text-align:left;
   display:flex;flex-direction:column;gap:3px;transition:border-color .15s,background .15s}
 .qbtn:active{background:var(--panel3)}
-.qbtn .qt{font-family:var(--disp);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.qbtn .qd{font-size:11.5px;color:var(--muted)}
+.qbtn .qt{display:block;font-family:var(--disp);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.qbtn .qd{display:block;margin-top:3px;font-size:11.5px;color:var(--muted)}
 .qbtn.accent{border-color:var(--garnet)}
 .qbtn.accent .qt{color:var(--rose)}
 
@@ -225,8 +227,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .lohead .code{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold);border:1px solid var(--gold-d);
   border-radius:6px;padding:3px 7px;flex:0 0 auto}
 .lohead .lt{flex:1;min-width:0}
-.lohead .lt .h{font-family:var(--disp);font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
-.lohead .lt .s{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
+.lohead .lt .h{display:block;font-family:var(--disp);font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.lohead .lt .s{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
 .lohead .chev{color:var(--muted);transition:transform .25s;flex:0 0 auto}
 .lo.open .chev{transform:rotate(90deg)}
 .lobody{display:none;padding:0 14px 14px}
@@ -325,6 +327,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .opt.correct{border-color:var(--green);background:rgba(127,170,85,.16)}
 .opt.wrong{border-color:var(--garnet);background:rgba(138,37,64,.16)}
 .opt .mk{font-family:var(--mono);font-size:11px;margin-right:9px;color:var(--muted)}
+/* Guided·Choices states: picked (pre-reveal) + the reveal traffic light (correct/missed/wrong) */
+.opt.picked{border-color:var(--gold);background:rgba(202,166,75,.13)}
+.opt.picked .mk{color:var(--gold-l)}
+.opt.missed{border-color:var(--gold-d);background:rgba(202,166,75,.16)}
+.opt.missed .mk{color:var(--gold-l)}
+.opt.correct .mk{color:var(--green-l)}
+.opt.wrong .mk{color:var(--rose)}
+.optlegend{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.optlegend .lg{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.optlegend .lg .g{flex:0 0 14px;text-align:center;font-size:11px}
 
 .revealbox{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:15px;margin-top:16px;animation:fade .2s}
 .revealbox .rl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:9px}
@@ -1279,7 +1291,7 @@ function viewCurriculum(){
    <!-- ── Pathway diagram ── -->
    <div class="cur-section-head"><h3>The WSET Wine Pathway</h3></div>
    <div class="cur-pathway-wrap">
-     <img class="cur-pathway-img" src="wset_pathway.webp" alt="WSET Wine Pathway — four levels from Award to Diploma" loading="lazy">
+     <img class="cur-pathway-img" src="wset_pathway.webp" srcset="wset_pathway.webp 1600w, wset_pathway@2x.webp 2752w" sizes="(min-width:960px) min(1100px, 92vw), 100vw" alt="WSET Wine Pathway — four levels from Award to Diploma" loading="lazy">
      <div class="cur-pathway-note">DuoVino covers wines only · Spirits, sake &amp; beer pathways not included</div>
    </div>
 
@@ -1674,7 +1686,7 @@ function viewStudyHome(){
      <div class="eyebrow" style="margin-bottom:9px">${isExam?'Paper':'Scope'}</div>
      <div class="chips" style="flex-wrap:wrap;overflow:visible">
        ${isExam
-         ?EXAMS.map(p=>`<button class="chip ${paper.id===p.id?'on':''}" data-exam-paper="${p.id}">${esc(p.sitting)}</button>`).join('')
+         ?examsChrono().map(p=>`<button class="chip ${paper.id===p.id?'on':''}" data-exam-paper="${p.id}">${esc(p.sitting)}</button>`).join('')
          :scopes.map(s=>`<button class="chip ${cur===s[0]?'on':''}" data-scope="${s[0]}">${esc(s[1])}</button>`).join('')}
      </div>
      ${isExam?examSitHtml(paper):''}
@@ -1712,7 +1724,7 @@ function modeHint(m){
 function scopeObj(cur){ if(cur==='all')return{type:'all'}; if(cur==='weak')return{type:'weak'}; return {type:'country',name:cur.slice(2)};}
 
 /* ============================ WSET D3 MOCK EXAM ============================ */
-// Two full theory papers grounded in real D3 examiners' reports. Each mark point is
+// Four full theory papers grounded in real D3 examiners' reports. Each mark point is
 // {p:text, cat:category-hint, ess:essential}; each part carries distractors[] — real
 // documented candidate errors — for the Guided · Choices sitting. Marking is positive,
 // points-based per weighted part:
@@ -1720,7 +1732,7 @@ function scopeObj(cur){ if(cur==='all')return{type:'all'}; if(cur==='weak')retur
 //   Guided · Choices:       part% = max(0, correct picks − wrong picks) / points × weight
 // question = sum of parts; exam = mean of questions → WSET band (pass 55%).
 const EXAMS=[
- {id:'d3t-2023',title:'D3 Theory Mock Paper 1',sitting:'October 2023',questions:[
+ {id:'d3t-2023',title:'D3 Theory Mock Paper 1',sitting:'October 2023',date:'2023-10',questions:[
   {n:1,topic:'Germany',stem:'Outline the legal categories of DRY German Riesling. Describe the role of the VDP in the development and understanding of quality German wine. Why is dry German Riesling increasing in popularity?',
    parts:[
     {label:'Legal categories of dry German Riesling',weight:30,points:[
@@ -1848,7 +1860,7 @@ const EXAMS=[
       'Coonawarra hedges its climate by blending in Merlot, while Pauillac bottles varietal Cabernet']}],
    tips:['70% of the marks are in the comparison — compare directly (rainfall vs rainfall, soil vs soil) instead of describing each region in turn.',
      'Answer both halves: candidates who skimped the vine characteristics threw away an easy 30%.']}]},
- {id:'d3t-2022',title:'D3 Theory Mock Paper 2',sitting:'October 2022',questions:[
+ {id:'d3t-2022',title:'D3 Theory Mock Paper 2',sitting:'October 2022',date:'2022-10',questions:[
   {n:1,topic:'Rosé',stem:'Compare the production and commercial success of rosé wines in Anjou, Provence and Navarra.',
    parts:[
     {label:'Production in the three regions',weight:60,points:[
@@ -1970,7 +1982,10 @@ const EXAMS=[
 let exam=null; // {paper, mode, idx, answers:{}, ticks:{qi:{pi:{ki:true}}}, revealed:{}, opts, picks, blanks, ai}
 let examSel=EXAMS[0].id;
 let examMode='exam'; // 'exam' | 'choices' | 'blanks'
-const EXAM_SITS=[['exam','Exam'],['choices','Guided · Choices'],['blanks','Guided · Blanks']];
+// Ordered easiest → hardest: recognise, recall from hints, then the full mock.
+const EXAM_SITS=[['choices','Guided · Choices'],['blanks','Guided · Blanks'],['exam','Mock Exam']];
+// Paper chips run oldest → newest; each paper carries a sortable date ('YYYY-MM').
+const examsChrono=()=>EXAMS.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
 
 // Exam-picker meta panel: sitting selector, stacked facts (one per line) and the
 // five-row grade-band scale in band colours — never a run-on sentence.
@@ -1997,7 +2012,7 @@ function examSitHtml(paper){
 
 function startExam(id){
   const paper=EXAMS.find(p=>p.id===id); if(!paper){toast('Paper not found.');return;}
-  exam={paper,mode:examMode,idx:0,answers:{},ticks:{},revealed:{},picks:{},blanks:{},ai:{},opts:null};
+  exam={paper,mode:examMode,idx:0,answers:{},ticks:{},revealed:{},picks:{},blanks:{},ai:{},hints:{},opts:null};
   if(examMode==='choices'){
     // Pre-shuffle each part's true points + distractors once, so the order is stable for the sitting.
     exam.opts=paper.questions.map(q=>q.parts.map(p=>shuffle([
@@ -2051,13 +2066,18 @@ function examChoiceList(qi){
     return `<div class="revealbox"><div class="rl">${head}</div>
       <div class="mcqopts" style="margin-top:4px">${opts.map((o,oi)=>{
         const picked=!!sel[oi];
-        let cls='opt',mk=picked?'●':'○',st='';
-        if(revealed){ if(o.ok){cls='opt correct';mk=picked?'✓':'○';} else if(picked){cls='opt wrong';mk='✗';} else {mk='·';} }
-        else if(picked){ st='style="border-color:var(--gold)"'; }
-        return `<button class="${cls}" ${st} ${revealed?'':`data-exam-pick="${qi}:${pi}:${oi}"`}><span class="mk">${mk}</span>${esc(o.t)}</button>`;
+        // Reveal traffic light: green ✓ correctly selected · gold ● real point missed · red ✗ distractor picked.
+        let cls='opt',mk=picked?'◉':'○';
+        if(revealed){ if(o.ok){ if(picked){cls='opt correct';mk='✓';} else {cls='opt missed';mk='●';} } else if(picked){cls='opt wrong';mk='✗';} else {mk='·';} }
+        else if(picked){ cls='opt picked'; }
+        return `<button class="${cls}" ${revealed?'':`data-exam-pick="${qi}:${pi}:${oi}"`}><span class="mk">${mk}</span>${esc(o.t)}</button>`;
       }).join('')}</div></div>`;
   }).join('')+(exam.revealed[qi]
-    ?'<div class="ptip">Green rows are the real mark-scheme points. Red rows are distractors you picked — documented errors from past candidates.</div>'
+    ?`<div class="optlegend">
+        <div class="lg"><span class="g" style="color:var(--green-l)">✓</span><span>Correct — a real point you picked</span></div>
+        <div class="lg"><span class="g" style="color:var(--gold-l)">●</span><span>Missed — a real point you left unticked</span></div>
+        <div class="lg"><span class="g" style="color:var(--rose)">✗</span><span>Wrong — a distractor you picked</span></div>
+      </div>`
     :'<div class="ptip">Tick every statement that belongs in a top answer. Wrong picks cost marks, so choose with conviction.</div>');
 }
 // Guided·Blanks: one category-hint chip + blank recall input per mark point.
@@ -2071,6 +2091,23 @@ function examBlankList(qi){
           style="flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 11px;color:var(--ink);font:inherit;font-size:13px">
       </div>`).join('')}
     </div></div>`).join('')+'<div class="ptip">Each chip hints the category of one mark point. Type what you can recall, then reveal and self-tick.</div>';
+}
+
+// Hint (pre-reveal, any sitting mode): the shape of the mark scheme — how many points
+// each part expects — without revealing any answers. One stacked line per part.
+function examHintHtml(qi){
+  const q=exam.paper.questions[qi];
+  const rows=q.parts.map((p,pi)=>{
+    const n=p.points.length;
+    const line=exam.mode==='choices'
+      ?`pick ${n} of the ${exam.opts[qi][pi].length}`
+      :`${n} point${n>1?'s':''} carry the ${p.weight}%`;
+    return `<div style="display:flex;gap:12px;align-items:baseline;justify-content:space-between">
+      <span style="font-size:13px;color:var(--ink-dim);line-height:1.4">${esc(p.label)}</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--gold-l);flex:0 0 auto">${line}</span></div>`;
+  }).join('');
+  return `<div class="revealbox"><div class="rl">Hint — the shape of the mark scheme</div>
+    <div style="display:flex;flex-direction:column;gap:7px">${rows}</div></div>`;
 }
 
 function viewExam(){
@@ -2096,10 +2133,11 @@ function viewExam(){
         <div class="prompt" style="font-size:19px">${esc(q.stem)}</div>
         ${exam.mode==='exam'?parts:''}
         ${body}
+        ${!revealed&&exam.hints[qi]?examHintHtml(qi):''}
       </div>
       <div class="actions">
         ${qi>0?`<button class="b-part" data-exam-prev>← Q${qi}</button>`:''}
-        ${!revealed?`<button class="b-next" data-exam-reveal>${revealLabel}</button>`
+        ${!revealed?`<button class="b-part" data-exam-hint>${exam.hints[qi]?'Hide hint':'Hint'}</button><button class="b-next" data-exam-reveal>${revealLabel}</button>`
           :(qi<qs.length-1?'<button class="b-next" data-exam-next>Next question →</button>'
           :'<button class="b-got" data-exam-finish>Finish exam →</button>')}
       </div>
@@ -2211,7 +2249,7 @@ function viewExamResult(){
   const qsc=qs.map((q,i)=>examQScore(q,i));
   const score=Math.round(qsc.reduce((a,b)=>a+b,0)/qs.length);
   const band=examBand(score);
-  const modeLabel={exam:'Exam',choices:'Guided · Choices',blanks:'Guided · Blanks'}[exam.mode];
+  const modeLabel={exam:'Mock Exam',choices:'Guided · Choices',blanks:'Guided · Blanks'}[exam.mode];
   const review=qs.map((q,i)=>{
     const qp=Math.round(qsc[i]); const qb=examBand(qp);
     return `<div class="panel">
@@ -2613,6 +2651,7 @@ function bind(){
   app.querySelectorAll('[data-ai-mark]').forEach(b=>b.onclick=()=>aiMark(+b.dataset.aiMark));
   app.querySelectorAll('[data-exam-end]').forEach(b=>b.onclick=()=>{ if(confirm('End this mock exam? Your answers and ticks will be lost.')){exam=null;nav('study');} });
   app.querySelectorAll('[data-exam-reveal]').forEach(b=>b.onclick=()=>{saveExamAns();exam.revealed[exam.idx]=true;render();});
+  app.querySelectorAll('[data-exam-hint]').forEach(b=>b.onclick=()=>{saveExamAns();exam.hints[exam.idx]=!exam.hints[exam.idx];render();});
   app.querySelectorAll('[data-exam-tick]').forEach(b=>b.onclick=()=>{const a=b.dataset.examTick.split(':').map(Number);
     const t=exam.ticks; t[a[0]]=t[a[0]]||{}; t[a[0]][a[1]]=t[a[0]][a[1]]||{}; t[a[0]][a[1]][a[2]]=!t[a[0]][a[1]][a[2]]; saveExamAns(); render();});
   app.querySelectorAll('[data-exam-prev]').forEach(b=>b.onclick=()=>{saveExamAns();exam.idx--;render();window.scrollTo(0,0);});
