@@ -1571,7 +1571,7 @@ function viewStudyHome(){
          ?EXAMS.map(p=>`<button class="chip ${paper.id===p.id?'on':''}" data-exam-paper="${p.id}">${esc(p.sitting)}</button>`).join('')
          :scopes.map(s=>`<button class="chip ${cur===s[0]?'on':''}" data-scope="${s[0]}">${esc(s[1])}</button>`).join('')}
      </div>
-     ${isExam?`<div style="font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5">${esc(paper.title)} — ${paper.questions.length} questions with weighted parts. A real sitting allows 3 hours (≈45 min per question). Bands: Distinction ≥75 · Merit 65–74 · Pass 55–64 · Fail 45–54 · Unclassified &lt;45.</div>`:''}
+     ${isExam?examSitHtml(paper):''}
    </div>
    ${isExam
      ?`<button class="studybtn" data-exam-start="${paper.id}">Start — ${paper.questions.length} questions →</button>`
@@ -1579,209 +1579,393 @@ function viewStudyHome(){
    <div class="empty" style="padding:18px 10px">${modeHint(studyMode)}</div>
   </div>`;
 }
-function modeHint(m){return {mixed:'Interleaving facts, causal explanations and tasting deductions is the strongest way to revise for the D3 theory paper.',
+function modeHint(m){
+  if(m==='exam'){
+    // One instruction per line — the sitting mode chosen above decides the flow described.
+    const lines={
+      exam:['A full theory paper under exam discipline.',
+        'Write each answer in full.',
+        'Reveal the mark scheme when you are done.',
+        'Tick the points you genuinely covered.',
+        'In the review, AI marking can highlight what your answer covered.'],
+      choices:['Each part becomes a set of statements to judge.',
+        'Real mark-scheme points are shuffled with plausible wrong answers.',
+        'The distractors are documented candidate errors from examiners’ reports.',
+        'Wrong picks cost marks, so choose with conviction.'],
+      blanks:['Each mark point is reduced to a category hint.',
+        'Type what you can recall from the hint alone.',
+        'Reveal the real points, then tick what you covered.']
+    }[examMode]||[];
+    return `<div style="display:flex;flex-direction:column;gap:6px">${lines.map(l=>`<div>${l}</div>`).join('')}</div>`;
+  }
+  return {mixed:'Interleaving facts, causal explanations and tasting deductions is the strongest way to revise for the D3 theory paper.',
   flash:'Quick recall of discrete facts. Mark honestly — “Mastered” only when instant.',
   mcq:'Distractors are real D3 confusions. Available where multiple-choice checks are authored.',
   explain:'The Diploma skill: produce the factor→mechanism→effect→style chain, then self-grade against the rubric.',
-  blind:'Given SAT tasting markers, deduce grape, climate and region — and justify. Hand-curated classic profiles.',
-  exam:'A full D3 theory paper under exam discipline: 4 questions with weighted parts. Write each answer in full, reveal the mark scheme, tick the points you genuinely covered — scored to the WSET bands (pass mark 55%).'}[m];}
+  blind:'Given SAT tasting markers, deduce grape, climate and region — and justify. Hand-curated classic profiles.'}[m];}
 function scopeObj(cur){ if(cur==='all')return{type:'all'}; if(cur==='weak')return{type:'weak'}; return {type:'country',name:cur.slice(2)};}
 
 /* ============================ WSET D3 MOCK EXAM ============================ */
-// Two full theory papers grounded in real D3 examiners' reports. Marking is positive,
-// points-based per weighted part: part% = (points ticked / points in part) × weight;
+// Two full theory papers grounded in real D3 examiners' reports. Each mark point is
+// {p:text, cat:category-hint, ess:essential}; each part carries distractors[] — real
+// documented candidate errors — for the Guided · Choices sitting. Marking is positive,
+// points-based per weighted part:
+//   Exam / Guided · Blanks: part% = (points ticked / points in part) × weight
+//   Guided · Choices:       part% = max(0, correct picks − wrong picks) / points × weight
 // question = sum of parts; exam = mean of questions → WSET band (pass 55%).
 const EXAMS=[
  {id:'d3t-2023',title:'D3 Theory Mock Paper 1',sitting:'October 2023',questions:[
   {n:1,topic:'Germany',stem:'Outline the legal categories of DRY German Riesling. Describe the role of the VDP in the development and understanding of quality German wine. Why is dry German Riesling increasing in popularity?',
    parts:[
     {label:'Legal categories of dry German Riesling',weight:30,points:[
-      'Trocken on the label is the legal dry definition — max 4 g/L residual sugar (up to 9 g/L where acidity is within 2 g/L of the sugar)',
-      'Qualitätswein: from one of the 13 Anbaugebiete, may be chaptalised — covers the bulk of dry Riesling at every price point',
-      'Prädikatswein: no chaptalisation; Kabinett trocken (light, delicate) and Spätlese trocken (riper, fuller) are the key dry categories',
-      'Auslese trocken exists but is rare and high in alcohol; the sweet Prädikat levels (BA, TBA, Eiswein) cannot be dry and are out of scope',
-      'Deutscher Wein and Landwein may also be trocken but are rarely seen in export markets',
-      'Halbtrocken/feinherb (up to c.12 g/L) are off-dry — relevant only to draw the legal boundary of dry']},
+      {p:'Trocken on the label is the legal dry definition — max 4 g/L residual sugar (up to 9 g/L where acidity is within 2 g/L of the sugar)',cat:'AOC / LAW',ess:true},
+      {p:'Qualitätswein: from one of the 13 Anbaugebiete, may be chaptalised — covers the bulk of dry Riesling at every price point',cat:'AOC / LAW',ess:true},
+      {p:'Prädikatswein: no chaptalisation; Kabinett trocken (light, delicate) and Spätlese trocken (riper, fuller) are the key dry categories',cat:'AOC / LAW',ess:true},
+      {p:'Auslese trocken exists but is rare and high in alcohol; the sweet Prädikat levels (BA, TBA, Eiswein) cannot be dry and are out of scope',cat:'AOC / LAW',ess:false},
+      {p:'Deutscher Wein and Landwein may also be trocken but are rarely seen in export markets',cat:'AOC / LAW',ess:false},
+      {p:'Halbtrocken/feinherb (up to c.12 g/L) are off-dry — relevant only to draw the legal boundary of dry',cat:'AOC / LAW',ess:false}],
+     distractors:[
+      'Beerenauslese, Trockenbeerenauslese and Eiswein complete the ladder of dry Riesling categories',
+      'Grosses Gewächs is a legal category written into German wine law',
+      'Trocken wines may hold up to 18 g/L of residual sugar provided the acidity is high enough']},
     {label:'Role of the VDP',weight:30,points:[
-      'Private association of c.200 elite estates — its rules sit on top of, and are stricter than, German wine law',
-      'Four-tier vineyard classification: Gutswein, Ortswein, Erste Lage, Grosse Lage — a Burgundian, site-based model',
-      'Grosses Gewächs (GG): a dry wine from a Grosse Lage vineyard — now the flagship dry category for quality German wine',
-      'Stricter requirements than the law: lower maximum yields, higher minimum must weights, hand harvesting on top sites',
-      'Shifted quality signalling from must weight (Prädikat) to vineyard site, helping consumers understand German terroir',
-      'The eagle logo on the capsule is a trusted quality mark; VDP estates drive Germany’s fine-wine image at home and abroad']},
+      {p:'Private association of c.200 elite estates — its rules sit on top of, and are stricter than, German wine law',cat:'AOC / LAW',ess:true},
+      {p:'Four-tier vineyard classification: Gutswein, Ortswein, Erste Lage, Grosse Lage — a Burgundian, site-based model',cat:'QUALITY',ess:true},
+      {p:'Grosses Gewächs (GG): a dry wine from a Grosse Lage vineyard — now the flagship dry category for quality German wine',cat:'QUALITY',ess:true},
+      {p:'Stricter requirements than the law: lower maximum yields, higher minimum must weights, hand harvesting on top sites',cat:'VITICULTURE',ess:false},
+      {p:'Shifted quality signalling from must weight (Prädikat) to vineyard site, helping consumers understand German terroir',cat:'QUALITY',ess:false},
+      {p:'The eagle logo on the capsule is a trusted quality mark; VDP estates drive Germany’s fine-wine image at home and abroad',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'The VDP is the government body that drafts and enforces German wine law',
+      'The VDP classifies quality by must weight at harvest, exactly like the Prädikat scale']},
     {label:'Why dry German Riesling is increasing in popularity',weight:40,points:[
-      'Climate change: full physiological ripeness is now achieved most years, so balanced dry styles are consistently possible even in the Mosel',
-      'The German domestic market strongly prefers trocken — gastronomy and sommeliers led the shift and producers followed',
-      'Food-friendly profile: high acidity, unoaked purity and moderate alcohol suit modern, lighter cuisine',
-      'VDP Grosses Gewächs created a prestige dry category able to compete with white Burgundy at high prices',
-      'Deliberate repositioning away from the cheap, sweet Liebfraumilch image — dry now signals quality',
-      'Better viticulture and winemaking (selective harvesting, cooler fermentations) explained as a cause, not just asserted',
-      'International critics and sommeliers champion dry Riesling, pulling demand through export markets']}],
+      {p:'Climate change: full physiological ripeness is now achieved most years, so balanced dry styles are consistently possible even in the Mosel',cat:'CLIMATE',ess:true},
+      {p:'The German domestic market strongly prefers trocken — gastronomy and sommeliers led the shift and producers followed',cat:'COMMERCIAL',ess:true},
+      {p:'Food-friendly profile: high acidity, unoaked purity and moderate alcohol suit modern, lighter cuisine',cat:'STYLE',ess:false},
+      {p:'VDP Grosses Gewächs created a prestige dry category able to compete with white Burgundy at high prices',cat:'COMMERCIAL',ess:true},
+      {p:'Deliberate repositioning away from the cheap, sweet Liebfraumilch image — dry now signals quality',cat:'COMMERCIAL',ess:false},
+      {p:'Better viticulture and winemaking (selective harvesting, cooler fermentations) explained as a cause, not just asserted',cat:'WINEMAKING',ess:false},
+      {p:'International critics and sommeliers champion dry Riesling, pulling demand through export markets',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'Consumers choose dry Riesling because it is lower in calories than off-dry styles',
+      'Winemaking has simply improved everywhere — that alone explains the trend, with no need to say how']}],
    tips:['Match your time to the weights: the 40% part deserves the most depth — examiners repeatedly penalise a single superficial paragraph on the highest-weighted part.',
      'Read the question: it asks about DRY Riesling. BA/TBA/Eiswein are out of scope, and lengthy tasting notes earn nothing.']},
   {n:2,topic:'Loire reds',stem:'Describe the production of RED wines in the Loire Valley with reference to key grape varieties and AOCs. Comment on the commercial challenges faced by producers of red wine in the Loire.',
    parts:[
     {label:'Production of Loire red wines — grapes and AOCs',weight:70,points:[
-      'Cabernet Franc is the key grape: Chinon, Bourgueil and St-Nicolas-de-Bourgueil in Touraine; Saumur and Saumur-Champigny in Anjou-Saumur',
-      'Wider range earns marks: Pinot Noir (Sancerre Rouge, Menetou-Salon), Gamay (Touraine, Anjou Gamay), plus Grolleau, Côt and Pineau d’Aunis',
-      'Cool, marginal climate (oceanic, turning more continental upstream): ripening is a challenge — mid-bodied, fresh, red-fruited wines with real vintage variation',
-      'Soil drives style: sand and gravel terraces give lighter early-drinking wines; tuffeau limestone slopes (Chinon, Saumur-Champigny) give structured, ageworthy wines',
-      'Anjou and Saumur are separate AOCs — Anjou-Saumur is a region, not an appellation (a common exam error)',
-      'Winemaking: gentle extraction to manage herbaceous character; mostly stainless steel or large used oak; some carbonic/semi-carbonic maceration for Gamay',
-      'Chaptalisation is permitted and used in cooler vintages; destemming is common to avoid green tannin',
-      'Styles span chillable bistro reds to serious, barrel-aged cuvées from the best tuffeau sites']},
+      {p:'Cabernet Franc is the key grape: Chinon, Bourgueil and St-Nicolas-de-Bourgueil in Touraine; Saumur and Saumur-Champigny in Anjou-Saumur',cat:'GRAPE',ess:true},
+      {p:'Wider range earns marks: Pinot Noir (Sancerre Rouge, Menetou-Salon), Gamay (Touraine, Anjou Gamay), plus Grolleau, Côt and Pineau d’Aunis',cat:'GRAPE',ess:false},
+      {p:'Cool, marginal climate (oceanic, turning more continental upstream): ripening is a challenge — mid-bodied, fresh, red-fruited wines with real vintage variation',cat:'CLIMATE',ess:true},
+      {p:'Soil drives style: sand and gravel terraces give lighter early-drinking wines; tuffeau limestone slopes (Chinon, Saumur-Champigny) give structured, ageworthy wines',cat:'VITICULTURE',ess:true},
+      {p:'Anjou and Saumur are separate AOCs — Anjou-Saumur is a region, not an appellation (a common exam error)',cat:'AOC / LAW',ess:false},
+      {p:'Winemaking: gentle extraction to manage herbaceous character; mostly stainless steel or large used oak; some carbonic/semi-carbonic maceration for Gamay',cat:'WINEMAKING',ess:true},
+      {p:'Chaptalisation is permitted and used in cooler vintages; destemming is common to avoid green tannin',cat:'WINEMAKING',ess:false},
+      {p:'Styles span chillable bistro reds to serious, barrel-aged cuvées from the best tuffeau sites',cat:'STYLE',ess:false}],
+     distractors:[
+      'Champigny-Saumur is the flagship AOC for structured Cabernet Franc',
+      'Merlot is widely grown in the Loire as Cabernet Franc’s blending partner',
+      'Chinon sits in South-West France, alongside St-Chinian']},
     {label:'Commercial challenges',weight:30,points:[
-      'Spring frost and vintage variation (2016, 2021) make volume and quality inconsistent — hard to guarantee supply or hold listings',
-      'Cabernet Franc has weak consumer recognition compared with Cabernet Sauvignon, Merlot or Pinot Noir',
-      'The Loire’s fame rests on whites and rosé (Sancerre, Muscadet, Rosé d’Anjou) — reds struggle for attention even within the regional image',
-      'The lighter, sometimes herbaceous style is out of step with consumers used to riper, fuller reds from warmer climates',
-      'Fragmented production from small family estates limits marketing budgets and export reach',
-      'Rising costs and heavy competition at the mid-price point squeeze margins; sommelier enthusiasm has not yet become volume retail sales']}],
+      {p:'Spring frost and vintage variation (2016, 2021) make volume and quality inconsistent — hard to guarantee supply or hold listings',cat:'CLIMATE',ess:true},
+      {p:'Cabernet Franc has weak consumer recognition compared with Cabernet Sauvignon, Merlot or Pinot Noir',cat:'COMMERCIAL',ess:true},
+      {p:'The Loire’s fame rests on whites and rosé (Sancerre, Muscadet, Rosé d’Anjou) — reds struggle for attention even within the regional image',cat:'COMMERCIAL',ess:false},
+      {p:'The lighter, sometimes herbaceous style is out of step with consumers used to riper, fuller reds from warmer climates',cat:'STYLE',ess:false},
+      {p:'Fragmented production from small family estates limits marketing budgets and export reach',cat:'COMMERCIAL',ess:false},
+      {p:'Rising costs and heavy competition at the mid-price point squeeze margins; sommelier enthusiasm has not yet become volume retail sales',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'Cabernet Franc enjoys stronger name recognition than Cabernet Sauvignon, so the wines largely sell themselves',
+      'The core commercial risk is over-ripeness: hot vintages make the reds jammy and high in alcohol']}],
    tips:['Breadth AND depth win: candidates who went beyond Chinon + Cabernet Franc and gave climatic and geographic reasons for each style took the Merits and Distinctions.',
      'Part 2 must be Loire-specific — generic lists (climate change, falling consumption, labour costs) score little unless you show how they bite in this region.']},
   {n:3,topic:'Sweet wines',stem:'Explain how the growing environment and production methods influence the style of the following sweet wines: (a) Jurançon Vendanges Tardives, (b) Tokaji Eszencia, (c) Vin Santo (from Tuscany).',
    parts:[
     {label:'(a) Jurançon Vendanges Tardives',weight:33,points:[
-      'Foothills of the Pyrenees, South-West France: Atlantic-influenced with a wet spring but a long, dry, sunny autumn',
-      'The warm, dry Föhn wind in autumn shrivels grapes on the vine — concentration by passerillage, NOT botrytis',
-      'Petit Manseng is the key variety: small, thick-skinned berries whose very high acidity survives extended hang time',
-      'Vendanges Tardives means genuinely late harvesting — into November/December, often in successive passes (tries)',
-      'Vines trained high and on slopes to escape spring frost in this rainy foothill climate',
-      'Style: intense candied/tropical fruit and sweetness balanced by racy acidity — moderate alcohol, long ageing potential']},
+      {p:'Foothills of the Pyrenees, South-West France: Atlantic-influenced with a wet spring but a long, dry, sunny autumn',cat:'CLIMATE',ess:true},
+      {p:'The warm, dry Föhn wind in autumn shrivels grapes on the vine — concentration by passerillage, NOT botrytis',cat:'CLIMATE',ess:true},
+      {p:'Petit Manseng is the key variety: small, thick-skinned berries whose very high acidity survives extended hang time',cat:'GRAPE',ess:true},
+      {p:'Vendanges Tardives means genuinely late harvesting — into November/December, often in successive passes (tries)',cat:'VITICULTURE',ess:false},
+      {p:'Vines trained high and on slopes to escape spring frost in this rainy foothill climate',cat:'VITICULTURE',ess:false},
+      {p:'Style: intense candied/tropical fruit and sweetness balanced by racy acidity — moderate alcohol, long ageing potential',cat:'STYLE',ess:false}],
+     distractors:[
+      'Autumn mists promote noble rot, which concentrates the Jurançon grapes',
+      'Jurançon lies in the Jura, in the mountains of eastern France',
+      'Grapes are picked early, in September, to lock in the acidity']},
     {label:'(b) Tokaji Eszencia',weight:33,points:[
-      'Tokaj, north-east Hungary: autumn mists from the confluence of the Bodrog and Tisza rivers promote noble rot; sunny afternoons dry the grapes',
-      'Key grapes: Furmint (thin-skinned, botrytis-prone, high acid), Hárslevelű and Sárga Muskotály, on volcanic and loess soils',
-      'Eszencia is the free-run juice that seeps from hand-picked aszú berries under their own weight — no pressing',
-      'The syrup ferments for years yet barely reaches a few % abv; residual sugar commonly exceeds 450 g/L',
-      'Distinct from Tokaji Aszú, where aszú berries are macerated in base wine or must — a frequent point of confusion',
-      'Tiny volumes and extreme concentration: the rarest, most expensive and longest-lived expression of Tokaj']},
+      {p:'Tokaj, north-east Hungary: autumn mists from the confluence of the Bodrog and Tisza rivers promote noble rot; sunny afternoons dry the grapes',cat:'CLIMATE',ess:true},
+      {p:'Key grapes: Furmint (thin-skinned, botrytis-prone, high acid), Hárslevelű and Sárga Muskotály, on volcanic and loess soils',cat:'GRAPE',ess:true},
+      {p:'Eszencia is the free-run juice that seeps from hand-picked aszú berries under their own weight — no pressing',cat:'WINEMAKING',ess:true},
+      {p:'The syrup ferments for years yet barely reaches a few % abv; residual sugar commonly exceeds 450 g/L',cat:'STYLE',ess:false},
+      {p:'Distinct from Tokaji Aszú, where aszú berries are macerated in base wine or must — a frequent point of confusion',cat:'WINEMAKING',ess:false},
+      {p:'Tiny volumes and extreme concentration: the rarest, most expensive and longest-lived expression of Tokaj',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'Eszencia is made by macerating aszú berries in a base wine before pressing',
+      'The finished Eszencia reaches a normal 12–14% alcohol with only moderate sugar']},
     {label:'(c) Vin Santo (Tuscany)',weight:34,points:[
-      'Tuscany’s warm, dry Mediterranean climate delivers healthy grapes suitable for months of drying',
-      'Typically Trebbiano Toscano and Malvasia; Occhio di Pernice is the rarer Sangiovese-based style — Vin Santo is NOT always red',
-      'Grapes dried indoors on straw mats or hung in ventilated lofts (appassimento) to concentrate sugar',
-      'Slow fermentation and ageing in small sealed barrels (caratelli), often under the roof where temperatures swing',
-      'The madre (lees/residue of previous vintages) can start fermentation; minimum ageing of c.3 years, often far longer',
-      'Long OXIDATIVE maturation defines the style: amber colour, nuts, dried fruit and caramel; from off-dry to lusciously sweet']}],
+      {p:'Tuscany’s warm, dry Mediterranean climate delivers healthy grapes suitable for months of drying',cat:'CLIMATE',ess:false},
+      {p:'Typically Trebbiano Toscano and Malvasia; Occhio di Pernice is the rarer Sangiovese-based style — Vin Santo is NOT always red',cat:'GRAPE',ess:true},
+      {p:'Grapes dried indoors on straw mats or hung in ventilated lofts (appassimento) to concentrate sugar',cat:'WINEMAKING',ess:true},
+      {p:'Slow fermentation and ageing in small sealed barrels (caratelli), often under the roof where temperatures swing',cat:'WINEMAKING',ess:false},
+      {p:'The madre (lees/residue of previous vintages) can start fermentation; minimum ageing of c.3 years, often far longer',cat:'WINEMAKING',ess:false},
+      {p:'Long OXIDATIVE maturation defines the style: amber colour, nuts, dried fruit and caramel; from off-dry to lusciously sweet',cat:'STYLE',ess:true}],
+     distractors:[
+      'Vin Santo is always a red wine, made exclusively from Sangiovese',
+      'Fresh grapes are pressed at harvest and fermented cool in stainless steel to keep the fruit primary',
+      'Ageing is strictly protective, in sealed tanks, so that no oxidative character develops']}],
    tips:['Six tidy sections — growing environment then production for each wine — was exactly the structure examiners rewarded.',
      'Link every factor to the style in the glass: the Föhn wind, the aszú seepage, the caratelli. Facts without consequences cap the answer at a Pass.']},
   {n:4,topic:'Cabernet',stem:'Outline the characteristics of the Cabernet Sauvignon vine. Comment on the similarities and differences in the climate, soil and grape growing options in Pauillac and Coonawarra.',
    parts:[
     {label:'Characteristics of the Cabernet Sauvignon vine',weight:30,points:[
-      'A natural crossing of Cabernet Franc × Sauvignon Blanc',
-      'Late budding (useful against spring frost) and late ripening — needs a warm climate with a long, dry autumn',
-      'Small, thick-skinned berries: high tannin and colour, blackcurrant fruit; herbaceous methoxypyrazines when under-ripe',
-      'Vigorous vine needing canopy management; susceptible to powdery mildew and trunk diseases (eutypa, esca)',
-      'High tannin and acidity give structure, ageability and a strong affinity with (new) oak',
-      'Best on warm, well-drained soils; in cool sites or wet autumns it simply fails to ripen']},
+      {p:'A natural crossing of Cabernet Franc × Sauvignon Blanc',cat:'GRAPE',ess:true},
+      {p:'Late budding (useful against spring frost) and late ripening — needs a warm climate with a long, dry autumn',cat:'VITICULTURE',ess:true},
+      {p:'Small, thick-skinned berries: high tannin and colour, blackcurrant fruit; herbaceous methoxypyrazines when under-ripe',cat:'GRAPE',ess:true},
+      {p:'Vigorous vine needing canopy management; susceptible to powdery mildew and trunk diseases (eutypa, esca)',cat:'VITICULTURE',ess:false},
+      {p:'High tannin and acidity give structure, ageability and a strong affinity with (new) oak',cat:'STYLE',ess:false},
+      {p:'Best on warm, well-drained soils; in cool sites or wet autumns it simply fails to ripen',cat:'VITICULTURE',ess:false}],
+     distractors:[
+      'Cabernet Sauvignon buds early, leaving it badly exposed to spring frost',
+      'A natural crossing of Cabernet Franc and Merlot',
+      'Thin skins give pale colour and soft, low tannin']},
     {label:'Pauillac vs Coonawarra — climate, soil, growing options',weight:70,points:[
-      'Both are moderate climates that just ripen Cabernet: Pauillac moderated by the Atlantic, Gironde estuary and Landes forest; Coonawarra by the Southern Ocean and afternoon cloud',
-      'Rainfall: Pauillac c.950mm spread through the year — harvest rain and fungal disease are the risks; Coonawarra c.570mm with dry summers — drought is the risk instead',
-      'Irrigation is banned in Pauillac; drip irrigation is essential and widely used in Coonawarra',
-      'Soils: Pauillac’s deep, free-draining gravel croupes store heat and force roots deep; Coonawarra’s terra rossa — thin iron-rich loam over free-draining limestone — naturally restricts vigour',
-      'Vintage variation is far greater in Pauillac; Coonawarra is more consistent year to year',
-      'Management: Pauillac high density (c.10,000 vines/ha), low-trained double Guyot, hand work on classed growths; Coonawarra low density, single-wire cordon, machine pruning and harvesting because labour is scarce',
-      'Frost: a genuine spring threat in Coonawarra (sprinklers used); Pauillac’s estuary proximity largely protects it',
-      'Consequence for the wines: Pauillac blends (Merlot etc.) to hedge its climate; Coonawarra’s reliable ripeness allows single-varietal Cabernet with a mint/eucalyptus signature']}],
+      {p:'Both are moderate climates that just ripen Cabernet: Pauillac moderated by the Atlantic, Gironde estuary and Landes forest; Coonawarra by the Southern Ocean and afternoon cloud',cat:'CLIMATE',ess:true},
+      {p:'Rainfall: Pauillac c.950mm spread through the year — harvest rain and fungal disease are the risks; Coonawarra c.570mm with dry summers — drought is the risk instead',cat:'CLIMATE',ess:true},
+      {p:'Irrigation is banned in Pauillac; drip irrigation is essential and widely used in Coonawarra',cat:'VITICULTURE',ess:true},
+      {p:'Soils: Pauillac’s deep, free-draining gravel croupes store heat and force roots deep; Coonawarra’s terra rossa — thin iron-rich loam over free-draining limestone — naturally restricts vigour',cat:'VITICULTURE',ess:true},
+      {p:'Vintage variation is far greater in Pauillac; Coonawarra is more consistent year to year',cat:'CLIMATE',ess:false},
+      {p:'Management: Pauillac high density (c.10,000 vines/ha), low-trained double Guyot, hand work on classed growths; Coonawarra low density, single-wire cordon, machine pruning and harvesting because labour is scarce',cat:'VITICULTURE',ess:false},
+      {p:'Frost: a genuine spring threat in Coonawarra (sprinklers used); Pauillac’s estuary proximity largely protects it',cat:'CLIMATE',ess:false},
+      {p:'Consequence for the wines: Pauillac blends (Merlot etc.) to hedge its climate; Coonawarra’s reliable ripeness allows single-varietal Cabernet with a mint/eucalyptus signature',cat:'STYLE',ess:false}],
+     distractors:[
+      'Terra rossa is a deep, fertile clay that drives vigorous growth',
+      'Irrigation is banned in Coonawarra just as it is in Pauillac',
+      'Coonawarra hedges its climate by blending in Merlot, while Pauillac bottles varietal Cabernet']}],
    tips:['70% of the marks are in the comparison — compare directly (rainfall vs rainfall, soil vs soil) instead of describing each region in turn.',
      'Answer both halves: candidates who skimped the vine characteristics threw away an easy 30%.']}]},
  {id:'d3t-2022',title:'D3 Theory Mock Paper 2',sitting:'October 2022',questions:[
   {n:1,topic:'Rosé',stem:'Compare the production and commercial success of rosé wines in Anjou, Provence and Navarra.',
    parts:[
     {label:'Production in the three regions',weight:60,points:[
-      'Anjou: Rosé d’Anjou is medium-dry, mainly Grolleau; Cabernet d’Anjou is medium-sweet from Cabernet Franc/Sauvignon and can age; Rosé de Loire is the dry style',
-      'Anjou’s cool Atlantic climate keeps alcohol modest and acidity high — residual sweetness balances the acid in the traditional styles',
-      'Provence: pale, dry rosé from Grenache, Cinsault, Syrah, Mourvèdre and local Tibouren; Côtes de Provence is by far the largest AOC',
-      'Provence method: mostly direct pressing (very pale colour) or very short maceration; protective, cool fermentation in stainless steel and early bottling',
-      'Navarra: rosado traditionally from Garnacha by saignée — juice bled off red must after a short maceration — giving deeper colour and more body',
-      'Define saignée correctly: juice is run off AFTER brief skin contact (also concentrating the remaining red) — it is not immediate pressing',
-      'Climate contrast: warm Mediterranean Provence and Navarra give riper fruit and higher potential alcohol than cool Anjou',
-      'Mainstream styles in all three avoid oak and malolactic and are released young; only a few premium Provence cuvées see barrel']},
+      {p:'Anjou: Rosé d’Anjou is medium-dry, mainly Grolleau; Cabernet d’Anjou is medium-sweet from Cabernet Franc/Sauvignon and can age; Rosé de Loire is the dry style',cat:'STYLE',ess:true},
+      {p:'Anjou’s cool Atlantic climate keeps alcohol modest and acidity high — residual sweetness balances the acid in the traditional styles',cat:'CLIMATE',ess:false},
+      {p:'Provence: pale, dry rosé from Grenache, Cinsault, Syrah, Mourvèdre and local Tibouren; Côtes de Provence is by far the largest AOC',cat:'GRAPE',ess:true},
+      {p:'Provence method: mostly direct pressing (very pale colour) or very short maceration; protective, cool fermentation in stainless steel and early bottling',cat:'WINEMAKING',ess:true},
+      {p:'Navarra: rosado traditionally from Garnacha by saignée — juice bled off red must after a short maceration — giving deeper colour and more body',cat:'WINEMAKING',ess:true},
+      {p:'Define saignée correctly: juice is run off AFTER brief skin contact (also concentrating the remaining red) — it is not immediate pressing',cat:'WINEMAKING',ess:false},
+      {p:'Climate contrast: warm Mediterranean Provence and Navarra give riper fruit and higher potential alcohol than cool Anjou',cat:'CLIMATE',ess:false},
+      {p:'Mainstream styles in all three avoid oak and malolactic and are released young; only a few premium Provence cuvées see barrel',cat:'WINEMAKING',ess:false}],
+     distractors:[
+      'In the saignée method the grapes are pressed immediately on arrival and the pale juice fermented like a white wine',
+      'A short maceration for rosé typically runs 5–14 days on the skins',
+      'Provence rosé takes its deep colour from long maceration']},
     {label:'Commercial success',weight:40,points:[
-      'Provence leads the category: pale dry rosé as a premium lifestyle brand (celebrity estates such as Whispering Angel) at the highest average prices',
-      'The Provence pale-equals-quality cue now drives the global category — Anjou and Navarra increasingly copy paler, drier styles',
-      'Rosé d’Anjou / Cabernet d’Anjou: big-volume, inexpensive off-dry wines for supermarkets and northern-European export — solid volumes, unfashionable image, thin margins',
-      'Navarra’s deeper saignée rosado has fallen from fashion and the region is overshadowed by neighbouring Rioja — weak brand recognition abroad',
-      'The global rosé boom (USA, France) lifts all three, but demand is seasonal and price-sensitive outside Provence',
-      'Wine tourism to Provence continually reinforces the brand at home and abroad']}],
+      {p:'Provence leads the category: pale dry rosé as a premium lifestyle brand (celebrity estates such as Whispering Angel) at the highest average prices',cat:'COMMERCIAL',ess:true},
+      {p:'The Provence pale-equals-quality cue now drives the global category — Anjou and Navarra increasingly copy paler, drier styles',cat:'COMMERCIAL',ess:true},
+      {p:'Rosé d’Anjou / Cabernet d’Anjou: big-volume, inexpensive off-dry wines for supermarkets and northern-European export — solid volumes, unfashionable image, thin margins',cat:'COMMERCIAL',ess:false},
+      {p:'Navarra’s deeper saignée rosado has fallen from fashion and the region is overshadowed by neighbouring Rioja — weak brand recognition abroad',cat:'COMMERCIAL',ess:false},
+      {p:'The global rosé boom (USA, France) lifts all three, but demand is seasonal and price-sensitive outside Provence',cat:'COMMERCIAL',ess:false},
+      {p:'Wine tourism to Provence continually reinforces the brand at home and abroad',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'Navarra rosado commands the highest average prices of the three regions',
+      'Cabernet d’Anjou is the fashionable premium style of the moment, with fat margins']}],
    tips:['Respect the 40%: commercial success needs real analysis for each region, not a vague sentence tagged onto the end.',
      'Factual precision matters — misdefining saignée or claiming maceration lasts 5–14 days undermines the credibility of the whole answer.']},
   {n:2,topic:'Portugal',stem:'Describe the growing environment, grape varieties and their growing options in Vinho Verde and Alentejo.',
    parts:[
     {label:'Growing environment',weight:40,points:[
-      'Vinho Verde (Minho, NW Portugal): moderate maritime climate with very high rainfall (c.1,500mm), much of it during the growing season',
-      'Explain the consequence: high rainfall means humidity and high fungal disease pressure — the reasoning earns the mark, not the number',
-      'Fertile granitic, sandy soils plus rain encourage vigour that has to be managed',
-      'Alentejo (SE Portugal): hot, dry Mediterranean/continental climate with abundant sunshine — drought and heat stress are the key hazards',
-      'Alentejo’s gently rolling plains suit large, mechanised vineyards; varied soils of granite, schist, limestone and clay',
-      'Cooler pockets exist: altitude at Serra de São Mamede (Portalegre) in Alentejo; Atlantic and river influence in Vinho Verde subregions',
-      'Contrast the outcomes: cool, wet and green (light, spritzy, low-alcohol whites) versus hot, dry and expansive (ripe, full-bodied reds)']},
+      {p:'Vinho Verde (Minho, NW Portugal): moderate maritime climate with very high rainfall (c.1,500mm), much of it during the growing season',cat:'CLIMATE',ess:true},
+      {p:'Explain the consequence: high rainfall means humidity and high fungal disease pressure — the reasoning earns the mark, not the number',cat:'CLIMATE',ess:true},
+      {p:'Fertile granitic, sandy soils plus rain encourage vigour that has to be managed',cat:'VITICULTURE',ess:false},
+      {p:'Alentejo (SE Portugal): hot, dry Mediterranean/continental climate with abundant sunshine — drought and heat stress are the key hazards',cat:'CLIMATE',ess:true},
+      {p:'Alentejo’s gently rolling plains suit large, mechanised vineyards; varied soils of granite, schist, limestone and clay',cat:'VITICULTURE',ess:false},
+      {p:'Cooler pockets exist: altitude at Serra de São Mamede (Portalegre) in Alentejo; Atlantic and river influence in Vinho Verde subregions',cat:'CLIMATE',ess:false},
+      {p:'Contrast the outcomes: cool, wet and green (light, spritzy, low-alcohol whites) versus hot, dry and expansive (ripe, full-bodied reds)',cat:'STYLE',ess:false}],
+     distractors:[
+      'Vinho Verde is hot and arid, so drip irrigation is essential there',
+      'Rainfall in Vinho Verde is modest — around 500mm a year, most of it in winter',
+      'Alentejo has a cool, wet Atlantic climate with constant fungal pressure']},
     {label:'Grape varieties',weight:40,points:[
-      'Vinho Verde whites: Loureiro (floral, citrus), Arinto/Pedernã (high acid), Trajadura and Avesso — usually blended',
-      'Alvarinho is the quality flagship — fuller-bodied, stone fruit — historically tied to the Monção e Melgaço subregion; use the local name, not Albariño',
-      'High natural acidity and low potential alcohol define the Vinho Verde varieties; red Vinhão exists but is minor',
-      'Alentejo reds: Aragonez (=Tinta Roriz/Tempranillo), drought-tolerant Trincadeira, Castelão, and Alicante Bouschet — a teinturier adding colour and tannin',
-      'Touriga Nacional and international varieties (Syrah, Cabernet Sauvignon) are widely used in Alentejo blends',
-      'Alentejo whites: heat-tolerant, full-bodied Antão Vaz and Roupeiro, with Arinto blended in for acidity',
-      'Select relevant varieties and spell them correctly — listing every Portuguese grape you know undermines examiner confidence']},
+      {p:'Vinho Verde whites: Loureiro (floral, citrus), Arinto/Pedernã (high acid), Trajadura and Avesso — usually blended',cat:'GRAPE',ess:true},
+      {p:'Alvarinho is the quality flagship — fuller-bodied, stone fruit — historically tied to the Monção e Melgaço subregion; use the local name, not Albariño',cat:'GRAPE',ess:true},
+      {p:'High natural acidity and low potential alcohol define the Vinho Verde varieties; red Vinhão exists but is minor',cat:'GRAPE',ess:false},
+      {p:'Alentejo reds: Aragonez (=Tinta Roriz/Tempranillo), drought-tolerant Trincadeira, Castelão, and Alicante Bouschet — a teinturier adding colour and tannin',cat:'GRAPE',ess:true},
+      {p:'Touriga Nacional and international varieties (Syrah, Cabernet Sauvignon) are widely used in Alentejo blends',cat:'GRAPE',ess:false},
+      {p:'Alentejo whites: heat-tolerant, full-bodied Antão Vaz and Roupeiro, with Arinto blended in for acidity',cat:'GRAPE',ess:false},
+      {p:'Select relevant varieties and spell them correctly — listing every Portuguese grape you know undermines examiner confidence',cat:'QUALITY',ess:false}],
+     distractors:[
+      'Loureiro is a teinturier variety, prized for adding deep colour to red blends',
+      'Aragonez is a uniquely Portuguese variety with no relation to Tempranillo',
+      'In Vinho Verde, Albariño is the correct name — Alvarinho is a common misspelling']},
     {label:'Growing options',weight:20,points:[
-      'Vinho Verde traditionally trained high — on trees or pergolas — to lift fruit away from damp ground (and allow crops beneath)',
-      'Modern Vinho Verde: rows with replacement-cane (Guyot) VSP or lyre systems for open canopies and airflow',
-      'Canopy management targets fungal disease: leaf removal, open training and wider spacing',
-      'Alentejo: low-trained cordon with VSP built around drip irrigation and machine harvesting (often at night to keep fruit cool)',
-      'Alentejo heat management: canopy shading against sunburn, drought-tolerant rootstocks and careful water scheduling']}],
+      {p:'Vinho Verde traditionally trained high — on trees or pergolas — to lift fruit away from damp ground (and allow crops beneath)',cat:'VITICULTURE',ess:true},
+      {p:'Modern Vinho Verde: rows with replacement-cane (Guyot) VSP or lyre systems for open canopies and airflow',cat:'VITICULTURE',ess:true},
+      {p:'Canopy management targets fungal disease: leaf removal, open training and wider spacing',cat:'VITICULTURE',ess:false},
+      {p:'Alentejo: low-trained cordon with VSP built around drip irrigation and machine harvesting (often at night to keep fruit cool)',cat:'VITICULTURE',ess:true},
+      {p:'Alentejo heat management: canopy shading against sunburn, drought-tolerant rootstocks and careful water scheduling',cat:'VITICULTURE',ess:false}],
+     distractors:[
+      'Vinho Verde vines are trained low to the ground to soak up soil warmth',
+      'Irrigation is prohibited across Alentejo, so its vineyards are dry-farmed']}],
    tips:['Follow the question’s structure — environment, then grapes, then options, region by region. Planned answers scored best.',
      'Each region is worth half the marks: strong Vinho Verde plus weak Alentejo dragged many candidates to an overall Fail.']},
   {n:3,topic:'Greece',stem:'Assess the strengths and weaknesses of Greece as a wine producing country.',
    parts:[
     {label:'Strengths — assessed, not listed',weight:50,points:[
-      'A treasury of indigenous varieties — Assyrtiko, Xinomavro, Agiorgitiko, Moschofilero, Malagousia — a genuine point of difference in a crowded market',
-      'Mediterranean climate with moderating altitude and sea influence: a wide range of styles at every quality level and price point',
-      'Distinctive terroirs with strong stories: volcanic Santorini, Naoussa’s tannic Xinomavro, Nemea’s Agiorgitiko',
-      'A quality revolution: modern wineries, internationally trained winemakers and a functioning PDO/PGI system',
-      'Tourism: millions of visitors taste Greek wine in situ every year — free export marketing',
-      'Sommelier and press enthusiasm abroad for food-friendly, high-acid whites such as Santorini Assyrtiko',
-      'Competitive pricing against Old World classics of comparable quality opens on-trade listings']},
+      {p:'A treasury of indigenous varieties — Assyrtiko, Xinomavro, Agiorgitiko, Moschofilero, Malagousia — a genuine point of difference in a crowded market',cat:'GRAPE',ess:true},
+      {p:'Mediterranean climate with moderating altitude and sea influence: a wide range of styles at every quality level and price point',cat:'CLIMATE',ess:true},
+      {p:'Distinctive terroirs with strong stories: volcanic Santorini, Naoussa’s tannic Xinomavro, Nemea’s Agiorgitiko',cat:'QUALITY',ess:false},
+      {p:'A quality revolution: modern wineries, internationally trained winemakers and a functioning PDO/PGI system',cat:'QUALITY',ess:true},
+      {p:'Tourism: millions of visitors taste Greek wine in situ every year — free export marketing',cat:'COMMERCIAL',ess:false},
+      {p:'Sommelier and press enthusiasm abroad for food-friendly, high-acid whites such as Santorini Assyrtiko',cat:'COMMERCIAL',ess:false},
+      {p:'Competitive pricing against Old World classics of comparable quality opens on-trade listings',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'Greece’s great strength is its reliance on international varieties, which are easy to sell abroad',
+      'Retsina remains Greece’s most powerful quality ambassador in export markets']},
     {label:'Weaknesses — assessed, not listed',weight:50,points:[
-      'Unfamiliar, hard-to-pronounce grape and region names are a barrier on the shelf and in export marketing',
-      'Fragmented production: many tiny holdings, little economy of scale, high cost per bottle',
-      'The same climate is also a weakness: harsh, arid, windy sites like Santorini (kouloura basket training) give tiny yields and high prices',
-      'A lingering low-quality image from bulk wine and cheap retsina still colours perception',
-      'Limited marketing budgets — a legacy of the economic crisis — against well-funded competitors',
-      'Climate change bites hard: heat, drought and wildfire risk in an already hot, dry country',
-      'Declining domestic consumption pushes producers into export before their brands are ready']}],
+      {p:'Unfamiliar, hard-to-pronounce grape and region names are a barrier on the shelf and in export marketing',cat:'COMMERCIAL',ess:true},
+      {p:'Fragmented production: many tiny holdings, little economy of scale, high cost per bottle',cat:'COMMERCIAL',ess:true},
+      {p:'The same climate is also a weakness: harsh, arid, windy sites like Santorini (kouloura basket training) give tiny yields and high prices',cat:'CLIMATE',ess:true},
+      {p:'A lingering low-quality image from bulk wine and cheap retsina still colours perception',cat:'COMMERCIAL',ess:false},
+      {p:'Limited marketing budgets — a legacy of the economic crisis — against well-funded competitors',cat:'COMMERCIAL',ess:false},
+      {p:'Climate change bites hard: heat, drought and wildfire risk in an already hot, dry country',cat:'CLIMATE',ess:false},
+      {p:'Declining domestic consumption pushes producers into export before their brands are ready',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'Santorini’s enormous yields flood the market with cheap wine',
+      'Greek wine is uniformly poor value against Old World classics of the same quality']}],
    tips:['The command verb was ASSESS: evaluate each factor — the best answers showed how one factor (like climate) can be both a strength and a weakness.',
      'Write balanced halves: a long list of strengths with a thin paragraph of weaknesses reads as unbalanced and rarely passes.']},
   {n:4,topic:'Bordeaux',stem:'Bordeaux has a unique commercial system, la place de Bordeaux. Identify the parties involved and explain their roles in the distribution of the region’s wines, including the role of en primeur.',
    parts:[
     {label:'The parties and their roles',weight:60,points:[
-      'Producers — growers, estates and co-operatives — rarely sell direct; they sell each vintage to négociants',
-      'Négociants (merchants) handle c.80% of Bordeaux by volume, selling and shipping to importers, wholesalers and retailers worldwide for roughly 15% of the sale price',
-      'Courtiers (brokers) sit between châteaux and négociants, matching supply to demand for c.2% commission and supplying market intelligence and price guidance',
-      'The allocation system: each négociant receives a set share of a château’s production every vintage — and must take weak vintages to keep allocations of great ones',
-      'Estates deliberately spread sales across many négociants to reach different target markets without running their own sales forces',
-      'The system evolved over centuries around Bordeaux’s export trade and serves every party — but creates exposure when supply and demand diverge',
-      'Examples and statistics add authority: c.300 négociants, dozens of courtiers, the share of production sold through la place']},
+      {p:'Producers — growers, estates and co-operatives — rarely sell direct; they sell each vintage to négociants',cat:'COMMERCIAL',ess:true},
+      {p:'Négociants (merchants) handle c.80% of Bordeaux by volume, selling and shipping to importers, wholesalers and retailers worldwide for roughly 15% of the sale price',cat:'COMMERCIAL',ess:true},
+      {p:'Courtiers (brokers) sit between châteaux and négociants, matching supply to demand for c.2% commission and supplying market intelligence and price guidance',cat:'COMMERCIAL',ess:true},
+      {p:'The allocation system: each négociant receives a set share of a château’s production every vintage — and must take weak vintages to keep allocations of great ones',cat:'COMMERCIAL',ess:true},
+      {p:'Estates deliberately spread sales across many négociants to reach different target markets without running their own sales forces',cat:'COMMERCIAL',ess:false},
+      {p:'The system evolved over centuries around Bordeaux’s export trade and serves every party — but creates exposure when supply and demand diverge',cat:'COMMERCIAL',ess:false},
+      {p:'Examples and statistics add authority: c.300 négociants, dozens of courtiers, the share of production sold through la place',cat:'QUALITY',ess:false}],
+     distractors:[
+      'Châteaux sell the bulk of their production direct to consumers and importers',
+      'Courtiers take about 15% of the sale price, while négociants work for a 2% commission',
+      'A négociant may decline a weak vintage without losing its allocation of the great ones']},
     {label:'The role of en primeur',weight:40,points:[
-      'Wines are sold as futures in the spring after harvest while still in barrel; physical delivery follows one to two years later',
-      'Barrel samples are shown to critics and trade in April — scores heavily influence demand and release pricing',
-      'The château releases its price through courtiers and négociants, often in successive tranches at rising prices',
-      'Benefit to the château: immediate cash flow and market signalling long before bottling',
-      'The buyer’s bet: secure sought-after wine at the lowest price — but prices can fall before delivery and counterparty failure is a real risk',
-      'Not universal: Château Latour withdrew from en primeur in 2012, preferring to release mature stock direct']}],
+      {p:'Wines are sold as futures in the spring after harvest while still in barrel; physical delivery follows one to two years later',cat:'COMMERCIAL',ess:true},
+      {p:'Barrel samples are shown to critics and trade in April — scores heavily influence demand and release pricing',cat:'COMMERCIAL',ess:false},
+      {p:'The château releases its price through courtiers and négociants, often in successive tranches at rising prices',cat:'COMMERCIAL',ess:true},
+      {p:'Benefit to the château: immediate cash flow and market signalling long before bottling',cat:'COMMERCIAL',ess:true},
+      {p:'The buyer’s bet: secure sought-after wine at the lowest price — but prices can fall before delivery and counterparty failure is a real risk',cat:'COMMERCIAL',ess:false},
+      {p:'Not universal: Château Latour withdrew from en primeur in 2012, preferring to release mature stock direct',cat:'COMMERCIAL',ess:false}],
+     distractors:[
+      'En primeur wine is delivered to buyers immediately after the April tastings',
+      'Château Latour joined the en primeur system in 2012 to reach new markets',
+      'Because release prices only ever rise, en primeur buyers carry no real risk']}],
    tips:['Explain the business motives of each party — most candidates described the structure but never said why each player takes part.',
      'Structure as an essay: context → roles → en primeur → a short evaluation (does la place still work?). Real examples lift an answer into Merit territory.']}]}
 ];
-let exam=null; // {paper, idx, answers:{}, ticks:{qi:{pi:{ki:true}}}, revealed:{}}
+let exam=null; // {paper, mode, idx, answers:{}, ticks:{qi:{pi:{ki:true}}}, revealed:{}, opts, picks, blanks, ai}
 let examSel=EXAMS[0].id;
+let examMode='exam'; // 'exam' | 'choices' | 'blanks'
+const EXAM_SITS=[['exam','Exam'],['choices','Guided · Choices'],['blanks','Guided · Blanks']];
+
+// Exam-picker meta panel: sitting selector, stacked facts (one per line) and the
+// five-row grade-band scale in band colours — never a run-on sentence.
+function examSitHtml(paper){
+  const bands=[['Distinction','75% and above','var(--green-l)'],['Merit','65 – 74%','var(--gold-l)'],
+    ['Pass','55 – 64%','var(--ink)'],['Fail','45 – 54%','var(--rose)'],['Fail Unclassified','below 45%','var(--rose)']];
+  return `<div class="eyebrow" style="margin:16px 0 9px">Sitting</div>
+   <div class="chips" style="flex-wrap:wrap;overflow:visible">
+     ${EXAM_SITS.map(s=>`<button class="chip ${examMode===s[0]?'on':''}" data-exam-sit="${s[0]}">${s[1]}</button>`).join('')}
+   </div>
+   <div style="display:flex;flex-direction:column;gap:5px;margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.45">
+     <div>${paper.questions.length} questions</div>
+     <div>Weighted parts within each question</div>
+     <div>3 hours in a real sitting</div>
+     <div>About 45 minutes per question</div>
+   </div>
+   <div class="eyebrow" style="margin:14px 0 8px">Grade bands</div>
+   <div style="display:flex;flex-direction:column;gap:6px">
+     ${bands.map(b=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+       <span class="tag" style="color:${b[2]};border-color:${b[2]}">${b[0]}</span>
+       <span style="font-family:var(--mono);font-size:11px;color:${b[2]}">${b[1]}</span></div>`).join('')}
+   </div>`;
+}
 
 function startExam(id){
   const paper=EXAMS.find(p=>p.id===id); if(!paper){toast('Paper not found.');return;}
-  exam={paper,idx:0,answers:{},ticks:{},revealed:{}};
+  exam={paper,mode:examMode,idx:0,answers:{},ticks:{},revealed:{},picks:{},blanks:{},ai:{},opts:null};
+  if(examMode==='choices'){
+    // Pre-shuffle each part's true points + distractors once, so the order is stable for the sitting.
+    exam.opts=paper.questions.map(q=>q.parts.map(p=>shuffle([
+      ...p.points.map((pt,ki)=>({t:pt.p,ok:true,ki})),
+      ...(p.distractors||[]).map(t=>({t,ok:false}))])));
+  }
   nav('exam');
 }
-function examQScore(q,qi){ let s=0; q.parts.forEach((p,pi)=>{ const t=(exam.ticks[qi]||{})[pi]||{}; const n=p.points.filter((_,ki)=>t[ki]).length; s+=n/p.points.length*p.weight; }); return s; }
+function examQScore(q,qi){
+  let s=0;
+  q.parts.forEach((p,pi)=>{
+    if(exam.mode==='choices'){
+      const sel=(exam.picks[qi]||{})[pi]||{}; const opts=exam.opts[qi][pi];
+      let c=0,w=0; opts.forEach((o,oi)=>{ if(sel[oi]) (o.ok?c++:w++); });
+      s+=Math.max(0,c-w)/p.points.length*p.weight;
+    } else {
+      const t=(exam.ticks[qi]||{})[pi]||{};
+      const n=p.points.filter((_,ki)=>t[ki]).length;
+      s+=n/p.points.length*p.weight;
+    }
+  });
+  return s;
+}
 function examBand(s){ return s>=75?['Distinction','var(--green-l)']:s>=65?['Merit','var(--gold-l)']:s>=55?['Pass','var(--ink)']:s>=45?['Fail','var(--rose)']:['Fail Unclassified','var(--rose)']; }
 function saveExamAns(){ const ta=document.getElementById('examta'); if(ta&&exam)exam.answers[exam.idx]=ta.value; }
+
+// Exam + Guided·Blanks reveal: the tickable mark scheme (blanks also shows the student's attempt).
+function examTickList(qi){
+  const q=exam.paper.questions[qi];
+  return q.parts.map((p,pi)=>{
+    const t=(exam.ticks[qi]||{})[pi]||{};
+    const done=p.points.filter((_,ki)=>t[ki]).length;
+    return `<div class="revealbox"><div class="rl">${esc(p.label)} — ${p.weight}% · ticked ${done}/${p.points.length}</div>
+      <div class="mcqopts" style="margin-top:4px">${p.points.map((pt,ki)=>{
+        const attempt=exam.mode==='blanks'?((((exam.blanks[qi]||{})[pi]||{})[ki])||'').trim():'';
+        const hint=exam.mode==='blanks'?`<div style="display:flex;gap:8px;align-items:baseline;margin:6px 0 2px">
+            <span class="tag" style="flex:0 0 auto">${esc(pt.cat)}</span>
+            <span style="font-size:12.5px;color:var(--muted);font-style:italic">${attempt?esc(attempt):'no attempt'}</span></div>`:'';
+        return `${hint}<button class="opt ${t[ki]?'correct':''}" data-exam-tick="${qi}:${pi}:${ki}"><span class="mk">${t[ki]?'✓':'○'}</span>${esc(pt.p)}</button>`;
+      }).join('')}</div></div>`;
+  }).join('')+'<div class="ptip">Tick only the points your answer genuinely covered — the honest tick is what makes the band meaningful.</div>';
+}
+// Guided·Choices: shuffled true points + distractors as tickable options.
+function examChoiceList(qi){
+  const q=exam.paper.questions[qi]; const revealed=!!exam.revealed[qi];
+  return q.parts.map((p,pi)=>{
+    const opts=exam.opts[qi][pi]; const sel=(exam.picks[qi]||{})[pi]||{};
+    let head=`${esc(p.label)} — ${p.weight}%`;
+    if(revealed){ let c=0,w=0; opts.forEach((o,oi)=>{ if(sel[oi]) (o.ok?c++:w++); });
+      head+=` · earned ${Math.round(Math.max(0,c-w)/p.points.length*p.weight)}/${p.weight}%`; }
+    return `<div class="revealbox"><div class="rl">${head}</div>
+      <div class="mcqopts" style="margin-top:4px">${opts.map((o,oi)=>{
+        const picked=!!sel[oi];
+        let cls='opt',mk=picked?'●':'○',st='';
+        if(revealed){ if(o.ok){cls='opt correct';mk=picked?'✓':'○';} else if(picked){cls='opt wrong';mk='✗';} else {mk='·';} }
+        else if(picked){ st='style="border-color:var(--gold)"'; }
+        return `<button class="${cls}" ${st} ${revealed?'':`data-exam-pick="${qi}:${pi}:${oi}"`}><span class="mk">${mk}</span>${esc(o.t)}</button>`;
+      }).join('')}</div></div>`;
+  }).join('')+(exam.revealed[qi]
+    ?'<div class="ptip">Green rows are the real mark-scheme points. Red rows are distractors you picked — documented errors from past candidates.</div>'
+    :'<div class="ptip">Tick every statement that belongs in a top answer. Wrong picks cost marks, so choose with conviction.</div>');
+}
+// Guided·Blanks: one category-hint chip + blank recall input per mark point.
+function examBlankList(qi){
+  const q=exam.paper.questions[qi];
+  return q.parts.map((p,pi)=>`<div class="revealbox"><div class="rl">${esc(p.label)} — ${p.weight}% · ${p.points.length} points</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+      ${p.points.map((pt,ki)=>`<div style="display:flex;gap:8px;align-items:center">
+        <span class="tag" style="flex:0 0 82px;text-align:center">${esc(pt.cat)}</span>
+        <input data-blank="${qi}:${pi}:${ki}" value="${esc(((exam.blanks[qi]||{})[pi]||{})[ki]||'').replace(/"/g,'&quot;')}" placeholder="Recall the point…"
+          style="flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 11px;color:var(--ink);font:inherit;font-size:13px">
+      </div>`).join('')}
+    </div></div>`).join('')+'<div class="ptip">Each chip hints the category of one mark point. Type what you can recall, then reveal and self-tick.</div>';
+}
 
 function viewExam(){
   if(!exam)return viewStudyHome();
@@ -1794,50 +1978,141 @@ function viewExam(){
   const parts=q.parts.map(p=>`<div style="display:flex;gap:8px;align-items:baseline;margin-top:9px">
       <span class="tag rel" style="flex:0 0 auto">${p.weight}%</span>
       <span style="font-size:14px;color:var(--ink-dim);line-height:1.4">${esc(p.label)}</span></div>`).join('');
-  const scheme=revealed?q.parts.map((p,pi)=>{
-      const t=(exam.ticks[qi]||{})[pi]||{};
-      const done=p.points.filter((_,ki)=>t[ki]).length;
-      return `<div class="revealbox"><div class="rl">${esc(p.label)} — ${p.weight}% · ticked ${done}/${p.points.length}</div>
-        <div class="mcqopts" style="margin-top:4px">${p.points.map((pt,ki)=>`<button class="opt ${t[ki]?'correct':''}" data-exam-tick="${qi}:${pi}:${ki}"><span class="mk">${t[ki]?'✓':'○'}</span>${esc(pt)}</button>`).join('')}</div></div>`;
-    }).join('')+'<div class="ptip">Tick only the points your written answer genuinely covered — the honest tick is what makes the band meaningful.</div>':'';
+  let body='';
+  if(exam.mode==='choices') body=examChoiceList(qi);
+  else if(exam.mode==='blanks') body=revealed?examTickList(qi):examBlankList(qi);
+  else body=`<textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>${revealed?examTickList(qi):''}`;
+  const revealLabel=exam.mode==='choices'?'Check my choices':(exam.mode==='blanks'?'Reveal the points':'Reveal mark scheme');
   return `<div class="view"><div class="runwrap">${bar}
     <div class="qcard">
       <div class="qmeta"><span class="topic">${esc(exam.paper.sitting)} · ${esc(q.topic)}</span><span class="qtype">Question ${qi+1} of ${qs.length}</span></div>
       <div class="qbody" style="justify-content:flex-start">
         <div class="prompt" style="font-size:19px">${esc(q.stem)}</div>
-        ${parts}
-        <textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>
-        ${scheme}
+        ${exam.mode==='exam'?parts:''}
+        ${body}
       </div>
       <div class="actions">
         ${qi>0?`<button class="b-part" data-exam-prev>← Q${qi}</button>`:''}
-        ${!revealed?'<button class="b-next" data-exam-reveal>Reveal mark scheme</button>'
+        ${!revealed?`<button class="b-next" data-exam-reveal>${revealLabel}</button>`
           :(qi<qs.length-1?'<button class="b-next" data-exam-next>Next question →</button>'
           :'<button class="b-got" data-exam-finish>Finish exam →</button>')}
       </div>
     </div></div></div>`;
 }
+
+// Result review — Exam / Guided·Blanks: from ticks, with essential misses called out.
+function reviewTickParts(q,i){
+  return q.parts.map((p,pi)=>{
+    const t=(exam.ticks[i]||{})[pi]||{};
+    const cov=[],misE=[],mis=[];
+    p.points.forEach((pt,ki)=>{ if(t[ki])cov.push(pt); else (pt.ess?misE:mis).push(pt); });
+    const earned=Math.round(cov.length/p.points.length*p.weight);
+    return `<div class="revealbox"><div class="rl">${esc(p.label)} — earned ${earned}/${p.weight}%</div>
+      ${cov.length?`<ul class="deduce">${cov.map(pt=>`<li>✓ ${esc(pt.p)}</li>`).join('')}</ul>`:''}
+      ${misE.length?`<div class="rl" style="margin-top:${cov.length?12:0}px;color:var(--rose)">Essential points you missed</div>
+        <ul>${misE.map(pt=>`<li style="color:var(--rose)">✗ ${esc(pt.p)}</li>`).join('')}</ul>`:''}
+      ${mis.length?`<div class="rl" style="margin-top:12px">Also creditable</div>
+        <ul>${mis.map(pt=>`<li>○ ${esc(pt.p)}</li>`).join('')}</ul>`:''}</div>`;
+  }).join('');
+}
+// Result review — Guided·Choices: correct picks, wrong picks, and real points left unticked.
+function reviewChoiceParts(q,i){
+  return q.parts.map((p,pi)=>{
+    const opts=exam.opts[i][pi]; const sel=(exam.picks[i]||{})[pi]||{};
+    const good=[],bad=[],missed=[];
+    opts.forEach((o,oi)=>{ if(sel[oi])(o.ok?good:bad).push(o); else if(o.ok)missed.push(o); });
+    const earned=Math.round(Math.max(0,good.length-bad.length)/p.points.length*p.weight);
+    return `<div class="revealbox"><div class="rl">${esc(p.label)} — earned ${earned}/${p.weight}%</div>
+      ${good.length?`<ul class="deduce">${good.map(o=>`<li>✓ ${esc(o.t)}</li>`).join('')}</ul>`:''}
+      ${bad.length?`<div class="rl" style="margin-top:${good.length?12:0}px;color:var(--rose)">Distractors you picked</div>
+        <ul>${bad.map(o=>`<li style="color:var(--rose)">✗ ${esc(o.t)}</li>`).join('')}</ul>`:''}
+      ${missed.length?`<div class="rl" style="margin-top:12px">Real points you left unticked</div>
+        <ul>${missed.map(o=>`<li>○ ${esc(o.t)}</li>`).join('')}</ul>`:''}</div>`;
+  }).join('');
+}
+
+/* ——— AI marking (exam sitting only): the Netlify grader reads the free-written answer
+   against the mark scheme, returns covered/missed point indices + verbatim evidence quotes.
+   Covered points are auto-ticked into exam.ticks so the band recalculates. */
+const GRADER_URL='https://duovino.netlify.app/.netlify/functions/grade';
+function aiHighlight(ans,quotes){
+  const ranges=[];
+  quotes.forEach(qt=>{ if(!qt)return; const idx=ans.indexOf(qt); if(idx>=0)ranges.push([idx,idx+qt.length]); });
+  ranges.sort((a,b)=>a[0]-b[0]);
+  const merged=[]; ranges.forEach(r=>{ const last=merged[merged.length-1];
+    if(last&&r[0]<=last[1]) last[1]=Math.max(last[1],r[1]); else merged.push(r.slice()); });
+  let out='',pos=0;
+  merged.forEach(r=>{ out+=esc(ans.slice(pos,r[0]));
+    out+=`<span style="background:rgba(127,170,85,.16);border-bottom:1px solid var(--green);color:var(--green-l);border-radius:3px;padding:0 1px">${esc(ans.slice(r[0],r[1]))}</span>`;
+    pos=r[1]; });
+  out+=esc(ans.slice(pos));
+  return out;
+}
+function aiBlockHtml(q,i){
+  const ans=(exam.answers[i]||'').trim();
+  if(ans.length<20) return '';
+  const st=exam.ai[i];
+  if(st&&st.loading) return `<button class="cmpbtn" style="width:100%;margin-top:12px;opacity:.6" disabled>Marking with AI…</button>`;
+  if(!st) return `<button class="cmpbtn" style="width:100%;margin-top:12px" data-ai-mark="${i}">AI-mark this answer</button>`;
+  const quotes=[]; st.parts.forEach(rp=>rp.evidence.forEach(ev=>quotes.push(ev.quote)));
+  const missE=[],missO=[];
+  q.parts.forEach((p,pi)=>{ ((st.parts[pi]||{}).missed||[]).forEach(ki=>{ const pt=p.points[ki]; if(pt)(pt.ess?missE:missO).push(pt.p); }); });
+  return `<div class="revealbox"><div class="rl">AI marking — your answer</div>
+      <div style="font-size:13.5px;line-height:1.55;color:var(--ink-dim);white-space:pre-wrap">${aiHighlight(ans,quotes)}</div>
+      <div class="ptip" style="margin-top:8px">Highlighted passages were credited against the mark scheme — the matching points are ticked above.</div>
+    </div>
+    ${missE.length?`<div class="revealbox" style="border-color:var(--rose);background:rgba(138,37,64,.16)"><div class="rl" style="color:var(--rose)">Essential points you missed</div>
+      <ul>${missE.map(t=>`<li style="color:var(--rose)">${esc(t)}</li>`).join('')}</ul></div>`:''}
+    ${missO.length?`<div class="revealbox"><div class="rl">Also creditable</div>
+      <ul>${missO.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:''}
+    ${st.comment?`<div class="revealbox"><div class="rl" style="color:var(--gold-l)">Examiner’s comment</div>
+      <div style="font-size:13.5px;color:var(--ink-dim);line-height:1.5">${fmtClauses(st.comment)}</div></div>`:''}`;
+}
+async function aiMark(i){
+  if(!exam)return;
+  const q=exam.paper.questions[i];
+  exam.ai[i]={loading:true}; render();
+  try{
+    const r=await fetch(GRADER_URL,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({stem:q.stem,
+        parts:q.parts.map(p=>({label:p.label,weight:p.weight,points:p.points.map(pt=>({p:pt.p,ess:!!pt.ess}))})),
+        answer:exam.answers[i]||''})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!d||!Array.isArray(d.parts)) throw new Error('bad response');
+    const parts=q.parts.map((p,pi)=>{
+      const rp=d.parts[pi]||{};
+      const inR=k=>Number.isInteger(k)&&k>=0&&k<p.points.length;
+      const covered=[...new Set((Array.isArray(rp.covered)?rp.covered:[]).filter(inR))];
+      const evidence=(Array.isArray(rp.evidence)?rp.evidence:[]).filter(ev=>ev&&typeof ev.quote==='string'&&ev.quote.length);
+      const missed=p.points.map((_,k)=>k).filter(k=>!covered.includes(k));
+      return {covered,evidence,missed};
+    });
+    if(!exam)return;
+    exam.ai[i]={parts,comment:String(d.comment||'')};
+    const t=exam.ticks; t[i]=t[i]||{};
+    parts.forEach((rp,pi)=>{ t[i][pi]=t[i][pi]||{}; rp.covered.forEach(k=>{ t[i][pi][k]=true; }); });
+  }catch(e){
+    if(exam)exam.ai[i]=null;
+    toast('AI marking unavailable — using self-assessment');
+  }
+  render();
+}
+
 function viewExamResult(){
   if(!exam)return viewStudyHome();
   const qs=exam.paper.questions;
   const qsc=qs.map((q,i)=>examQScore(q,i));
   const score=Math.round(qsc.reduce((a,b)=>a+b,0)/qs.length);
   const band=examBand(score);
+  const modeLabel={exam:'Exam',choices:'Guided · Choices',blanks:'Guided · Blanks'}[exam.mode];
   const review=qs.map((q,i)=>{
     const qp=Math.round(qsc[i]); const qb=examBand(qp);
     return `<div class="panel">
       <div class="sec-h" style="margin:0 0 8px"><h3 style="font-size:15px">Q${i+1} · ${esc(q.topic)}</h3><span class="tag" style="color:${qb[1]}">${qp}% · ${qb[0]}</span></div>
       <div style="font-size:13px;color:var(--muted);line-height:1.45">${esc(q.stem)}</div>
-      ${q.parts.map((p,pi)=>{
-        const t=(exam.ticks[i]||{})[pi]||{};
-        const cov=[],mis=[];
-        p.points.forEach((pt,ki)=>(t[ki]?cov:mis).push(pt));
-        const earned=Math.round(cov.length/p.points.length*p.weight);
-        return `<div class="revealbox"><div class="rl">${esc(p.label)} — earned ${earned}/${p.weight}%</div>
-          ${cov.length?`<ul class="deduce">${cov.map(pt=>`<li>✓ ${esc(pt)}</li>`).join('')}</ul>`:''}
-          ${mis.length?`<div class="rl" style="margin-top:${cov.length?12:0}px;color:var(--rose)">Points you could have collected</div>
-            <ul>${mis.map(pt=>`<li>✗ ${esc(pt)}</li>`).join('')}</ul>`:''}</div>`;
-      }).join('')}
+      ${exam.mode==='choices'?reviewChoiceParts(q,i):reviewTickParts(q,i)}
+      ${exam.mode==='exam'?aiBlockHtml(q,i):''}
       <div class="revealbox"><div class="rl" style="color:var(--gold-l)">Examiner’s tips</div><ul>${(q.tips||[]).map(tp=>`<li>${esc(tp)}</li>`).join('')}</ul></div>
     </div>`;
   }).join('');
@@ -1845,7 +2120,9 @@ function viewExamResult(){
     <div class="summary" style="padding-bottom:6px">
       <div class="glasswrap">${glass(score,110)}</div>
       <h2 style="color:${band[1]}">${band[0]}</h2>
-      <div class="ssub">${esc(exam.paper.title)} · ${esc(exam.paper.sitting)} · overall ${score}% · pass mark 55%</div>
+      <div class="ssub">${esc(exam.paper.title)} — ${esc(exam.paper.sitting)}</div>
+      <div class="ssub">Sat as ${modeLabel}</div>
+      <div class="ssub">Overall ${score}% against a pass mark of 55%</div>
       <div class="sgrid" style="grid-template-columns:repeat(${qs.length},1fr)">
         ${qs.map((q,i)=>`<div class="sg"><div class="n" style="color:${examBand(Math.round(qsc[i]))[1]};font-size:20px">${Math.round(qsc[i])}%</div><div class="l">Q${i+1}</div></div>`).join('')}
       </div>
@@ -2221,7 +2498,13 @@ function bind(){
   app.querySelectorAll('[data-todash]').forEach(b=>b.onclick=()=>{study=null;nav('dash');});
   // mock exam (D3 theory)
   app.querySelectorAll('[data-exam-paper]').forEach(b=>b.onclick=()=>{examSel=b.dataset.examPaper;render();});
+  app.querySelectorAll('[data-exam-sit]').forEach(b=>b.onclick=()=>{examMode=b.dataset.examSit;render();});
   app.querySelectorAll('[data-exam-start]').forEach(b=>b.onclick=()=>startExam(b.dataset.examStart));
+  app.querySelectorAll('[data-exam-pick]').forEach(b=>b.onclick=()=>{const a=b.dataset.examPick.split(':').map(Number);
+    const pk=exam.picks; pk[a[0]]=pk[a[0]]||{}; pk[a[0]][a[1]]=pk[a[0]][a[1]]||{}; pk[a[0]][a[1]][a[2]]=!pk[a[0]][a[1]][a[2]]; render();});
+  app.querySelectorAll('[data-blank]').forEach(inp=>inp.addEventListener('input',()=>{ if(!exam)return; const a=inp.dataset.blank.split(':').map(Number);
+    const bl=exam.blanks; bl[a[0]]=bl[a[0]]||{}; bl[a[0]][a[1]]=bl[a[0]][a[1]]||{}; bl[a[0]][a[1]][a[2]]=inp.value;}));
+  app.querySelectorAll('[data-ai-mark]').forEach(b=>b.onclick=()=>aiMark(+b.dataset.aiMark));
   app.querySelectorAll('[data-exam-end]').forEach(b=>b.onclick=()=>{ if(confirm('End this mock exam? Your answers and ticks will be lost.')){exam=null;nav('study');} });
   app.querySelectorAll('[data-exam-reveal]').forEach(b=>b.onclick=()=>{saveExamAns();exam.revealed[exam.idx]=true;render();});
   app.querySelectorAll('[data-exam-tick]').forEach(b=>b.onclick=()=>{const a=b.dataset.examTick.split(':').map(Number);
@@ -2229,7 +2512,7 @@ function bind(){
   app.querySelectorAll('[data-exam-prev]').forEach(b=>b.onclick=()=>{saveExamAns();exam.idx--;render();window.scrollTo(0,0);});
   app.querySelectorAll('[data-exam-next]').forEach(b=>b.onclick=()=>{saveExamAns();exam.idx++;render();window.scrollTo(0,0);});
   app.querySelectorAll('[data-exam-finish]').forEach(b=>b.onclick=()=>{saveExamAns();nav('examResult');});
-  app.querySelectorAll('[data-exam-retake]').forEach(b=>b.onclick=()=>startExam(exam.paper.id));
+  app.querySelectorAll('[data-exam-retake]').forEach(b=>b.onclick=()=>{examMode=exam.mode;startExam(exam.paper.id);});
   app.querySelectorAll('[data-exam-home]').forEach(b=>b.onclick=()=>{exam=null;nav('study');});
   const _eta=document.getElementById('examta'); if(_eta)_eta.addEventListener('input',()=>{if(exam)exam.answers[exam.idx]=_eta.value;});
   // map (multi-country, MapLibre) — chips are wired inside ensureMap so the live map isn't torn down
