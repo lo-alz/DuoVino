@@ -10,5 +10,8 @@
     "directory": ".",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
-  }
+  },
+  "routes": [
+    { "pattern": "duovino.com/*", "zone_id": "YOUR_ZONE_ID_HERE" }
+  ]
 }
