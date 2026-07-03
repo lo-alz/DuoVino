@@ -57,6 +57,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .app{max-width:720px;margin:0 auto;min-height:100vh}
 /* the study/exam runner may breathe on large screens; every other page keeps the 720px column */
 @media(min-width:960px){.app:has(.runwrap){max-width:920px}}
+/* Learn pages get a wider canvas on desktop — nav stays 720px, content expands */
+@media(min-width:960px){.app:has(.learn-wide){max-width:1080px}}
+@media(min-width:1280px){.app:has(.learn-wide){max-width:1320px}}
 .view{padding:18px 16px 28px;animation:fade .32s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -521,24 +524,33 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 
 /* ---------- learn regions redesign ---------- */
 /* country group header */
-.lrg-country{margin:18px 0 8px;display:flex;align-items:center;gap:10px}
-.lrg-country:first-child{margin-top:4px}
-.lrg-flag{font-size:20px;flex:0 0 auto;line-height:1}
-.lrg-cname{font-family:var(--disp);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;flex:1;min-width:0}
+/* ---- Learn Regions: country card + sub-grid ---- */
+/* Country card wrapper */
+.lrg-ccard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;margin-bottom:10px}
+/* Country header row inside the card */
+.lrg-country{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.lrg-flag{font-size:18px;flex:0 0 auto;line-height:1}
+.lrg-cname{font-family:var(--disp);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;flex:1;min-width:0}
 .lrg-cpct{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--muted)}
-.lrg-cbar{height:2px;background:var(--line);border-radius:1px;flex:1;overflow:hidden;max-width:60px}
+.lrg-cbar{height:2px;background:var(--line);border-radius:1px;flex:0 0 50px;overflow:hidden}
 .lrg-cbar-fill{height:100%;border-radius:1px;background:var(--gold);transition:width .3s}
-/* topic card — horizontal compact row */
-.lrg-cards{display:flex;flex-direction:column;gap:5px;margin-bottom:4px}
-.lrg-tcard{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
-.lrg-tcard:active{border-color:var(--line2);background:var(--panel2)}
+/* Region sub-cards grid — auto-fill, content-sized */
+.lrg-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}
+.lrg-tcard{display:flex;flex-direction:column;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left;min-width:0}
+.lrg-tcard:active{border-color:var(--line2);background:var(--panel3)}
+.lrg-tcard-top{display:flex;align-items:center;gap:7px}
 .lrg-tcard .lrg-glass{flex:0 0 auto}
-.lrg-tcard .lrg-title{font-family:var(--disp);font-size:14px;text-transform:uppercase;letter-spacing:.01em;line-height:1.05;flex:1;min-width:0}
-.lrg-tcard .lrg-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.03em;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lrg-tcard .lrg-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:0 0 auto}
-.lrg-pct{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold-l)}
+.lrg-tcard .lrg-title{font-family:var(--disp);font-size:13px;text-transform:uppercase;letter-spacing:.01em;line-height:1.1;flex:1;min-width:0;white-space:normal}
+.lrg-tcard .lrg-sub{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrg-tcard .lrg-meta{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:2px}
+.lrg-pct{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-l)}
 .lrg-pct.zero{color:var(--muted)}
-.lrg-kkp{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:.03em}
+.lrg-kkp{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.02em}
+/* On desktop, outer country-card grid: 2 columns for large countries, 1 for small */
+@media(min-width:960px){
+  .lrg-grid-outer{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px}
+  .lrg-ccard{margin-bottom:0}
+}
 
 /* ---------- learn grapes redesign ---------- */
 /* colour section header */
@@ -550,8 +562,8 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .lgr-sname{font-family:var(--disp);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;flex:0 0 auto}
 .lgr-sline{flex:1;height:1px;background:var(--line)}
 .lgr-count{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.04em;flex:0 0 auto}
-/* grape card — 2-col grid, horizontal layout */
-.lgr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+/* grape card — fluid auto-fill grid, content-sized */
+.lgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
 .lgr-card{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 11px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
 .lgr-card.w{border-left:3px solid var(--gold)}
 .lgr-card.r{border-left:3px solid var(--garnet-l)}
@@ -1419,36 +1431,38 @@ function viewLearn(){
     return {c,topics,cpct};
   }).filter(Boolean);
 
-  const groupsHtml=groups.map(({c,topics,cpct})=>{
+  const groupsHtml='<div class="lrg-grid-outer">'+groups.map(({c,topics,cpct})=>{
     const cards=topics.map(t=>{
       const ids=topicKKPs(t);const p=fillPct(ids);
       const sub=t.alt&&t.alt!==t.country?esc(t.alt):'';
       const subHtml=sub?'<div class="lrg-sub">'+sub+'</div>':'';
       const zeroCls=p===0?'zero':'';
       return `<button class="lrg-tcard" data-topic="${t.id}">
-        <span class="lrg-glass">${glass(p,22,topicGlassFill(t))}</span>
-        <span style="flex:1;min-width:0">
-          <div class="lrg-title">${esc(t.title)}</div>
-          ${subHtml}
-        </span>
-        <span class="lrg-meta">
+        <div class="lrg-tcard-top">
+          <span class="lrg-glass">${glass(p,18,topicGlassFill(t))}</span>
+          <span class="lrg-title">${esc(t.title)}</span>
+        </div>
+        ${subHtml}
+        <div class="lrg-meta">
           <span class="lrg-pct ${zeroCls}">${p}%</span>
           <span class="lrg-kkp">${ids.length} KKP</span>
-        </span></button>`;
+        </div></button>`;
     }).join('');
-    return `<div class="lrg-country">
-      <span class="lrg-flag">${c.flag||''}</span>
-      <span class="lrg-cname">${esc(c.name)}</span>
-      <span class="lrg-cbar"><span class="lrg-cbar-fill" style="width:${cpct}%"></span></span>
-      <span class="lrg-cpct">${cpct}%</span>
-    </div>
-    <div class="lrg-cards">${cards}</div>`;
-  }).join('');
+    return `<div class="lrg-ccard">
+      <div class="lrg-country">
+        <span class="lrg-flag">${c.flag||''}</span>
+        <span class="lrg-cname">${esc(c.name)}</span>
+        <span class="lrg-cbar"><span class="lrg-cbar-fill" style="width:${cpct}%"></span></span>
+        <span class="lrg-cpct">${cpct}%</span>
+      </div>
+      <div class="lrg-cards">${cards}</div>
+    </div>`;
+  }).join('')+'</div>';
 
   const totalRegions=allList.length;
   const curricLabel=curric==='L3'?'WSET Level 3':'WSET Diploma (D3)';
   const bannerHtml=curric!=='all'?'<div class="curbanner">Curriculum: <b>'+curricLabel+'</b> · '+totalRegions+' regions<button class="curclear" data-curric="all">show all</button></div>':'';
-  return `<div class="view">
+  return `<div class="view learn-wide">
    <div class="top"><div class="brand"><span><h1 style="font-size:26px">Learn</h1><div class="sub">Regions &amp; appellations</div></span></div></div>
    ${learnToggle()}
    ${bannerHtml}
@@ -1489,7 +1503,7 @@ function viewLearnGrapes(){
   const filters=[['all','All'],['w','Whites'],['r','Reds']];
   const fchips=filters.map(([k,l])=>{const on=grapeFilter===k?'on':'';return `<button class="chip ${on}" data-gfilter="${k}">${l}</button>`;}).join('');
 
-  return `<div class="view">
+  return `<div class="view learn-wide">
    <div class="top"><div class="brand"><span><h1 style="font-size:26px">Learn</h1><div class="sub">Grape varieties</div></span></div></div>
    ${learnToggle()}
    <div class="chips">${fchips}</div>
