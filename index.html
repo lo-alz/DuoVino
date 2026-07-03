@@ -402,7 +402,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .rgmark.sel .rglabel{color:#e6d7a0;font-size:12px}
 .authov{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 28%,#1b1f28,#0d0f13);display:flex;align-items:center;justify-content:center;padding:24px}
 .authbox{width:100%;max-width:344px;background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:30px 24px;text-align:center;box-shadow:0 22px 60px rgba(0,0,0,.55)}
-.authwine{font-size:42px;line-height:1;margin-bottom:4px}
+.authwine{line-height:0;margin-bottom:6px;display:flex;justify-content:center}
 .authbox h2{font-family:var(--disp);font-size:32px;letter-spacing:.02em;color:var(--ink)}
 .authsub{color:var(--ink-dim);font-size:13.5px;line-height:1.5;margin:6px 0 18px}
 .authbox input{width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--line2);border-radius:11px;padding:13px 14px;color:var(--ink);font-size:15px;font-family:var(--body);margin-bottom:10px}
@@ -696,17 +696,20 @@ function relCount(){return ALL_KKP.filter(id=>KKP[id].cat==='relationship');}
 /* ============================ COMPONENTS ============================ */
 let _gid=0;
 function glass(pct,w){
-  const id='gl'+(_gid++); const h=w*1.36;
-  // bowl interior spans y≈20 (rim) to y≈64 (base of bowl); fill from bottom up
-  const top=64-(pct/100)*44;
-  const bowl="M16 20 C16 46 28 62 40 62 C52 62 64 46 64 20 Z";
+  const id='gl'+(_gid++); const h=(w*1.36).toFixed(1);
+  const p=Math.max(0,Math.min(100,pct));
+  // refined tulip bowl; interior spans y≈19 (rim) to y≈62 (base) — fill from the bottom up
+  const bowl="M20 17 C20 43 28 62 40 62 C52 62 60 43 60 17 Z";
+  const top=62-(p/100)*43;
+  const men=p>3?`<ellipse cx="40" cy="${top.toFixed(1)}" rx="22" ry="2.3" fill="var(--rose)" opacity=".5" clip-path="url(#${id})"/>`:'';
   return `<svg viewBox="0 0 80 108" width="${w}" height="${h}" aria-label="${pct}% filled" role="img">
     <defs><clipPath id="${id}"><path d="${bowl}"/></clipPath></defs>
-    <rect x="14" y="${top}" width="52" height="60" fill="url(#garnetGrad)" clip-path="url(#${id})"/>
-    <path d="${bowl}" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
-    <line x1="40" y1="62" x2="40" y2="94" stroke="var(--gold)" stroke-width="1.6"/>
-    <line x1="26" y1="98" x2="54" y2="98" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"/>
-    <ellipse cx="40" cy="20" rx="24" ry="3.4" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
+    <rect x="15" y="${top.toFixed(1)}" width="50" height="60" fill="url(#garnetGrad)" clip-path="url(#${id})"/>
+    ${men}
+    <path d="${bowl}" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linejoin="round"/>
+    <line x1="40" y1="62" x2="40" y2="93" stroke="var(--gold)" stroke-width="1.5"/>
+    <path d="M25 95 Q40 101 55 95" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>
+    <ellipse cx="40" cy="17" rx="20" ry="3.1" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
   </svg>`;
 }
 function polar(cx,cy,r,a){const rad=(a-90)*Math.PI/180;return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)];}
@@ -1762,7 +1765,7 @@ function renderAccount(){
   if(authNeeded()){
     if(!ov){ ov=document.createElement('div'); ov.id='authov'; document.body.appendChild(ov); }
     ov.className='authov';
-    ov.innerHTML=`<div class="authbox"><div class="authwine">&#127863;</div><h2>DuoVino</h2>
+    ov.innerHTML=`<div class="authbox"><div class="authwine">${glass(100,48)}</div><h2>DuoVino</h2>
       <p class="authsub">Sign in to sync your study progress across all your devices.</p>
       <input id="authemail" type="email" inputmode="email" placeholder="you@email.com" autocomplete="email">
       <button id="authsend" class="authbtn">Continue with email</button>
