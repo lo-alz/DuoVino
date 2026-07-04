@@ -1,5 +1,5 @@
 // Cloudflare Worker route (see src/worker.js) — DuoVino WSET mock-exam AI grader.
-// The Anthropic API key lives ONLY here (ANTHROPIC_API_KEY, set in the
+// The Gemini API key lives ONLY here (GEMINI_API_KEY, set in the
 // Cloudflare dashboard -> Workers & Pages -> duovino -> Settings -> Variables
 // and secrets); it is never shipped to the browser.
 //
@@ -61,8 +61,8 @@ export async function onRequestPost({ request, env }) {
   if (typeof stem !== "string" || !stem || !partsOk) return json({ error: "Missing or invalid stem/parts" }, 400);
   if (typeof answer !== "string" || answer.trim().length < 20) return json({ error: "Answer too short to mark" }, 400);
 
-  const apiKey = env.ANTHROPIC_API_KEY;
-  if (!apiKey) return json({ error: "Server not configured: ANTHROPIC_API_KEY is not set" }, 500);
+  const apiKey = env.GEMINI_API_KEY;
+  if (!apiKey) return json({ error: "Server not configured: GEMINI_API_KEY is not set" }, 500);
 
   const scheme = parts
     .map((p, pi) =>
@@ -74,19 +74,16 @@ export async function onRequestPost({ request, env }) {
 
   let resp;
   try {
-    resp = await fetch("https://api.anthropic.com/v1/messages", {
+    resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-5",
-        max_tokens: 2000,
-        thinking: { type: "disabled" },
-        system: SYSTEM,
-        messages: [{ role: "user", content: user }],
+        systemInstruction: { parts: [{ text: SYSTEM }] },
+        contents: [{ role: "user", parts: [{ text: user }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2000, responseMimeType: "application/json" },
       }),
     });
   } catch (e) {
@@ -101,8 +98,8 @@ export async function onRequestPost({ request, env }) {
 
   const msg = await resp.json();
 
-  // Defensive parse: join text blocks, strip code fences, isolate the outermost object.
-  let raw = (msg.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+  // Defensive parse: join text parts, strip code fences, isolate the outermost object.
+  let raw = ((msg.candidates?.[0]?.content?.parts) || []).map((b) => b.text || "").join("").trim();
   const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fence) raw = fence[1].trim();
   const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
