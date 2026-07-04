@@ -2541,8 +2541,11 @@ function viewExam(){
   let body='';
   if(exam.mode==='choices') body=examChoiceList(qi);
   else if(exam.mode==='blanks') body=revealed?examTickList(qi):examBlankList(qi);
-  else body=`<textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>${revealed?aiBlockHtml(q,qi):''}`;
+  else body=`<textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>`;
   const revealLabel='Reveal Answer';
+  // Mock Exam: no reveal gate — write and move straight on, like a real timed paper.
+  // AI marking (with per-point score + on-demand hint) lives in the final review only.
+  const skipReveal=exam.mode==='exam';
   return `<div class="view"><div class="runwrap">${bar}
     <div class="qcard">
       <div class="qmeta"><span class="topic">${esc(exam.paper.sitting)} · ${esc(q.topic)}</span><span class="qtype">Question ${qi+1} of ${qs.length}</span></div>
@@ -2553,7 +2556,7 @@ function viewExam(){
       </div>
       <div class="actions">
         ${qi>0?`<button class="b-part" data-exam-prev>← Q${qi}</button>`:''}
-        ${!revealed?`<button class="b-next" data-exam-reveal>${revealLabel}</button>`
+        ${(!revealed&&!skipReveal)?`<button class="b-next" data-exam-reveal>${revealLabel}</button>`
           :(qi<qs.length-1?'<button class="b-next" data-exam-next>Next question →</button>'
           :'<button class="b-got" data-exam-finish>Finish exam →</button>')}
       </div>
