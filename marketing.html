@@ -95,7 +95,7 @@ async function send(){
   const out=addMsg('bot','');
   out.textContent='…';
   try{
-    const res=await fetch('https://duovino.pages.dev/agent',{
+    const res=await fetch('https://duovino.alzapp.workers.dev/agent',{
       method:'POST',
       headers:{'content-type':'application/json'},
       body:JSON.stringify({messages, passcode})

@@ -1,11 +1,11 @@
-// Cloudflare Pages Function — DuoVino WSET mock-exam AI grader.
+// Cloudflare Worker route (see src/worker.js) — DuoVino WSET mock-exam AI grader.
 // The Anthropic API key lives ONLY here (ANTHROPIC_API_KEY, set in the
-// Cloudflare Pages dashboard -> Settings -> Environment variables); it is
-// never shipped to the browser.
+// Cloudflare dashboard -> Workers & Pages -> duovino -> Settings -> Variables
+// and secrets); it is never shipped to the browser.
 //
 // The live site is served from GitHub Pages, so the browser calls this
-// function CROSS-ORIGIN at https://duovino.pages.dev/grade — every response
-// (including the OPTIONS preflight and errors) must carry CORS headers.
+// function CROSS-ORIGIN at https://duovino.alzapp.workers.dev/grade — every
+// response (including the OPTIONS preflight and errors) must carry CORS headers.
 //
 // Contract:
 //   POST { stem: string,

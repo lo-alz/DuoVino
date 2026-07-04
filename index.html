@@ -2403,10 +2403,10 @@ function reviewChoiceParts(q,i){
   }).join('');
 }
 
-/* ——— AI marking (exam sitting only): the Netlify grader reads the free-written answer
+/* ——— AI marking (exam sitting only): the Cloudflare Worker grader reads the free-written answer
    against the mark scheme, returns covered/missed point indices + verbatim evidence quotes.
    Covered points are auto-ticked into exam.ticks so the band recalculates. */
-const GRADER_URL='https://duovino.pages.dev/grade';
+const GRADER_URL='https://duovino.alzapp.workers.dev/grade';
 function aiHighlight(ans,quotes){
   const ranges=[];
   quotes.forEach(qt=>{ if(!qt)return; const idx=ans.indexOf(qt); if(idx>=0)ranges.push([idx,idx+qt.length]); });

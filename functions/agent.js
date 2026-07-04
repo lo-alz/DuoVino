@@ -1,9 +1,9 @@
-// Cloudflare Pages Function — DuoVino "Head of Marketing" agent.
+// Cloudflare Worker route (see src/worker.js) — DuoVino "Head of Marketing" agent.
 // The Anthropic API key lives ONLY here (ANTHROPIC_API_KEY, set in the
-// Cloudflare Pages dashboard -> Settings -> Environment variables); it is
-// never shipped to the browser. The live site is served from GitHub Pages,
-// so the browser calls this function CROSS-ORIGIN at
-// https://duovino.pages.dev/agent — every response needs CORS headers.
+// Cloudflare dashboard -> Workers & Pages -> duovino -> Settings -> Variables
+// and secrets); it is never shipped to the browser. The live site is served
+// from GitHub Pages, so the browser calls this function CROSS-ORIGIN at
+// https://duovino.alzapp.workers.dev/agent — every response needs CORS headers.
 
 const CORS = {
   "access-control-allow-origin": "*",
