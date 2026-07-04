@@ -1,9 +1,15 @@
 // Cloudflare Worker route (see src/worker.js) — DuoVino "Head of Marketing" agent.
-// The Anthropic API key lives ONLY here (ANTHROPIC_API_KEY, set in the
-// Cloudflare dashboard -> Workers & Pages -> duovino -> Settings -> Variables
-// and secrets); it is never shipped to the browser. The live site is served
+// The AI provider is NOT hardcoded here — see functions/_lib/ai.js. Which
+// vendor/model answers is chosen by the AGENT_PROVIDER / AGENT_MODEL env vars
+// (Cloudflare dashboard -> Workers & Pages -> duovino -> Settings -> Variables
+// and secrets), defaulting to Claude. That vendor's API key (e.g.
+// ANTHROPIC_API_KEY) is never shipped to the browser. The live site is served
 // from GitHub Pages, so the browser calls this function CROSS-ORIGIN at
 // https://duovino.alzapp.workers.dev/agent — every response needs CORS headers.
+
+import { callAIStream } from "./_lib/ai.js";
+
+const DEFAULT_MODEL = "claude-opus-4-8";
 
 const CORS = {
   "access-control-allow-origin": "*",
@@ -49,72 +55,15 @@ export async function onRequestPost({ request, env }) {
     return new Response("Missing messages", { status: 400, headers: CORS });
   }
 
-  const apiKey = env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return new Response("Server not configured: ANTHROPIC_API_KEY is not set.", { status: 500, headers: CORS });
-  }
+  const provider = env.AGENT_PROVIDER || "anthropic";
+  const model = env.AGENT_MODEL || DEFAULT_MODEL;
 
-  let upstream;
+  let stream;
   try {
-    upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-8",
-        max_tokens: 8000,
-        thinking: { type: "adaptive" },
-        system: SYSTEM,
-        messages,
-        stream: true,
-      }),
-    });
+    stream = await callAIStream({ env, provider, model, system: SYSTEM, messages, maxTokens: 8000, thinking: "adaptive" });
   } catch (e) {
     return new Response("Upstream error: " + (e?.message || "unknown"), { status: 502, headers: CORS });
   }
-
-  if (!upstream.ok || !upstream.body) {
-    let detail = "";
-    try { detail = (await upstream.json())?.error?.message || ""; } catch {}
-    return new Response("Model call failed" + (detail ? ": " + detail : ""), { status: 502, headers: CORS });
-  }
-
-  // Re-stream: parse the upstream SSE and forward only the text deltas as plain text,
-  // matching the previous Netlify function's client contract (plain-text stream).
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-  const reader = upstream.body.getReader();
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      let buf = "";
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buf += decoder.decode(value, { stream: true });
-          const lines = buf.split("\n");
-          buf = lines.pop() ?? "";
-          for (const line of lines) {
-            const m = line.match(/^data:\s*(.*)$/);
-            if (!m) continue;
-            let evt;
-            try { evt = JSON.parse(m[1]); } catch { continue; }
-            if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
-              controller.enqueue(encoder.encode(evt.delta.text));
-            }
-          }
-        }
-      } catch (e) {
-        controller.enqueue(encoder.encode("\n\n[stream error: " + (e?.message || "unknown") + "]"));
-      } finally {
-        controller.close();
-      }
-    },
-  });
 
   return new Response(stream, {
     headers: { ...CORS, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },

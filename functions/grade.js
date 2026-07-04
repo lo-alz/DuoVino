@@ -1,7 +1,9 @@
 // Cloudflare Worker route (see src/worker.js) — DuoVino WSET mock-exam AI grader.
-// The Gemini API key lives ONLY here (GEMINI_API_KEY, set in the
-// Cloudflare dashboard -> Workers & Pages -> duovino -> Settings -> Variables
-// and secrets); it is never shipped to the browser.
+// The AI provider is NOT hardcoded here — see functions/_lib/ai.js. Which
+// vendor/model grades exams is chosen by the GRADE_PROVIDER / GRADE_MODEL env
+// vars (Cloudflare dashboard -> Workers & Pages -> duovino -> Settings ->
+// Variables and secrets), defaulting to Gemini. That vendor's API key
+// (e.g. GEMINI_API_KEY) is never shipped to the browser.
 //
 // The live site is served from GitHub Pages, so the browser calls this
 // function CROSS-ORIGIN at https://duovino.alzapp.workers.dev/grade — every
@@ -16,6 +18,8 @@
 //                    missed: [pointIdx] }],
 //          comment: "2-3 sentence examiner comment" }
 //   4xx/5xx { error: string }
+
+import { callAI } from "./_lib/ai.js";
 
 const CORS = {
   "access-control-allow-origin": "*",
@@ -61,9 +65,6 @@ export async function onRequestPost({ request, env }) {
   if (typeof stem !== "string" || !stem || !partsOk) return json({ error: "Missing or invalid stem/parts" }, 400);
   if (typeof answer !== "string" || answer.trim().length < 20) return json({ error: "Answer too short to mark" }, 400);
 
-  const apiKey = env.GEMINI_API_KEY;
-  if (!apiKey) return json({ error: "Server not configured: GEMINI_API_KEY is not set" }, 500);
-
   const scheme = parts
     .map((p, pi) =>
       `Part ${pi} — ${p.label} (${p.weight}% of the question):\n` +
@@ -72,34 +73,18 @@ export async function onRequestPost({ request, env }) {
 
   const user = `QUESTION:\n${stem}\n\nMARK SCHEME:\n${scheme}\n\nCANDIDATE ANSWER:\n${answer}\n\nMark the answer now. Respond with the strict JSON object only.`;
 
-  let resp;
+  const provider = env.GRADE_PROVIDER || "gemini";
+  const model = env.GRADE_MODEL || undefined;
+
+  let text;
   try {
-    resp = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 2000, responseMimeType: "application/json" },
-      }),
-    });
+    ({ text } = await callAI({ env, provider, model, system: SYSTEM, user, maxTokens: 2000, json: true }));
   } catch (e) {
     return json({ error: "Grader model call failed: " + (e?.message || "unknown") }, 502);
   }
 
-  if (!resp.ok) {
-    let detail = "";
-    try { detail = (await resp.json())?.error?.message || ""; } catch {}
-    return json({ error: "Grader model call failed" + (detail ? ": " + detail : "") }, 502);
-  }
-
-  const msg = await resp.json();
-
-  // Defensive parse: join text parts, strip code fences, isolate the outermost object.
-  let raw = ((msg.candidates?.[0]?.content?.parts) || []).map((b) => b.text || "").join("").trim();
+  // Defensive parse: strip code fences, isolate the outermost object.
+  let raw = text.trim();
   const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fence) raw = fence[1].trim();
   const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
