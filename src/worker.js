@@ -11,11 +11,13 @@
 import * as grade from "../functions/grade.js";
 import * as agent from "../functions/agent.js";
 import * as admin from "../functions/admin.js";
+import * as hint from "../functions/hint.js";
 
 const ROUTES = {
   "/grade": grade,
   "/agent": agent,
   "/admin": admin,
+  "/hint": hint,
 };
 
 export default {

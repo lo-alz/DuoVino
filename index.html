@@ -2256,7 +2256,7 @@ function examSitHtml(paper){
 
 function startExam(id){
   const paper=EXAMS.find(p=>p.id===id); if(!paper){toast('Paper not found.');return;}
-  exam={paper,mode:examMode,idx:0,answers:{},ticks:{},revealed:{},picks:{},blanks:{},ai:{},hints:{},opts:null};
+  exam={paper,mode:examMode,idx:0,answers:{},ticks:{},revealed:{},picks:{},blanks:{},blankHints:{},ai:{},hints:{},opts:null};
   if(examMode==='choices'){
     // Pre-shuffle each part's true points + distractors once, so the order is stable for the sitting.
     exam.opts=paper.questions.map(q=>q.parts.map(p=>shuffle([
@@ -2331,11 +2331,18 @@ function examBlankList(qi){
   const q=exam.paper.questions[qi];
   return q.parts.map((p,pi)=>`<div class="revealbox"><div class="rl">${esc(p.label)} — ${p.weight}% · ${p.points.length} points</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
-      ${p.points.map((pt,ki)=>`<div style="display:flex;gap:8px;align-items:center">
-        <span class="tag" style="flex:0 0 82px;text-align:center">${esc(pt.cat)}</span>
-        <input data-blank="${qi}:${pi}:${ki}" value="${esc(((exam.blanks[qi]||{})[pi]||{})[ki]||'').replace(/"/g,'&quot;')}" placeholder="Recall the point…"
-          style="flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 11px;color:var(--ink);font:inherit;font-size:13px">
-      </div>`).join('')}
+      ${p.points.map((pt,ki)=>{
+        const hs=((exam.blankHints[qi]||{})[pi]||{})[ki];
+        const hintBtn=hs&&hs.question?'':`<button class="hintbtn" data-blank-hint="${qi}:${pi}:${ki}" title="Hint" ${hs&&hs.loading?'disabled':''}>${hs&&hs.loading?'…':'?'}</button>`;
+        const hintLine=hs&&hs.question?`<div class="ptip" style="margin-top:5px;color:var(--gold-l)">${esc(hs.question)}</div>`:'';
+        return `<div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="tag" style="flex:0 0 82px;text-align:center">${esc(pt.cat)}</span>
+          <input data-blank="${qi}:${pi}:${ki}" value="${esc(((exam.blanks[qi]||{})[pi]||{})[ki]||'').replace(/"/g,'&quot;')}" placeholder="Recall the point…"
+            style="flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 11px;color:var(--ink);font:inherit;font-size:13px">
+          ${hintBtn}
+        </div>${hintLine}</div>`;
+      }).join('')}
     </div></div>`).join('')+'<div class="ptip">Each chip hints the category of one mark point. Type what you can recall, then reveal and self-tick.</div>';
 }
 
@@ -2413,6 +2420,7 @@ function reviewChoiceParts(q,i){
    against the mark scheme, returns covered/missed point indices + verbatim evidence quotes.
    Covered points are auto-ticked into exam.ticks so the band recalculates. */
 const GRADER_URL='https://duovino.alzapp.workers.dev/grade';
+const HINT_URL='https://duovino.alzapp.workers.dev/hint';
 function aiHighlight(ans,quotes){
   const ranges=[];
   quotes.forEach(qt=>{ if(!qt)return; const idx=ans.indexOf(qt); if(idx>=0)ranges.push([idx,idx+qt.length]); });
@@ -2473,6 +2481,27 @@ async function aiMark(i){
   }catch(e){
     if(exam)exam.ai[i]=null;
     toast('AI marking unavailable — using self-assessment');
+  }
+  render();
+}
+// Guided·Blanks: on demand, a leading question that nudges toward one mark point
+// without revealing it — cached per point so re-opening doesn't refetch.
+async function blankHint(qi,pi,ki){
+  if(!exam)return;
+  const q=exam.paper.questions[qi], p=q.parts[pi], pt=p.points[ki];
+  const bh=exam.blankHints; bh[qi]=bh[qi]||{}; bh[qi][pi]=bh[qi][pi]||{};
+  bh[qi][pi][ki]={loading:true}; render();
+  try{
+    const r=await fetch(HINT_URL,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({point:pt.p,category:pt.cat||'',topic:q.topic||''})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!d||typeof d.question!=='string'||!d.question.trim()) throw new Error('bad response');
+    if(!exam)return;
+    bh[qi][pi][ki]={question:d.question.trim()};
+  }catch(e){
+    if(exam) bh[qi][pi][ki]=null;
+    toast('Hint unavailable');
   }
   render();
 }
@@ -2883,6 +2912,7 @@ function bind(){
   app.querySelectorAll('[data-blank]').forEach(inp=>inp.addEventListener('input',()=>{ if(!exam)return; const a=inp.dataset.blank.split(':').map(Number);
     const bl=exam.blanks; bl[a[0]]=bl[a[0]]||{}; bl[a[0]][a[1]]=bl[a[0]][a[1]]||{}; bl[a[0]][a[1]][a[2]]=inp.value;}));
   app.querySelectorAll('[data-ai-mark]').forEach(b=>b.onclick=()=>aiMark(+b.dataset.aiMark));
+  app.querySelectorAll('[data-blank-hint]').forEach(b=>b.onclick=()=>{const a=b.dataset.blankHint.split(':').map(Number);blankHint(a[0],a[1],a[2]);});
   app.querySelectorAll('[data-exam-end]').forEach(b=>b.onclick=()=>{ if(confirm('End this mock exam? Your answers and ticks will be lost.')){exam=null;nav('study');} });
   app.querySelectorAll('[data-exam-reveal]').forEach(b=>b.onclick=()=>{saveExamAns();exam.revealed[exam.idx]=true;render();});
   app.querySelectorAll('[data-exam-hint]').forEach(b=>b.onclick=()=>{
