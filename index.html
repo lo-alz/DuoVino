@@ -1796,6 +1796,122 @@ function scopeObj(cur){ if(cur==='all')return{type:'all'}; if(cur==='weak')retur
 //   Guided · Choices:       part% = max(0, correct picks − wrong picks) / points × weight
 // question = sum of parts; exam = mean of questions → WSET band (pass 55%).
 const EXAMS=[
+ {id:"d3t-2024",title:"D3 Theory Mock Paper 4",sitting:"October 2024",date:"2024-10",questions:[
+  {n:1,topic:"Alsace",stem:"Explain how the following factors make the vineyards of Alsace ideal for the production of wines of varied style and quality: a) Climate b) Topography / Soil c) Vineyard management",
+   parts:[
+    {label:"Climate",weight:40,points:[
+      {p:"The Vosges Mountains create a rain shadow over Alsace, limiting rainfall to around 600mm per year",cat:"CLIMATE",ess:true},
+      {p:"Low rainfall and a long, dry growing season support extended ripening, allowing late-picked Vendange Tardive (VT) and botrytis-affected Sélection de Grains Nobles (SGN) sweet wines",cat:"CLIMATE",ess:true},
+      {p:"Alsace has a continental climate with warm, sunny summers and cold winters, giving a long growing season across a full range of styles from dry to sweet",cat:"CLIMATE",ess:true},
+      {p:"Sheltered, semi-continental conditions let grapes reach high sugar ripeness while retaining acidity, supporting both bone-dry and late-harvest styles",cat:"STYLE",ess:false}],
+     distractors:[
+      "Alsace's northerly latitude gives it a short growing season that limits ripeness",
+      "Irrigation is commonly used in Alsace to counteract low rainfall",
+      "Alsace produces almost exclusively dry wines, with sweet late-harvest styles playing a negligible role"]},
+    {label:"Topography / Soil",weight:35,points:[
+      {p:"Vineyards lie on the eastern foothills of the Vosges, facing south/south-east for maximum sun exposure",cat:"VITICULTURE",ess:true},
+      {p:"Alsace has an unusually wide diversity of soil types (granite, limestone, schist, marl, clay, volcanic) across a narrow strip of vineyard",cat:"VITICULTURE",ess:true},
+      {p:"Soil diversity lets producers match grape varieties and sites to the soil best suited to them, contributing to the wide range of styles and quality levels",cat:"QUALITY",ess:true},
+      {p:"Steeper slopes with better drainage and sun exposure are associated with Grand Cru sites",cat:"QUALITY",ess:false}],
+     distractors:[
+      "Alsace vineyards sit on a single, uniform granite soil type throughout the region",
+      "The best Alsace vineyards face north-west, sheltered from the sun to preserve acidity",
+      "Grand Cru sites in Alsace are chosen mainly for their flat, easily mechanised terrain"]},
+    {label:"Vineyard management",weight:25,points:[
+      {p:"Vine density and canopy management are adjusted by producers to control yields and ripeness for the intended style and quality level",cat:"VITICULTURE",ess:true},
+      {p:"Careful canopy management (leaf removal, shoot positioning) improves sunlight interception and airflow, reducing disease pressure in a relatively wet, disease-prone climate",cat:"VITICULTURE",ess:true},
+      {p:"Harvest date and picking method (single pass vs multiple tries through the vineyard) are chosen deliberately to access dry, late-harvest (Vendange Tardive) or botrytis-affected (Sélection de Grains Nobles) fruit",cat:"VITICULTURE",ess:true},
+      {p:"Manual harvesting is required to select botrytis-affected or overripe berries for sweet wine styles",cat:"VITICULTURE",ess:false}],
+     distractors:[
+      "Vineyard management in Alsace refers primarily to winemaking decisions such as fermentation and maturation",
+      "Machine harvesting is used for all Vendange Tardive and Sélection de Grains Nobles picks",
+      "Canopy management in Alsace focuses on maximising yield rather than controlling ripeness or disease"]}],
+   tips:["Match your structure to the question: cover climate, soil AND vineyard management in roughly equal depth — many candidates over-weighted climate/topography and gave little on vineyard management.",
+     "Don't forget sweet wine styles (VT, SGN) — omitting them cost a large share of the marks."]},
+
+  {n:2,topic:"Germany",stem:"Assess Germany's strengths (50% weighting) and weaknesses (50% weighting) as a wine producing country.",
+   parts:[
+    {label:"Strengths",weight:50,points:[
+      {p:"Riesling is Germany's flagship variety, with a strong international reputation for quality that lifts perceptions of German wine generally",cat:"COMMERCIAL",ess:true},
+      {p:"Varied topography and a wide range of soils (e.g. blue slate in the Mosel) allow site-specific, terroir-driven wines of high to outstanding quality",cat:"VITICULTURE",ess:true},
+      {p:"Germany can produce the full range of sweetness levels and colours (dry to lusciously sweet, still and sparkling Sekt, white, red and rosé), giving broad commercial flexibility",cat:"STYLE",ess:true},
+      {p:"The VDP's Grosses Gewächs category and four-tier vineyard classification give Germany a Burgundy-like quality hierarchy that appeals to fine-wine consumers",cat:"QUALITY",ess:true},
+      {p:"A long history of quality winemaking and pioneering viticultural research (e.g. early 20th-century grape breeding) underpins Germany's technical reputation",cat:"COMMERCIAL",ess:false},
+      {p:"Rising quality and interest in German Spätburgunder (Pinot Noir) is winning new, high-involvement consumers",cat:"COMMERCIAL",ess:false},
+      {p:"Climate change is extending ripening and improving vintage consistency across German regions",cat:"CLIMATE",ess:false}],
+     distractors:[
+      "Müller-Thurgau is a hybrid grape variety bred for disease resistance",
+      "Germany's classification system is simple and easily understood by export consumers",
+      "Germany produces almost no red wine, focusing entirely on white varieties"]},
+    {label:"Weaknesses",weight:50,points:[
+      {p:"Germany's cool, northerly climate restricts the viable growing area and the range of grape varieties that can ripen reliably",cat:"CLIMATE",ess:true},
+      {p:"The historic promotion of cheap, sweet Liebfraumilch in export markets damaged Germany's image, leaving it strongly associated with inexpensive sweet wine even though most export demand now favours dry styles",cat:"COMMERCIAL",ess:true},
+      {p:"A complex, multi-layered quality system (Qualitätswein, Prädikatswein, VDP, the 2021 law revision) confuses even engaged consumers",cat:"AOC / LAW",ess:true},
+      {p:"German labels often omit clear sweetness indicators and can carry long, hard-to-pronounce regional, producer and grape names, a barrier for low-involvement consumers",cat:"COMMERCIAL",ess:true},
+      {p:"Many top sites sit on very steep slopes (e.g. Mosel, over 45°), making mechanisation difficult, requiring costly manual labour, and risking erosion or vineyard abandonment",cat:"VITICULTURE",ess:true},
+      {p:"High summer rainfall and humidity in many regions raise fungal disease pressure, adding to production costs for dry wine styles",cat:"CLIMATE",ess:false},
+      {p:"Declining global demand for sweet wine styles threatens the commercial viability of labour-intensive, high-cost sweet wines such as Eiswein and Trockenbeerenauslese",cat:"COMMERCIAL",ess:false}],
+     distractors:[
+      "Germany's proximity to France and Italy is a straightforward advantage for its export trade",
+      "Sweet Prädikat wines such as Eiswein and Trockenbeerenauslese are cheap to produce due to reliably high yields",
+      "Germany has one of the highest rates of organic-certified vineyard area in Europe"]}],
+   tips:["Cover strengths and weaknesses in genuinely equal depth — many strong candidates lost marks by writing far more on one side than the other.",
+     "The best answers showed that some features (e.g. the classification system, sweetness) can be argued as both a strength and a weakness — don't be afraid to hold that tension."]},
+
+  {n:3,topic:"Carmenère & Malbec",stem:"Describe the growing conditions for Chilean Carmenère and Argentinian Malbec. (70% weighting) Comment on the commercial significance of these two wines. (30% weighting)",
+   parts:[
+    {label:"Growing conditions",weight:70,points:[
+      {p:"Chile's climate is shaped by the cooling Pacific Ocean (Humboldt Current), the Andes mountains, and periodic El Niño weather patterns",cat:"CLIMATE",ess:true},
+      {p:"Carmenère is a late-ripening variety, so warm, well-exposed sites with a long growing season (e.g. parts of the Central Valley) are needed for it to ripen fully and avoid green, herbaceous character",cat:"VITICULTURE",ess:true},
+      {p:"Site selection is critical for Carmenère: cooler or poorly exposed sites risk unripe, vegetal flavours, while warmer sites achieve riper fruit and softer tannins",cat:"VITICULTURE",ess:true},
+      {p:"Argentina's high-altitude, desert-like sites (e.g. Mendoza/Uco Valley) give intense sunlight, a large diurnal temperature range, and low humidity, all suited to Malbec",cat:"CLIMATE",ess:true},
+      {p:"Low rainfall in Argentina's wine regions makes irrigation, often from Andean snowmelt, essential for viticulture",cat:"VITICULTURE",ess:true},
+      {p:"High altitude and diurnal range in Argentina help Malbec retain acidity and colour while achieving full ripeness",cat:"CLIMATE",ess:false}],
+     distractors:[
+      "Carmenère is an early-ripening variety, typically picked before other Bordeaux varieties",
+      "Chile's climate is defined mainly by tropical humidity rather than the cooling Pacific and the Andes",
+      "Argentina's high-altitude vineyards rely on abundant natural rainfall rather than irrigation"]},
+    {label:"Commercial significance",weight:30,points:[
+      {p:"Malbec is Argentina's signature variety and dominates the country's export identity, giving Argentina a clear, single-variety marketing message",cat:"COMMERCIAL",ess:true},
+      {p:"Carmenère plays a smaller, less dominant commercial role for Chile, which markets a broader portfolio of varieties (e.g. Cabernet Sauvignon, Sauvignon Blanc) alongside it",cat:"COMMERCIAL",ess:true},
+      {p:"Both varieties are significant export earners for their countries, but their weight within each country's overall wine identity differs substantially",cat:"COMMERCIAL",ess:false}],
+     distractors:[
+      "Carmenère is Chile's dominant grape variety in the same way Malbec is Argentina's",
+      "Chile markets Carmenère as its single flagship variety, in the same way Argentina markets Malbec",
+      "Malbec plays only a minor role in Argentina's wine export identity"]}],
+   tips:["Structure your answer logically: cover growing conditions and commercial significance for one country fully before moving to the other — comparing the two constantly often produced convoluted answers.",
+     "Don't neglect the 30%-weighted commercial section — several otherwise strong answers lost marks by only lightly addressing marketing/commercial significance."]},
+
+  {n:4,topic:"Tokaji",stem:"Describe the production processes for the following styles of Tokaji, starting at harvest and ending at bottling: a) Aszú (60% weighting) b) Late Harvest (20% weighting) c) Szamorodni (20% weighting)",
+   parts:[
+    {label:"Aszú",weight:60,points:[
+      {p:"Botrytis-affected, shrivelled Furmint (and other permitted) berries are hand-harvested individually or in small selective passes through the vineyard",cat:"WINEMAKING",ess:true},
+      {p:"The shrivelled aszú berries are crushed into a thick paste",cat:"WINEMAKING",ess:true},
+      {p:"The aszú paste is macerated in a base wine or must for a period of hours up to a few days, extracting sugar, flavour and glycerol",cat:"WINEMAKING",ess:true},
+      {p:"After maceration the mixture is pressed and the resulting sweet must is fermented, typically slowly, and arrested once the desired sweetness/alcohol balance is reached",cat:"WINEMAKING",ess:true},
+      {p:"The wine is aged in Tokaj's cellars, traditionally in Gönci barrels, for an extended minimum period before bottling",cat:"WINEMAKING",ess:true}],
+     distractors:[
+      "Aszú production begins with a detailed discussion of Tokaj's climate and soil before any winery steps",
+      "Essencia is the standard base wine used for maceration in Aszú production",
+      "Puttonyos measures the final alcohol level of the finished Aszú wine"]},
+    {label:"Late Harvest",weight:20,points:[
+      {p:"Late Harvest Tokaji is made from very ripe, sometimes partially botrytis-affected grapes picked later than the main harvest, without the concentrated aszú-paste maceration step",cat:"WINEMAKING",ess:true},
+      {p:"Fermentation proceeds more conventionally than Aszú, is stopped before dryness to retain natural sweetness, and the wine is released without the extended aszú-style ageing requirement",cat:"WINEMAKING",ess:true}],
+     distractors:[
+      "Late Harvest Tokaji undergoes the same aszú-paste maceration step as Aszú, only briefly",
+      "Late Harvest Tokaji is always fully fermented to dryness",
+      "Late Harvest Tokaji must be aged for the same extended minimum period as Aszú"]},
+    {label:"Szamorodni",weight:20,points:[
+      {p:"Szamorodni is made from whole bunches containing a natural mix of healthy and botrytis-affected berries, fermented together without separating out individual aszú berries",cat:"WINEMAKING",ess:true},
+      {p:"Száraz (dry) Szamorodni ferments fully to dryness and is often aged oxidatively under a partial flor-like veil, similar in character to Fino Sherry",cat:"WINEMAKING",ess:false},
+      {p:"Édes (sweet) Szamorodni retains natural residual sugar when the proportion of botrytis-affected fruit is high enough",cat:"WINEMAKING",ess:false}],
+     distractors:[
+      "All Tokaji Szamorodni is produced as a dry style, similar to Fino Sherry",
+      "Szamorodni requires individually selected botrytis-affected berries to be hand-picked, exactly as in Aszú",
+      "Szamorodni Édes is always more prestigious and expensive than Aszú"]}],
+   tips:["Stay strictly in scope: this question asked about winery production only, starting at harvest — climate, soil, topography and history earned no credit here.",
+     "Weight your answer to match the question: Aszú carried 60% of the marks, so it deserved the most depth, with Late Harvest and Szamorodni each proportionally shorter."]}
+]},
  {id:'d3t-2023',title:'D3 Theory Mock Paper 1',sitting:'October 2023',date:'2023-10',questions:[
   {n:1,topic:'Germany',stem:'Outline the legal categories of DRY German Riesling. Describe the role of the VDP in the development and understanding of quality German wine. Why is dry German Riesling increasing in popularity?',
    parts:[
