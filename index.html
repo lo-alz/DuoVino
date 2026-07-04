@@ -43,6 +43,12 @@ body.light ::selection{background:var(--garnet);color:#fbf8f1}
   color:var(--ink-dim);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;
   box-shadow:0 2px 9px rgba(0,0,0,.22);transition:background .15s}
 .themebtn:active{background:var(--panel3)}
+.langbtn{height:34px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2);
+  color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.03em;
+  display:flex;align-items:center;gap:5px;padding:0 11px;box-shadow:0 2px 9px rgba(0,0,0,.22);transition:background .15s}
+.langbtn:active{background:var(--panel3)}
+.langbtn .lb-sep{opacity:.4}
+.langbtn span.on{color:var(--ink);font-weight:700}
 .corner-logo{display:block;line-height:0;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
 .corner-logo svg{display:block}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -804,13 +810,14 @@ function toggleTheme(){ applyTheme(document.body.classList.contains('light')?'da
 // Language toggle — pilot: only Chablis carries a 'zh' translation today; every other
 // topic and all UI chrome falls back to English automatically when zh has no override.
 let LANG='en'; try{ LANG=localStorage.getItem('duovino.lang')||'en'; }catch(e){}
+function langBtnHtml(){ return `<span class="${LANG==='en'?'on':''}">EN</span><span class="lb-sep">|</span><span class="${LANG==='zh'?'on':''}">SCN</span>`; }
 function toggleLang(){ LANG=LANG==='zh'?'en':'zh'; try{localStorage.setItem('duovino.lang',LANG);}catch(e){}
-  const b=document.getElementById('langBtn'); if(b)b.textContent=LANG==='zh'?'EN':'中'; try{render();}catch(e){} }
+  const b=document.getElementById('langBtn'); if(b)b.innerHTML=langBtnHtml(); try{render();}catch(e){} }
 function initChrome(){
   let t='dark'; try{ t=localStorage.getItem('duovino.theme')||'dark'; }catch(e){}
   if(!document.getElementById('appcorner')){
     const c=document.createElement('div'); c.className='corner'; c.id='appcorner';
-    c.innerHTML='<button class="themebtn" id="langBtn" aria-label="Toggle language">'+(LANG==='zh'?'EN':'中')+'</button>'+
+    c.innerHTML='<button class="langbtn" id="langBtn" aria-label="Toggle language">'+langBtnHtml()+'</button>'+
       '<button class="themebtn" id="themeBtn" aria-label="Toggle theme"></button>'+
       '<span class="corner-logo" role="img" aria-label="DuoVino">'+glass(100,24)+'</span>';
     document.body.appendChild(c);
@@ -1675,7 +1682,11 @@ function viewTopic(id){
       if(c){ if(c.type==='explain'){const pts=dedupePoints(c.requiredPoints,k.chain);
           checkInner=`<div class="q">${esc(c.prompt)}</div>${pts.length?`<div class="rub">Model answer must contain</div><ul>${pts.map(p=>fmtClauseLis(p)).join('')}</ul>`:'<div class="rub">Covered by the chain table above</div>'}`;}
         else if(c.type==='mcq'){checkInner=`<div class="q">${esc(c.question)}</div><div class="ans">✓ ${esc(c.correctAnswer)}</div>`;}
-        else if(c.type==='flash'){checkInner=`<div class="q">${esc(c.question)}</div><div class="ans">${fmtClauses(c.answer)}</div>`;} }
+        else if(c.type==='flash'){
+          const norm=s=>String(s||'').trim().replace(/\.$/,'').toLowerCase();
+          const dup=norm(c.answer)===norm(k.statement);
+          checkInner=`<div class="q">${esc(c.question)}</div>${dup?'<div class="rub">Covered by the fact above</div>':`<div class="ans">${fmtClauses(c.answer)}</div>`}`;
+        } }
       return `<div class="kkp ${cls}" data-kkp="${k.id}">
         <div class="ktop"><span class="tag ${tagcls}">${k.cat}</span>${k.verified?'':'<span class="tag" style="color:var(--rose);border-color:var(--garnet)">unverified</span>'}<span class="kid">${k.id}</span></div>
         ${fmtKkpBody(kd)}
