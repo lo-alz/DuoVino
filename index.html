@@ -334,12 +334,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .opt.missed .mk{color:var(--gold-l)}
 .opt.correct .mk{color:var(--green-l)}
 .opt.wrong .mk{color:var(--rose)}
-.optlegend{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.optlegend{display:flex;flex-direction:column;align-items:center;gap:6px;margin:14px auto 0;width:max-content}
 .optlegend .lg{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .optlegend .lg .g{flex:0 0 14px;text-align:center;font-size:11px}
 
 .revealbox{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:15px;margin-top:16px;animation:fade .2s}
 .revealbox .rl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:9px}
+.rl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.rl-row .rl{margin-bottom:0}
+.hintbtn{flex:0 0 auto;background:transparent;border:1px solid var(--line2);border-radius:20px;padding:2px 9px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--gold-l);cursor:pointer;white-space:nowrap;line-height:1.6}
+.hintbtn:hover{border-color:var(--gold)}
 .revealbox ul{margin:0;padding-left:16px}
 .revealbox li{font-size:13.5px;color:var(--ink-dim);margin-bottom:6px;line-height:1.4}
 .revealbox .deduce li{color:var(--green-l);font-weight:500}
@@ -2303,7 +2307,9 @@ function examChoiceList(qi){
     let head=`${esc(p.label)} — ${p.weight}%`;
     if(revealed){ let c=0,w=0; opts.forEach((o,oi)=>{ if(sel[oi]) (o.ok?c++:w++); });
       head+=` · earned ${Math.round(Math.max(0,c-w)/p.points.length*p.weight)}/${p.weight}%`; }
-    return `<div class="revealbox"><div class="rl">${head}</div>
+    const hintOn=!!(exam.hints[qi]||{})[pi];
+    const hintBtn=revealed?'':`<button class="hintbtn" data-exam-hint="${qi}:${pi}" title="${hintOn?'Hide hint':'Hint'}">${hintOn?`pick ${p.points.length} of the ${opts.length}`:'?'}</button>`;
+    return `<div class="revealbox"><div class="rl-row"><div class="rl">${head}</div>${hintBtn}</div>
       <div class="mcqopts" style="margin-top:4px">${opts.map((o,oi)=>{
         const picked=!!sel[oi];
         // Reveal traffic light: green ✓ correctly selected · gold ● real point missed · red ✗ distractor picked.
@@ -2333,23 +2339,6 @@ function examBlankList(qi){
     </div></div>`).join('')+'<div class="ptip">Each chip hints the category of one mark point. Type what you can recall, then reveal and self-tick.</div>';
 }
 
-// Hint (pre-reveal, any sitting mode): the shape of the mark scheme — how many points
-// each part expects — without revealing any answers. One stacked line per part.
-function examHintHtml(qi){
-  const q=exam.paper.questions[qi];
-  const rows=q.parts.map((p,pi)=>{
-    const n=p.points.length;
-    const line=exam.mode==='choices'
-      ?`pick ${n} of the ${exam.opts[qi][pi].length}`
-      :`${n} point${n>1?'s':''} carry the ${p.weight}%`;
-    return `<div style="display:flex;gap:12px;align-items:baseline;justify-content:space-between">
-      <span style="font-size:13px;color:var(--ink-dim);line-height:1.4">${esc(p.label)}</span>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--gold-l);flex:0 0 auto">${line}</span></div>`;
-  }).join('');
-  return `<div class="revealbox"><div class="rl">Hint — the shape of the mark scheme</div>
-    <div style="display:flex;flex-direction:column;gap:7px">${rows}</div></div>`;
-}
-
 function viewExam(){
   if(!exam)return viewStudyHome();
   const qs=exam.paper.questions, qi=exam.idx, q=qs[qi];
@@ -2358,9 +2347,15 @@ function viewExam(){
   const bar=`<div class="runbar"><button class="close" data-exam-end>✕ End</button>
      <div class="progress"><i style="width:${prog}%"></i></div>
      <span class="count">Q${qi+1}/${qs.length}</span></div>`;
-  const parts=q.parts.map(p=>`<div style="display:flex;gap:8px;align-items:baseline;margin-top:9px">
+  const parts=q.parts.map((p,pi)=>{
+      const n=p.points.length;
+      const hintOn=!!(exam.hints[qi]||{})[pi];
+      const hintBtn=revealed?'':`<button class="hintbtn" data-exam-hint="${qi}:${pi}" title="${hintOn?'Hide hint':'Hint'}">${hintOn?`${n} point${n>1?'s':''} carry the ${p.weight}%`:'?'}</button>`;
+      return `<div style="display:flex;gap:8px;align-items:baseline;margin-top:9px">
       <span class="tag rel" style="flex:0 0 auto">${p.weight}%</span>
-      <span style="font-size:14px;color:var(--ink-dim);line-height:1.4">${esc(p.label)}</span></div>`).join('');
+      <span style="font-size:14px;color:var(--ink-dim);line-height:1.4;flex:1">${esc(p.label)}</span>
+      ${hintBtn}</div>`;
+    }).join('');
   let body='';
   if(exam.mode==='choices') body=examChoiceList(qi);
   else if(exam.mode==='blanks') body=revealed?examTickList(qi):examBlankList(qi);
@@ -2373,11 +2368,10 @@ function viewExam(){
         <div class="prompt" style="font-size:19px">${esc(q.stem)}</div>
         ${exam.mode==='exam'?parts:''}
         ${body}
-        ${!revealed&&exam.hints[qi]?examHintHtml(qi):''}
       </div>
       <div class="actions">
         ${qi>0?`<button class="b-part" data-exam-prev>← Q${qi}</button>`:''}
-        ${!revealed?`<button class="b-part" data-exam-hint>${exam.hints[qi]?'Hide hint':'Hint'}</button><button class="b-next" data-exam-reveal>${revealLabel}</button>`
+        ${!revealed?`<button class="b-next" data-exam-reveal>${revealLabel}</button>`
           :(qi<qs.length-1?'<button class="b-next" data-exam-next>Next question →</button>'
           :'<button class="b-got" data-exam-finish>Finish exam →</button>')}
       </div>
@@ -2891,7 +2885,13 @@ function bind(){
   app.querySelectorAll('[data-ai-mark]').forEach(b=>b.onclick=()=>aiMark(+b.dataset.aiMark));
   app.querySelectorAll('[data-exam-end]').forEach(b=>b.onclick=()=>{ if(confirm('End this mock exam? Your answers and ticks will be lost.')){exam=null;nav('study');} });
   app.querySelectorAll('[data-exam-reveal]').forEach(b=>b.onclick=()=>{saveExamAns();exam.revealed[exam.idx]=true;render();});
-  app.querySelectorAll('[data-exam-hint]').forEach(b=>b.onclick=()=>{saveExamAns();exam.hints[exam.idx]=!exam.hints[exam.idx];render();});
+  app.querySelectorAll('[data-exam-hint]').forEach(b=>b.onclick=()=>{
+    const [qi,pi]=b.dataset.examHint.split(':').map(Number);
+    saveExamAns();
+    exam.hints[qi]=exam.hints[qi]||{};
+    exam.hints[qi][pi]=!exam.hints[qi][pi];
+    render();
+  });
   app.querySelectorAll('[data-exam-tick]').forEach(b=>b.onclick=()=>{const a=b.dataset.examTick.split(':').map(Number);
     const t=exam.ticks; t[a[0]]=t[a[0]]||{}; t[a[0]][a[1]]=t[a[0]][a[1]]||{}; t[a[0]][a[1]][a[2]]=!t[a[0]][a[1]][a[2]]; saveExamAns(); render();});
   app.querySelectorAll('[data-exam-prev]').forEach(b=>b.onclick=()=>{saveExamAns();exam.idx--;render();window.scrollTo(0,0);});
