@@ -13,9 +13,7 @@
 //   POST { stem: string,
 //          parts: [{ label, weight, points: [{ p: string, ess: boolean }] }],
 //          answer: string }                     // one question at a time
-//   200  { parts: [{ covered: [pointIdx],
-//                    evidence: [{ i: pointIdx, quote: "verbatim substring of answer" }],
-//                    missed: [pointIdx] }],
+//   200  { parts: [{ points: [{ score: 0-100, quote: "verbatim substring of answer, or '' if score is 0" }] }],
 //          comment: "2-3 sentence examiner comment" }
 //   4xx/5xx { error: string }
 
@@ -33,22 +31,24 @@ const json = (obj, status = 200) =>
     headers: { ...CORS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
   });
 
-const SYSTEM = `You are a WSET Diploma (Level 4, D3 Wines of the World) theory examiner using positive, points-based marking.
+const SYSTEM = `You are a WSET Diploma (Level 4, D3 Wines of the World) theory examiner using positive, points-based marking with partial credit.
 
 You are given a question, its official mark scheme (weighted parts, each with indexed mark points — some flagged ESSENTIAL) and one candidate's written answer.
 
-Decide, for every mark point, whether the candidate's answer genuinely addresses it. A point is covered only when the substance of the point is actually made — a passing mention of a keyword without the idea behind it earns nothing. Do not reward material that merely relates to the topic.
+For every mark point, score how close the candidate's answer comes to it on a 0-100 scale, judging essence (is the right idea there), depth (is it developed, not just named), and content (is it accurate and specific) — never just keyword matching:
+- 0 = not addressed at all.
+- 1-39 = a passing mention or partially relevant idea, missing the substance, depth, or accuracy the point requires.
+- 40-79 = the core idea is present but underdeveloped, imprecise, or missing a qualifying detail a top answer would include.
+- 80-100 = the point is made with the essence, depth, and precision expected of a strong answer.
 
-For each covered point, copy ONE exact contiguous substring from the candidate's answer as evidence — the passage that earns the mark. Quotes MUST be verbatim, character-for-character substrings of the answer (the client highlights them by exact string search). Never paraphrase, trim internal words, or fix spelling inside a quote. Keep each quote under 200 characters.
+For every point scoring above 0, copy ONE exact contiguous substring from the candidate's answer as evidence — the passage that earns the credit. Quotes MUST be verbatim, character-for-character substrings of the answer (the client highlights them by exact string search). Never paraphrase, trim internal words, or fix spelling inside a quote. Keep each quote under 200 characters. Points scoring 0 get an empty quote.
 
 Return STRICT JSON only — no markdown, no code fences, no commentary outside the JSON:
-{"parts":[{"covered":[pointIdx...],"evidence":[{"i":pointIdx,"quote":"..."}],"missed":[pointIdx...]}],"comment":"..."}
+{"parts":[{"points":[{"score":0-100,"quote":"..."}]}],"comment":"..."}
 
 Rules:
-- "parts" has exactly one entry per mark-scheme part, in the same order.
-- "covered" and "missed" together account for every point index of that part.
-- Every covered index should have one evidence entry; missed points have none.
-- "comment" is a 2-3 sentence examiner's comment in the register of a WSET examiners' report: name the strongest aspect, the most costly omission (especially ESSENTIAL points), and one concrete improvement.`;
+- "parts" has exactly one entry per mark-scheme part, in the same order; "points" has exactly one entry per mark point, in the same order.
+- "comment" is a 2-3 sentence examiner's comment in the register of a WSET examiners' report: name the strongest aspect, the most costly shortfall (especially ESSENTIAL points that scored low), and one concrete improvement.`;
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS });
@@ -93,18 +93,22 @@ export async function onRequestPost({ request, env }) {
   let out;
   try { out = JSON.parse(raw); } catch { return json({ error: "Grader returned unparseable output" }, 502); }
 
-  // Validate + clamp: indices in range, quotes verbatim substrings, missed = complement of covered.
+  // Validate + clamp: scores 0-100, quotes must be verbatim substrings of the answer —
+  // a nonzero score with no defensible quote is untrusted and clamped to 0.
   const clean = {
     parts: parts.map((p, pi) => {
       const rp = (Array.isArray(out?.parts) ? out.parts[pi] : null) || {};
-      const n = p.points.length;
-      const inR = (k) => Number.isInteger(k) && k >= 0 && k < n;
-      const covered = [...new Set((Array.isArray(rp.covered) ? rp.covered : []).filter(inR))];
-      const evidence = (Array.isArray(rp.evidence) ? rp.evidence : [])
-        .filter((ev) => ev && inR(ev.i) && typeof ev.quote === "string" && ev.quote.length && answer.includes(ev.quote))
-        .map((ev) => ({ i: ev.i, quote: ev.quote }));
-      const missed = Array.from({ length: n }, (_, k) => k).filter((k) => !covered.includes(k));
-      return { covered, evidence, missed };
+      const rpoints = Array.isArray(rp.points) ? rp.points : [];
+      const points = p.points.map((_, ki) => {
+        const rk = rpoints[ki] || {};
+        let score = Number(rk.score);
+        if (!Number.isFinite(score)) score = 0;
+        score = Math.max(0, Math.min(100, Math.round(score)));
+        let quote = typeof rk.quote === "string" ? rk.quote : "";
+        if (!quote || !answer.includes(quote)) { quote = ""; score = 0; }
+        return { score, quote };
+      });
+      return { points };
     }),
     comment: typeof out?.comment === "string" ? out.comment : "",
   };

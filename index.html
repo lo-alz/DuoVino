@@ -2267,11 +2267,17 @@ function startExam(id){
 }
 function examQScore(q,qi){
   let s=0;
+  const ai=exam.mode==='exam'?exam.ai[qi]:null;
   q.parts.forEach((p,pi)=>{
     if(exam.mode==='choices'){
       const sel=(exam.picks[qi]||{})[pi]||{}; const opts=exam.opts[qi][pi];
       let c=0,w=0; opts.forEach((o,oi)=>{ if(sel[oi]) (o.ok?c++:w++); });
       s+=Math.max(0,c-w)/p.points.length*p.weight;
+    } else if(ai&&Array.isArray(ai.parts)){
+      // Mock Exam, AI-marked: partial credit per point (0-100), not boolean coverage.
+      const rp=ai.parts[pi]||{points:[]};
+      const avg=rp.points.length?rp.points.reduce((a,pt)=>a+(pt.score||0),0)/rp.points.length:0;
+      s+=avg/100*p.weight;
     } else {
       const t=(exam.ticks[qi]||{})[pi]||{};
       const n=p.points.filter((_,ki)=>t[ki]).length;
@@ -2355,18 +2361,23 @@ function viewExam(){
      <div class="progress"><i style="width:${prog}%"></i></div>
      <span class="count">Q${qi+1}/${qs.length}</span></div>`;
   const parts=q.parts.map((p,pi)=>{
-      const n=p.points.length;
-      const hintOn=!!(exam.hints[qi]||{})[pi];
-      const hintBtn=revealed?'':`<button class="hintbtn" data-exam-hint="${qi}:${pi}" title="${hintOn?'Hide hint':'Hint'}">${hintOn?`${n} point${n>1?'s':''} carry the ${p.weight}%`:'?'}</button>`;
-      return `<div style="display:flex;gap:8px;align-items:baseline;margin-top:9px">
-      <span class="tag rel" style="flex:0 0 auto">${p.weight}%</span>
-      <span style="font-size:14px;color:var(--ink-dim);line-height:1.4;flex:1">${esc(p.label)}</span>
-      ${hintBtn}</div>`;
+      const bhs=((exam.blankHints[qi]||{})[pi])||{};
+      const gotAll=p.points.every((_,ki)=>bhs[ki]&&bhs[ki].question);
+      const anyLoading=p.points.some((_,ki)=>bhs[ki]&&bhs[ki].loading);
+      const hintBtn=(revealed||gotAll)?'':`<button class="hintbtn" data-essay-hint="${qi}:${pi}" title="Hint" ${anyLoading?'disabled':''}>${anyLoading?'…':'?'}</button>`;
+      const qList=p.points.map((_,ki)=>bhs[ki]&&bhs[ki].question?bhs[ki].question:null).filter(Boolean);
+      const hintLines=qList.length?`<ul style="margin:6px 0 0 20px;padding:0;font-size:13px;color:var(--gold-l);line-height:1.55">${qList.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'';
+      return `<div style="margin-top:9px">
+      <div style="display:flex;gap:8px;align-items:baseline">
+        <span class="tag rel" style="flex:0 0 auto">${p.weight}%</span>
+        <span style="font-size:14px;color:var(--ink-dim);line-height:1.4;flex:1">${esc(p.label)}</span>
+        ${hintBtn}
+      </div>${hintLines}</div>`;
     }).join('');
   let body='';
   if(exam.mode==='choices') body=examChoiceList(qi);
   else if(exam.mode==='blanks') body=revealed?examTickList(qi):examBlankList(qi);
-  else body=`<textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>${revealed?examTickList(qi):''}`;
+  else body=`<textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>${revealed?aiBlockHtml(q,qi):''}`;
   const revealLabel='Reveal Answer';
   return `<div class="view"><div class="runwrap">${bar}
     <div class="qcard">
@@ -2440,17 +2451,32 @@ function aiBlockHtml(q,i){
   const st=exam.ai[i];
   if(st&&st.loading) return `<button class="cmpbtn" style="width:100%;margin-top:12px;opacity:.6" disabled>Marking with AI…</button>`;
   if(!st) return `<button class="cmpbtn" style="width:100%;margin-top:12px" data-ai-mark="${i}">AI-mark this answer</button>`;
-  const quotes=[]; st.parts.forEach(rp=>rp.evidence.forEach(ev=>quotes.push(ev.quote)));
-  const missE=[],missO=[];
-  q.parts.forEach((p,pi)=>{ ((st.parts[pi]||{}).missed||[]).forEach(ki=>{ const pt=p.points[ki]; if(pt)(pt.ess?missE:missO).push(pt.p); }); });
+  const quotes=[]; st.parts.forEach(rp=>rp.points.forEach(pt=>{ if(pt.quote)quotes.push(pt.quote); }));
+  const scoreColor=s=>s>=80?'var(--green-l)':s>=40?'var(--gold-l)':'var(--rose)';
+  // Never show the mark point's actual wording here (that's for MCQ mode only) — just the
+  // score, and on demand the same Socratic leading question Guided·Blanks uses.
+  const partsHtml=q.parts.map((p,pi)=>{
+    const rp=st.parts[pi]||{points:[]};
+    const avg=rp.points.length?rp.points.reduce((a,pt)=>a+(pt.score||0),0)/rp.points.length:0;
+    const earned=Math.round(avg/100*p.weight);
+    const rows=p.points.map((pt,ki)=>{
+      const score=(rp.points[ki]||{}).score||0;
+      const hs=((exam.blankHints[i]||{})[pi]||{})[ki];
+      const shown=hs&&hs.question
+        ?`<span style="font-size:13px;color:var(--ink-dim);line-height:1.4;flex:1">${esc(hs.question)}</span>`
+        :`<button class="hintbtn" data-blank-hint="${i}:${pi}:${ki}" title="Hint" ${hs&&hs.loading?'disabled':''}>${hs&&hs.loading?'…':'? hint'}</button>`;
+      return `<div style="display:flex;gap:10px;align-items:center;padding:5px 0;${ki>0?'border-top:1px solid var(--line2)':''}">
+        <span style="font-family:var(--mono);font-size:11px;color:${scoreColor(score)};flex:0 0 34px">${score}%</span>
+        ${shown}
+      </div>`;
+    }).join('');
+    return `<div class="revealbox"><div class="rl">${esc(p.label)} — earned ${earned}/${p.weight}%</div>${rows}</div>`;
+  }).join('');
   return `<div class="revealbox"><div class="rl">AI marking — your answer</div>
       <div style="font-size:13.5px;line-height:1.55;color:var(--ink-dim);white-space:pre-wrap">${aiHighlight(ans,quotes)}</div>
-      <div class="ptip" style="margin-top:8px">Highlighted passages were credited against the mark scheme — the matching points are ticked above.</div>
+      <div class="ptip" style="margin-top:8px">Highlighted passages were credited by the examiner. Tap “hint” on any point below for a leading question toward what you missed.</div>
     </div>
-    ${missE.length?`<div class="revealbox" style="border-color:var(--rose);background:rgba(138,37,64,.16)"><div class="rl" style="color:var(--rose)">Essential points you missed</div>
-      <ul>${missE.map(t=>`<li style="color:var(--rose)">${esc(t)}</li>`).join('')}</ul></div>`:''}
-    ${missO.length?`<div class="revealbox"><div class="rl">Also creditable</div>
-      <ul>${missO.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:''}
+    ${partsHtml}
     ${st.comment?`<div class="revealbox"><div class="rl" style="color:var(--gold-l)">Examiner’s comment</div>
       <div style="font-size:13.5px;color:var(--ink-dim);line-height:1.5">${fmtClauses(st.comment)}</div></div>`:''}`;
 }
@@ -2468,16 +2494,17 @@ async function aiMark(i){
     if(!d||!Array.isArray(d.parts)) throw new Error('bad response');
     const parts=q.parts.map((p,pi)=>{
       const rp=d.parts[pi]||{};
-      const inR=k=>Number.isInteger(k)&&k>=0&&k<p.points.length;
-      const covered=[...new Set((Array.isArray(rp.covered)?rp.covered:[]).filter(inR))];
-      const evidence=(Array.isArray(rp.evidence)?rp.evidence:[]).filter(ev=>ev&&typeof ev.quote==='string'&&ev.quote.length);
-      const missed=p.points.map((_,k)=>k).filter(k=>!covered.includes(k));
-      return {covered,evidence,missed};
+      const rpoints=Array.isArray(rp.points)?rp.points:[];
+      const points=p.points.map((_,ki)=>{
+        const rk=rpoints[ki]||{};
+        let score=Number(rk.score); if(!Number.isFinite(score))score=0; score=Math.max(0,Math.min(100,score));
+        const quote=typeof rk.quote==='string'?rk.quote:'';
+        return {score,quote};
+      });
+      return {points};
     });
     if(!exam)return;
     exam.ai[i]={parts,comment:String(d.comment||'')};
-    const t=exam.ticks; t[i]=t[i]||{};
-    parts.forEach((rp,pi)=>{ t[i][pi]=t[i][pi]||{}; rp.covered.forEach(k=>{ t[i][pi][k]=true; }); });
   }catch(e){
     if(exam)exam.ai[i]=null;
     toast('AI marking unavailable — using self-assessment');
@@ -2518,7 +2545,7 @@ function viewExamResult(){
     return `<div class="panel">
       <div class="sec-h" style="margin:0 0 8px"><h3 style="font-size:15px">Q${i+1} · ${esc(q.topic)}</h3><span class="tag" style="color:${qb[1]}">${qp}% · ${qb[0]}</span></div>
       <div style="font-size:13px;color:var(--muted);line-height:1.45">${esc(q.stem)}</div>
-      ${exam.mode==='choices'?reviewChoiceParts(q,i):reviewTickParts(q,i)}
+      ${exam.mode==='choices'?reviewChoiceParts(q,i):(exam.mode==='exam'?'':reviewTickParts(q,i))}
       ${exam.mode==='exam'?aiBlockHtml(q,i):''}
       <div class="revealbox"><div class="rl" style="color:var(--gold-l)">Examiner’s tips</div><ul>${(q.tips||[]).map(tp=>`<li>${esc(tp)}</li>`).join('')}</ul></div>
     </div>`;
@@ -2913,6 +2940,14 @@ function bind(){
     const bl=exam.blanks; bl[a[0]]=bl[a[0]]||{}; bl[a[0]][a[1]]=bl[a[0]][a[1]]||{}; bl[a[0]][a[1]][a[2]]=inp.value;}));
   app.querySelectorAll('[data-ai-mark]').forEach(b=>b.onclick=()=>aiMark(+b.dataset.aiMark));
   app.querySelectorAll('[data-blank-hint]').forEach(b=>b.onclick=()=>{const a=b.dataset.blankHint.split(':').map(Number);blankHint(a[0],a[1],a[2]);});
+  // Mock Exam: one click fetches a leading question per mark point in that part (same
+  // Socratic hint as Guided·Blanks) without ever showing the points/categories themselves.
+  app.querySelectorAll('[data-essay-hint]').forEach(b=>b.onclick=()=>{
+    const [qi,pi]=b.dataset.essayHint.split(':').map(Number);
+    const p=exam.paper.questions[qi].parts[pi];
+    const bh=exam.blankHints[qi]=exam.blankHints[qi]||{}; bh[pi]=bh[pi]||{};
+    p.points.forEach((_,ki)=>{ if(!bh[pi][ki]||!bh[pi][ki].question) blankHint(qi,pi,ki); });
+  });
   app.querySelectorAll('[data-exam-end]').forEach(b=>b.onclick=()=>{ if(confirm('End this mock exam? Your answers and ticks will be lost.')){exam=null;nav('study');} });
   app.querySelectorAll('[data-exam-reveal]').forEach(b=>b.onclick=()=>{saveExamAns();exam.revealed[exam.idx]=true;render();});
   app.querySelectorAll('[data-exam-hint]').forEach(b=>b.onclick=()=>{
