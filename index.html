@@ -142,6 +142,27 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   font-family:var(--disp);font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-dim);white-space:nowrap}
 .chip.on{background:var(--gold);color:#1a1407;border-color:var(--gold)}
 
+/* study-mode carousel */
+.modecarousel{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;-ms-overflow-style:none}
+.modecarousel::-webkit-scrollbar{display:none}
+.modecard{flex:0 0 118px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:13px 12px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:9px;text-align:left;cursor:pointer}
+.modecard svg{width:20px;height:20px;stroke:var(--gold-l);flex:0 0 auto}
+.modecard.accent{border-color:var(--rose);background:rgba(138,37,64,.14)}
+.modecard.accent svg{stroke:var(--rose)}
+.modecard .mt{font-family:var(--disp);font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink)}
+.modecard .md{font-size:10px;color:var(--muted);line-height:1.3}
+
+/* hover tooltip (e.g. exam-paper topic coverage) */
+.tipwrap{position:relative;display:inline-flex}
+.tipwrap .tippop{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:9px 11px;
+  min-width:150px;max-width:220px;opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .15s;z-index:30;box-shadow:0 8px 20px rgba(0,0,0,.4);text-align:left}
+.tipwrap:hover .tippop,.tipwrap:focus-within .tippop{opacity:1;visibility:visible}
+.tippop .tt{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.tippop .ti{font-size:11.5px;color:var(--ink-dim);line-height:1.6}
+
 /* topic list cards */
 .tcards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .tcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px;
@@ -1679,10 +1700,18 @@ function viewTopic(id){
 
 /* ============================ STUDY HOME ============================ */
 let studyScope={type:'all'}, studyMode='mixed';
+const MODE_ICONS={
+  mixed:'<path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/>',
+  flash:'<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+  mcq:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  explain:'<path d="M9.5 13.5a4.8 4.8 0 0 0 7.2.5l2.8-2.8a4.8 4.8 0 0 0-6.8-6.8l-1.6 1.6"/><path d="M14.5 10.5a4.8 4.8 0 0 0-7.2-.5L4.5 12.8a4.8 4.8 0 0 0 6.8 6.8l1.6-1.6"/>',
+  blind:'<path d="M8 3h8l-1 6.5a3 3 0 0 1-6 0L8 3z"/><path d="M12 12v6"/><path d="M8.5 21h7"/>',
+  exam:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h8"/>',
+};
 function viewStudyHome(){
   const modes=[['mixed','Mixed','Everything, interleaved'],['flash','Flashcards','Fact recall'],
     ['mcq','Quiz','Multiple-choice facts'],['explain','Explain','Causal "why" + rubric'],['blind','Blind tasting','Deduce from the glass'],
-    ['exam','Mock Exam','Full WSET-style theory paper']];
+    ['exam','Mock Exam','Full theory paper']];
   const scopes=[['all','All regions'],...COUNTRY_LIST.map(c=>['c:'+c.name,c.name]),['weak','Weakest gaps']];
   const cur=studyScope.type==='all'?'all':(studyScope.type==='weak'?'weak':'c:'+studyScope.name);
   const isExam=studyMode==='exam';
@@ -1692,17 +1721,18 @@ function viewStudyHome(){
    <div class="top"><div class="brand"><span><h1 style="font-size:26px">Study</h1><div class="sub">Teach · test · track</div></span></div></div>
    <div class="panel">
      <div class="eyebrow" style="margin-bottom:9px">Mode</div>
-     <div style="display:flex;flex-direction:column;gap:8px">
-     ${modes.map(m=>`<button class="qbtn ${studyMode===m[0]?'accent':''}" data-mode="${m[0]}" style="flex-direction:row;align-items:center;justify-content:space-between">
-        <span><span class="qt">${m[1]}</span><span class="qd">${m[2]}</span></span>
-        ${studyMode===m[0]?'<span style="color:var(--rose);font-family:var(--mono);font-size:11px">●</span>':''}</button>`).join('')}
+     <div class="modecarousel">
+     ${modes.map(m=>`<button class="modecard ${studyMode===m[0]?'accent':''}" data-mode="${m[0]}">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${MODE_ICONS[m[0]]}</svg>
+        <span class="mt">${m[1]}</span><span class="md">${m[2]}</span></button>`).join('')}
      </div>
    </div>
    <div class="panel">
      <div class="eyebrow" style="margin-bottom:9px">${isExam?'Paper':'Scope'}</div>
      <div class="chips" style="flex-wrap:wrap;overflow:visible">
        ${isExam
-         ?examsChrono().map(p=>`<button class="chip ${paper.id===p.id?'on':''}" data-exam-paper="${p.id}">${esc(p.sitting)}</button>`).join('')
+         ?examsChrono().map(p=>`<span class="tipwrap"><button class="chip ${paper.id===p.id?'on':''}" data-exam-paper="${p.id}">${esc(p.sitting)}</button>
+            <span class="tippop"><span class="tt">Topics covered</span>${p.questions.map(q=>`<span class="ti" style="display:block">${esc(q.topic)}</span>`).join('')}</span></span>`).join('')
          :scopes.map(s=>`<button class="chip ${cur===s[0]?'on':''}" data-scope="${s[0]}">${esc(s[1])}</button>`).join('')}
      </div>
      ${isExam?examSitHtml(paper):''}
@@ -1719,9 +1749,8 @@ function modeHint(m){
     const lines={
       exam:['A full theory paper under exam discipline.',
         'Write each answer in full.',
-        'Reveal the mark scheme when you are done.',
-        'Tick the points you genuinely covered.',
-        'In the review, AI marking can highlight what your answer covered.'],
+        'Reveal when you are done for an AI-marked score per point.',
+        'Ask for a leading question on any point you missed.'],
       choices:['Each part becomes a set of statements to judge.',
         'Real mark-scheme points are shuffled with plausible wrong answers.',
         'The distractors are documented candidate errors from examiners’ reports.',
@@ -1732,10 +1761,10 @@ function modeHint(m){
     }[examMode]||[];
     return `<div style="display:flex;flex-direction:column;gap:6px">${lines.map(l=>`<div>${l}</div>`).join('')}</div>`;
   }
-  return {mixed:'Interleaving facts, causal explanations and tasting deductions is the strongest way to revise for the D3 theory paper.',
+  return {mixed:'Interleaving facts, causal explanations and tasting deductions is the strongest way to build lasting recall.',
   flash:'Quick recall of discrete facts. Mark honestly — “Mastered” only when instant.',
-  mcq:'Distractors are real D3 confusions. Available where multiple-choice checks are authored.',
-  explain:'The Diploma skill: produce the factor→mechanism→effect→style chain, then self-grade against the rubric.',
+  mcq:'Distractors are real, documented confusions. Available where multiple-choice checks are authored.',
+  explain:'Build the causal chain — factor, mechanism, effect, style — then self-grade against the rubric.',
   blind:'Given SAT tasting markers, deduce grape, climate and region — and justify. Hand-curated classic profiles.'}[m];}
 function scopeObj(cur){ if(cur==='all')return{type:'all'}; if(cur==='weak')return{type:'weak'}; return {type:'country',name:cur.slice(2)};}
 
