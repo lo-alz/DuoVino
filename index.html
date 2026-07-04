@@ -1445,6 +1445,11 @@ function viewCompare(){
       let cur=null;
       items.forEach(e=>{ const c=e.country||'Other'; if(c!==cur){ if(cur!==null)out+='</optgroup>'; out+=`<optgroup label="${esc(c)}">`; cur=c; } out+=optTag(e); });
       if(cur!==null)out+='</optgroup>';
+    } else if(cmp.mode==='grape'){ // group options under color headers
+      [['r','Red grapes'],['w','White grapes']].forEach(([code,label])=>{
+        const list=items.filter(e=>e.color===code);
+        if(list.length)out+=`<optgroup label="${esc(label)}">${list.map(optTag).join('')}</optgroup>`;
+      });
     } else { out+=items.map(optTag).join(''); }
     return out;
   };
