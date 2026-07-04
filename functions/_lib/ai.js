@@ -35,13 +35,17 @@ export const PROVIDERS = {
     defaultModel: "gemini-2.5-flash",
     endpoint: (model) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     headers: (key) => ({ "x-goog-api-key": key }),
-    body: ({ system, user, maxTokens, json }) => ({
+    body: ({ system, user, maxTokens, json, thinking }) => ({
       systemInstruction: { parts: [{ text: system }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
       generationConfig: {
         temperature: 0.2,
         maxOutputTokens: maxTokens,
         ...(json ? { responseMimeType: "application/json" } : {}),
+        // Gemini 2.5's "thinking" tokens count against maxOutputTokens — with a
+        // small budget the model can spend it all reasoning and emit no visible
+        // text. Structured one-shot calls (grading, hints) don't need it.
+        ...(thinking === "disabled" ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
       },
     }),
     text: (data) => (data.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join(""),
@@ -49,13 +53,16 @@ export const PROVIDERS = {
 
     streamEndpoint: (model) =>
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`,
-    streamBody: ({ system, messages, maxTokens }) => ({
+    streamBody: ({ system, messages, maxTokens, thinking }) => ({
       systemInstruction: { parts: [{ text: system }] },
       contents: messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       })),
-      generationConfig: { maxOutputTokens: maxTokens },
+      generationConfig: {
+        maxOutputTokens: maxTokens,
+        ...(thinking === "disabled" ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
+      },
     }),
     streamDelta: (evt) => (evt.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join(""),
   },

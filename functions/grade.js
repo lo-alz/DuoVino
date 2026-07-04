@@ -78,7 +78,7 @@ export async function onRequestPost({ request, env }) {
 
   let text;
   try {
-    ({ text } = await callAI({ env, provider, model, system: SYSTEM, user, maxTokens: 2000, json: true }));
+    ({ text } = await callAI({ env, provider, model, system: SYSTEM, user, maxTokens: 2000, json: true, thinking: "disabled" }));
   } catch (e) {
     return json({ error: "Grader model call failed: " + (e?.message || "unknown") }, 502);
   }
