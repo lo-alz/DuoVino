@@ -2334,14 +2334,14 @@ function examBlankList(qi){
       ${p.points.map((pt,ki)=>{
         const hs=((exam.blankHints[qi]||{})[pi]||{})[ki];
         const hintBtn=hs&&hs.question?'':`<button class="hintbtn" data-blank-hint="${qi}:${pi}:${ki}" title="Hint" ${hs&&hs.loading?'disabled':''}>${hs&&hs.loading?'…':'?'}</button>`;
-        const hintLine=hs&&hs.question?`<div class="ptip" style="margin-top:5px;color:var(--gold-l)">${esc(hs.question)}</div>`:'';
-        return `<div>
+        const hintLine=hs&&hs.question?`<div class="ptip" style="margin-bottom:5px;color:var(--gold-l)">${esc(hs.question)}</div>`:'';
+        return `<div>${hintLine}
         <div style="display:flex;gap:8px;align-items:center">
           <span class="tag" style="flex:0 0 82px;text-align:center">${esc(pt.cat)}</span>
           <input data-blank="${qi}:${pi}:${ki}" value="${esc(((exam.blanks[qi]||{})[pi]||{})[ki]||'').replace(/"/g,'&quot;')}" placeholder="Recall the point…"
             style="flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:9px 11px;color:var(--ink);font:inherit;font-size:13px">
           ${hintBtn}
-        </div>${hintLine}</div>`;
+        </div></div>`;
       }).join('')}
     </div></div>`).join('')+'<div class="ptip">Each chip hints the category of one mark point. Type what you can recall, then reveal and self-tick.</div>';
 }
