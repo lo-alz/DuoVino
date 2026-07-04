@@ -2367,7 +2367,7 @@ function viewExam(){
   if(exam.mode==='choices') body=examChoiceList(qi);
   else if(exam.mode==='blanks') body=revealed?examTickList(qi):examBlankList(qi);
   else body=`<textarea id="examta" class="examta" placeholder="Write your answer here — aim for the depth you would give in about 45 minutes…">${esc(exam.answers[qi]||'')}</textarea>${revealed?examTickList(qi):''}`;
-  const revealLabel=exam.mode==='choices'?'Check my choices':(exam.mode==='blanks'?'Reveal the points':'Reveal mark scheme');
+  const revealLabel='Reveal Answer';
   return `<div class="view"><div class="runwrap">${bar}
     <div class="qcard">
       <div class="qmeta"><span class="topic">${esc(exam.paper.sitting)} · ${esc(q.topic)}</span><span class="qtype">Question ${qi+1} of ${qs.length}</span></div>
