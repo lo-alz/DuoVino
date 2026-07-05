@@ -598,10 +598,12 @@ body.light .flipcard.answer{background:linear-gradient(160deg,#f1e7cf,var(--pane
 .lrg-pct{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-l)}
 .lrg-pct.zero{color:var(--muted)}
 .lrg-kkp{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.02em}
-/* On desktop, outer country-card grid: 2 columns for large countries, 1 for small */
+/* On desktop, outer country-card layout: CSS multi-column masonry so a short
+   country card doesn't leave a grid row stretched to a tall neighbour's height —
+   cards pack upward into whichever column has room, like Pinterest. */
 @media(min-width:960px){
-  .lrg-grid-outer{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px;align-items:start}
-  .lrg-ccard{margin-bottom:0}
+  .lrg-grid-outer{column-width:440px;column-gap:12px}
+  .lrg-ccard{break-inside:avoid;margin-bottom:12px}
 }
 
 /* ---------- learn grapes redesign ---------- */
