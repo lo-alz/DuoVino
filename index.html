@@ -236,6 +236,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .back{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding:4px 0}
 .thead h2{font-size:30px;text-transform:uppercase;letter-spacing:.02em;line-height:1.02}
+.pronounce{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  margin-left:6px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);
+  color:var(--ink-dim);vertical-align:middle;transition:background .15s,color .15s}
+.pronounce:hover,.pronounce:active{background:var(--panel3);color:var(--gold-l)}
+.thead h2 .pronounce{width:28px;height:28px;margin-left:10px}
+.thead h2 .pronounce svg{width:15px;height:15px}
 .thead .country{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
 .thead .alt{font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.04em;margin-top:6px}
 .thead .blurb{color:var(--ink-dim);font-size:14.5px;margin-top:10px}
@@ -1066,6 +1072,36 @@ function chainTable(ch){
   return `<div class="chain">${cells.map((c,i)=>`<div class="cc ${i===3?'last':''}"><div class="cl">${c[0]}</div><div class="cv">${esc(c[1]||'')}</div></div>`).join('')}</div>`;
 }
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* ---------- native-accent pronunciation (Web Speech API) ---------- */
+// Country → BCP-47 locale. English-speaking countries are omitted on purpose —
+// the whole point is hearing the *native* accent for names an English speaker
+// wouldn't otherwise pronounce correctly.
+const COUNTRY_LOCALE={'France':'fr-FR','Italy':'it-IT','Germany, Austria & Hungary':'de-DE',
+  'Spain':'es-ES','Portugal':'pt-PT','Argentina':'es-AR','Chile':'es-CL','Greece':'el-GR','China':'zh-CN'};
+const GLOSS_LANG_LOCALE={fr:'fr-FR',it:'it-IT',de:'de-DE',es:'es-ES',pt:'pt-PT',el:'el-GR'};
+let _voicesCache=null;
+function _pickVoice(lang){
+  if(!('speechSynthesis' in window))return null;
+  if(!_voicesCache||!_voicesCache.length)_voicesCache=window.speechSynthesis.getVoices();
+  const v=_voicesCache||[];
+  return v.find(x=>x.lang===lang)||v.find(x=>x.lang&&x.lang.split('-')[0]===lang.split('-')[0])||null;
+}
+function speakNative(text,lang){
+  if(!('speechSynthesis' in window)){toast('Speech isn’t supported on this device.');return;}
+  try{window.speechSynthesis.cancel();}catch(e){}
+  const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=0.85;
+  const voice=_pickVoice(lang); if(voice)u.voice=voice;
+  try{window.speechSynthesis.speak(u);}catch(e){}
+}
+if(typeof window!=='undefined'&&'speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged=()=>{_voicesCache=window.speechSynthesis.getVoices();};
+}
+const SPEAKER_SVG='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+function pronounceBtn(text,lang){
+  if(!lang||!text)return '';
+  return `<button class="pronounce" data-say="${esc(text)}" data-say-lang="${lang}" title="Hear native pronunciation" aria-label="Hear native pronunciation of ${esc(text)}">${SPEAKER_SVG}</button>`;
+}
+
 /* Flag emoji render as bare regional-indicator letters ("FR") on systems without a
    color-emoji font. Convert the flag emoji to its ISO-3166 alpha-2 code and render
    an actual flag icon image instead, so it looks the same everywhere. */
@@ -1708,7 +1744,8 @@ function viewTopic(id){
   }).join('');
   const gloss=t.glossary&&t.glossary.length?`<div class="sec-h"><h3>Glossary</h3></div><div class="panel glossary">${t.glossary.map((g,gi)=>{
     const zdef=(LANG==='zh'&&t.zh&&t.zh.glossary&&t.zh.glossary[gi])?t.zh.glossary[gi]:g.def;
-    return `<div class="gt"><div class="gterm">${esc(g.term)}${g.language?`<span class="lang">${esc(g.language)}</span>`:''}</div><div class="gdef">${fmtClauses(zdef)}</div></div>`;
+    const gLoc=GLOSS_LANG_LOCALE[g.language];
+    return `<div class="gt"><div class="gterm">${esc(g.term)}${g.language?`<span class="lang">${esc(g.language)}</span>`:''}${pronounceBtn(g.term,gLoc)}</div><div class="gdef">${fmtClauses(zdef)}</div></div>`;
   }).join('')}</div>`:'';
   const flags=t.flags&&t.flags.length?`<div class="flagbox"><div class="ft">⚑ Flagged for expert ruling</div>${t.flags.map(f=>`<div class="fi"><b>${esc(f.kp)}</b> — ${esc(f.issue)}</div>`).join('')}</div>`:'';
   const blind=t.blind&&t.blind.length?`<div class="sec-h"><h3>Blind deduction</h3></div><div class="panel"><div style="font-size:13px;color:var(--ink-dim)">${t.blind.length} tasting profile${t.blind.length>1?'s':''} for this topic — practise in <b style="color:var(--gold-l)">Study → Blind tasting</b>.</div></div>`:'';
@@ -1716,7 +1753,7 @@ function viewTopic(id){
     <button class="back" data-back>‹ All topics</button>
     <div class="thead">
       <div class="country">${t.flag||''} ${esc(t.country)}</div>
-      <h2>${esc(t.title)}</h2>
+      <h2>${esc(t.title)}${pronounceBtn(t.title,COUNTRY_LOCALE[t.country])}</h2>
       ${t.alt?`<div class="alt">${esc(t.alt)}</div>`:''}
       ${t.blurb?`<div class="blurb">${esc((LANG==='zh'&&t.zh&&t.zh.blurb)?t.zh.blurb:t.blurb)}</div>`:''}
       ${t.source?`<div class="src">Source · ${esc(t.source)}</div>`:''}
@@ -3045,6 +3082,7 @@ function bind(){
   app.querySelectorAll('[data-nav2]').forEach(b=>b.onclick=()=>nav(b.dataset.nav2));
   app.querySelectorAll('[data-country]').forEach(b=>b.onclick=()=>{learnCountry=b.dataset.country;learnMode='geo';nav('learn');});
   app.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>nav('topic',{id:b.dataset.topic}));
+  app.querySelectorAll('[data-say]').forEach(b=>b.onclick=(ev)=>{ev.stopPropagation();speakNative(b.dataset.say,b.dataset.sayLang);});
   app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>nav('learn'));
   app.querySelectorAll('[data-signout]').forEach(b=>b.onclick=async()=>{ USER=null; _skipAuth=false; try{localStorage.removeItem('duovino.account');}catch(e){} try{localStorage.removeItem('cellar.localonly');}catch(e){} if(SB){ try{await SB.auth.signOut();}catch(_){} } renderAccount(); render(); });
   app.querySelectorAll('[data-signin]').forEach(b=>b.onclick=()=>{ _skipAuth=false; try{localStorage.removeItem('cellar.localonly');}catch(e){} renderAccount(); });
